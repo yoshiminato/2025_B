@@ -3,9 +3,7 @@ import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
+import 'package:class_2025_b/services/auth_service.dart';
 
 
 
@@ -15,6 +13,7 @@ class LoginScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    final authService = AuthService();
 
     final emailTextController = useTextEditingController();
     final emailText = useState<String>("");
@@ -51,8 +50,23 @@ class LoginScreen extends HookConsumerWidget {
     );  
 
     final loginButton = ElevatedButton(
-      onPressed: () {
-        AppRouter.goToHome(context);  
+      onPressed: () async {
+        try{
+          await authService.signIn(emailText.value, passwordText.value);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("ログイン成功"),
+            ),
+          );
+          AppRouter.goToHome(context);  
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("ログインに失敗しました: ${e.toString()}"),
+            ),
+          );
+        }
+                
       },
       child: Text("ログインする")
     );

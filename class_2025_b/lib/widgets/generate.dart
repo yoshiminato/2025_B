@@ -13,6 +13,8 @@ class GenerateWidget extends ConsumerWidget {
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Text("user: ${user?.email ?? "未ログイン"}"),
+        Text("signedIn: ${ref.watch(signedInProvider)}"),
         const Text("レシピ生成画面"),
         ElevatedButton(
           onPressed: () => AppRouter.goToRecipe(context, "recipeId"),

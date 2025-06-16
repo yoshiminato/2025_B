@@ -3,6 +3,7 @@ import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:class_2025_b/services/auth_service.dart';
 
 
 
@@ -12,6 +13,7 @@ class RegisterScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    final authService = AuthService();
 
     final emailTextController = useTextEditingController();
     final emailText = useState<String>("");
@@ -48,8 +50,22 @@ class RegisterScreen extends HookConsumerWidget {
     );  
 
     final registerButton = ElevatedButton(
-      onPressed: () {
-        AppRouter.goToHome(context);  
+      onPressed: () async {
+        try {
+          await authService.signUp(emailText.value, passwordText.value);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("新規登録が完了しました"),
+            ),
+          );
+          AppRouter.goToHome(context);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("新規登録に失敗しました: $e"),
+            ),
+          );
+        }  
       },
       child: Text("新規登録する")
     );

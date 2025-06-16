@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:class_2025_b/routers/router.dart';
-import 'package:class_2025_b/widgets/search.dart';
 import 'package:class_2025_b/states/user_state.dart';
+import 'package:class_2025_b/services/auth_service.dart';
 
 class SideMenuWidget extends ConsumerWidget {
   const SideMenuWidget({super.key});
@@ -13,6 +13,9 @@ class SideMenuWidget extends ConsumerWidget {
     final header = DrawerHeader(child: Text("header"));
 
     final signedIn = ref.watch(signedInProvider);
+
+    final authService = AuthService();
+
 
     final loginTile = ListTile(
       leading: const Icon(Icons.login),
@@ -27,14 +30,24 @@ class SideMenuWidget extends ConsumerWidget {
     final logoutTile = ListTile(
       leading: const Icon(Icons.logout),
       title: const Text("ログアウト"),
-      onTap: () => signedIn ?
-        () {
+      onTap: signedIn ?
+        () async {
           // ログアウト処理を実行
-          AppRouter.goToHome(context);
+          try{
+            debugPrint("ログアウト処理を開始");
+            await authService.signOut();
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("ログアウトしました"))
+            );
+          }catch(e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("ログアウトに失敗しました: $e"))
+            );
+          }
         } :
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("ログインしていません"))
-        )
+        () => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("ログインしていません"))
+              ),  
     );
 
     final customizeTile = ListTile(
