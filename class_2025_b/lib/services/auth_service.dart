@@ -17,7 +17,6 @@ class AuthService {
       'email', // メールアドレス
     ];
 
-
     // Googleでサインイン の画面へ飛ばす
     final request = GoogleSignIn(
       clientId: kIsWeb ? clientId : null, // Webの場合はクライアントIDを指定
@@ -49,21 +48,12 @@ class AuthService {
       oAuthCredential,
     );
 
-    
-
     return true;
     
   }
 
   /// サインアウト
-  Future<void> signOut() async {
-    // // Google Sign-Inからもサインアウト
-    // final googleSignIn = GoogleSignIn();
-    // if (await googleSignIn.isSignedIn()) {
-    //   await googleSignIn.signOut();
-    //   debugPrint("Google Sign-Inからサインアウト完了");
-    // }
-    
+  Future<void> signOut() async {    
     // Firebase Authからサインアウト
     await FirebaseAuth.instance.signOut();
     return;
@@ -76,7 +66,6 @@ class AuthService {
         password: passwd,
       );
     } on FirebaseAuthException catch (e) {
-      // エラーハンドリング
       debugPrint(e.message);
       rethrow;
     }
@@ -89,7 +78,6 @@ class AuthService {
         password: passwd,
       );
     } on FirebaseAuthException catch (e) {
-      // エラーハンドリング
       debugPrint(e.message);
       rethrow;
     }
@@ -97,7 +85,6 @@ class AuthService {
 
   bool isEmailVerified() {
     final user = FirebaseAuth.instance.currentUser;
-    debugPrint("user: ${user?.email}, emailVerified: ${user?.emailVerified}");
     if (user != null && user.emailVerified) {
       return true;
     }

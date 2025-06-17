@@ -23,6 +23,7 @@ dependencies:
   google_sign_in: ^6.2.1
   google_generative_ai: ^0.3.2
   cloud_firestore: ^4.13.0
+  cloud_functions: 
   sqflite: ^2.3.0
   path_provider: ^2.1.0
 

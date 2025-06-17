@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBS8cBB1GELpPeTWA9_cSGtkOwQE3zgbmE',
-    appId: '1:172786292841:android:4f3b5c9fd7f41e8aaaeaf8',
+    appId: '1:172786292841:android:7b2d0e5e402b0375aaeaf8',
     messagingSenderId: '172786292841',
     projectId: 'recipe-ai-175b2',
     storageBucket: 'recipe-ai-175b2.firebasestorage.app',
@@ -66,12 +66,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC2z3RJSo67kptoCil8Y_0LBZY1SUeybfo',
-    appId: '1:172786292841:ios:f8395102e542ffe3aaeaf8',
+    appId: '1:172786292841:ios:167a4f30c469b5bbaaeaf8',
     messagingSenderId: '172786292841',
     projectId: 'recipe-ai-175b2',
     storageBucket: 'recipe-ai-175b2.firebasestorage.app',
-    iosClientId: '172786292841-m5ufi5o8q9ststfpq57erl2bhf1gghib.apps.googleusercontent.com',
-    iosBundleId: 'com.example.recipeAi',
+    androidClientId: '172786292841-81eb286tjlh8mdrrpgg3j04b6sltkho5.apps.googleusercontent.com',
+    iosClientId: '172786292841-cpcfs95kflii5930uigq4g1rrk26cu77.apps.googleusercontent.com',
+    iosBundleId: 'com.example.class2025b',
   );
 
 }
