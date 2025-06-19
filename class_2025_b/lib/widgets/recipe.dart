@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 
-class RecipeScreen extends StatelessWidget {
+class RecipeWidget extends StatelessWidget {
   final String? recipeId;
   
-  const RecipeScreen({super.key, this.recipeId});
+  const RecipeWidget({super.key, this.recipeId});
 
   @override
   Widget build(BuildContext context) {
@@ -93,22 +93,16 @@ class RecipeScreen extends StatelessWidget {
       child: const Text("ﾎｰﾑに戻る")
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Recipe Details"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          children: [
-            futureBuilder, 
-            SizedBox(height: 20),
-            homeButton
-          ],
-        )
-      )
-    );
-    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(30.0),
+      child: Column(
+        children: [
+          futureBuilder, 
+          SizedBox(height: 20),
+          homeButton
+        ],
+      )    
+    );   
   }
     
 }

@@ -106,6 +106,7 @@ class Recipe{
     );
   }
 
+
   // デバッグ用のtoString()メソッド
   @override
   String toString() {

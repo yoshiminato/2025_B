@@ -1,16 +1,18 @@
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/services/function_service.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
+import 'package:class_2025_b/states/home_content_index_provider.dart';
 
-class GenerateWidget extends HookWidget {
+class GenerateWidget extends HookConsumerWidget {
   const GenerateWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
 
     // レシピ生成中かどうかのフラグフック
     final isGenerating = useState(false);
@@ -71,7 +73,11 @@ class GenerateWidget extends HookWidget {
                       ),
                     );
                   }
-                  AppRouter.goToRecipe(context, recipeId!);
+                  final contentNotifier = ref.read(homeContentIndexProvider.notifier);
+                  contentNotifier.state = Content.recipe; // ホーム画面のレシピ一覧に戻る
+                  final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+                  recipeIdNotifier.state = recipeId; // 生成されたレシピのIDを
+                  // AppRouter.goToRecipe(context, recipeId!);
                 }
                 catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -80,6 +86,9 @@ class GenerateWidget extends HookWidget {
                     ),
                   );
                 }
+
+                
+
                 isGenerating.value = false;
               },
 

@@ -4,8 +4,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/widgets/generate.dart';
 import 'package:class_2025_b/widgets/search.dart';
-import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/widgets/side_menu.dart';
+import 'package:class_2025_b/widgets/recipe.dart';
+import 'package:class_2025_b/states/home_content_index_provider.dart';
 
 
 class HomeScreen extends HookConsumerWidget {
@@ -20,8 +21,20 @@ class HomeScreen extends HookConsumerWidget {
       child: SideMenuWidget(),
     );
 
-    final screens = [
+    final contentIndex = ref.watch(homeContentIndexProvider);
+    final recipeId = ref.watch(recipeIdProvider);
+
+    debugPrint("===============recipeId: $recipeId=================");
+
+    final contents = [
       const GenerateWidget(),
+      RecipeWidget(recipeId: recipeId),
+    ];
+
+    final content = contents[contentIndex.index];
+
+    final screens = [
+      content,
       const SearchWidget(),
     ];
 
@@ -43,7 +56,12 @@ class HomeScreen extends HookConsumerWidget {
       drawer: drawer,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index.value,
-        onTap: (idx) => index.value = idx,
+        onTap: (idx) { 
+          index.value = idx;
+          if(idx == 0) {
+            ref.read(homeContentIndexProvider.notifier).state = Content.generate;
+          }
+        },
         items: [
           generateItem,
           searchItem,
