@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -60,6 +61,7 @@ class LoginScreen extends HookConsumerWidget {
           );
           AppRouter.goToHome(context);  
         } catch (e) {
+          debugPrint("ログインに失敗: ${e.toString()}");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("ログインに失敗しました: ${e.toString()}"),
@@ -86,7 +88,6 @@ class LoginScreen extends HookConsumerWidget {
       child: Text("ログインせずに使用する")
     );
 
-    final user = ref.watch(userProvider);
     
     return Scaffold(
       body: Center(

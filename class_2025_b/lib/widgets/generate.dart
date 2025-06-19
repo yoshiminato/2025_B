@@ -1,25 +1,91 @@
+import 'package:class_2025_b/models/filter_model.dart';
+import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/routers/router.dart';
-import 'package:class_2025_b/states/user_state.dart';
+import 'package:class_2025_b/services/function_service.dart';
+import 'package:class_2025_b/models/recipe_model.dart';
 
-class GenerateWidget extends ConsumerWidget {
+class GenerateWidget extends HookWidget {
   const GenerateWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
+  Widget build(BuildContext context) {
+
+    // レシピ生成中かどうかのフラグフック
+    final isGenerating = useState(false);
 
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("user: ${user?.email ?? "未ログイン"}"),
-        Text("signedIn: ${ref.watch(signedInProvider)}"),
         const Text("レシピ生成画面"),
-        ElevatedButton(
-          onPressed: () => AppRouter.goToRecipe(context, "recipeId"),
-          child: const Text("レシピ生成ボタン")
-        ),
+        SizedBox(height: 20),
+        isGenerating.value
+            ? 
+            // レシピ生成中はインジケータ表示
+            const CircularProgressIndicator()
+            :
+            // レシピ生成中でなければ生成ボタン表示
+            ElevatedButton(
+
+              //生成ボタンが押された場合の処理
+              onPressed: () async {
+
+                // レシピ生成中のフラグをたてる
+                isGenerating.value = true;
+
+                // レシピ生成処理
+                final functionService = FunctionService();
+
+                // サンプルフィルターを使用(開発段階では固定値を使用)
+                // 後でユーザーが入力した値を使用するように変更する
+                final Filter filter = sampleFilter;
+
+                // 生成されたレシピを格納する変数
+                late final Recipe? recipe;
+
+                // レシピ生成を試みる
+                try {
+                   recipe = await functionService.generateRecipe(filter);
+                   debugPrint("生成されたレシピ: ${recipe?.toMap()}");
+                } 
+                catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("レシピ生成に失敗しました: ${e.toString()}"),
+                    ),
+                  );
+                  // レシピ生成に失敗したら生成中フラグを下げて処理中断
+                  isGenerating.value = false;
+                  return;
+                }
+
+                // レシピのDB登録を試みる
+                final dbService = DatabaseService();
+                try {
+                  final String? recipeId = await dbService.addRecipe(recipe!);
+                  if (recipeId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("レシピIDがnullです"),
+                      ),
+                    );
+                  }
+                  AppRouter.goToRecipe(context, recipeId!);
+                }
+                catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("レシピの保存に失敗しました: ${e.toString()}"),
+                    ),
+                  );
+                }
+                isGenerating.value = false;
+              },
+
+              // ボタン内に表示するテキスト
+              child: const Text("レシピ生成ボタン")
+            ),
       ],
     );
     return Center(

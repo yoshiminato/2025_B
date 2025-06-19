@@ -22,6 +22,7 @@
   },
   "firestore": {
     "database": "(default)",
+    "location": "asia-northeast1",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
@@ -46,12 +47,19 @@
   },
   "emulators": {
     "functions": {
+      "host": "0.0.0.0",
       "port": 5001
     },
     "firestore": {
+      "host": "0.0.0.0",
       "port": 8080
     },
+    "auth": {
+      "host": "0.0.0.0",
+      "port": 9099
+    },
     "storage": {
+      "host": "0.0.0.0",
       "port": 9199
     },
     "ui": {
@@ -59,8 +67,23 @@
       "port": 10000
     },
     "singleProjectMode": true,
-    "auth": {
-      "port": 9099
+    "hosting": {
+      "host": "0.0.0.0",
+      "port": 5000
     }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

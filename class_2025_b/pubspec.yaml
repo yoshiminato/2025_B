@@ -20,6 +20,7 @@ dependencies:
   flutter_hooks: ^0.20.5
   firebase_core: ^2.27.0
   firebase_auth: ^4.17.8
+  firebase_storage:
   google_sign_in: ^6.2.1
   google_generative_ai: ^0.3.2
   cloud_firestore: ^4.13.0
