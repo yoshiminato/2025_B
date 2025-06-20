@@ -1,10 +1,10 @@
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/home_state.dart';
+import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/services/function_service.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/states/recipeId_state.dart';
@@ -22,7 +22,7 @@ class GenerateWidget extends HookConsumerWidget {
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("レシピ生成画面"),
+        RecipeFilterWidget(),
         isGenerating.value
             ? 
             // レシピ生成中はインジケータ表示
@@ -94,12 +94,15 @@ class GenerateWidget extends HookConsumerWidget {
               },
 
               // ボタン内に表示するテキスト
-              child: const Text("レシピ生成ボタン")
+              child: 
+                const Text("レシピ生成ボタン")
             ),
       ],
     );
-    return Center(
+    return SingleChildScrollView(
+      child: Center(
         child: column,
+      )
     );
   }
 }
