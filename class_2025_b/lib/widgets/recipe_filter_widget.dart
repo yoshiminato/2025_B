@@ -10,6 +10,8 @@ class RecipeFilterWidget extends ConsumerWidget {
     // ヘッダーの高さ(文字列「イメージ----」,「予算----」などの高さ)
     final headerHeight = 50.0;
 
+    final subHeaderWidth = 100.0;
+
     // キーワード入力部分
     final textField = TextField(
       decoration: InputDecoration(
@@ -98,7 +100,7 @@ class RecipeFilterWidget extends ConsumerWidget {
 
     // 予算のヘッダー部分のコンテナ
     final budgetHeaderContainer = Container(
-      height: headerHeight,
+      width: subHeaderWidth,
       child: budgetHeaderText
     );
 
@@ -141,7 +143,7 @@ class RecipeFilterWidget extends ConsumerWidget {
 
     // 調理時間のヘッダー部分のコンテナ
     final timeHeaderContainer = Container(
-      height: headerHeight,
+      width: subHeaderWidth,
       child: timeHeaderText
     );
 

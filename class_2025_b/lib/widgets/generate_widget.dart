@@ -18,7 +18,6 @@ class GenerateWidget extends HookConsumerWidget {
     // レシピ生成中かどうかのフラグフック
     final isGenerating = useState(false);
 
-
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
