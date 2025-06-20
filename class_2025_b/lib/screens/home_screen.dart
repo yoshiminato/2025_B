@@ -1,70 +1,60 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:class_2025_b/widgets/generate.dart';
-import 'package:class_2025_b/widgets/search.dart';
+import 'package:class_2025_b/widgets/generate_widget.dart';
+import 'package:class_2025_b/widgets/search_widget.dart';
 import 'package:class_2025_b/widgets/side_menu.dart';
-import 'package:class_2025_b/widgets/recipe.dart';
-import 'package:class_2025_b/states/home_content_index_provider.dart';
+import 'package:class_2025_b/widgets/recipe_widget.dart';
+import 'package:class_2025_b/states/home_state.dart';
 
 
-class HomeScreen extends HookConsumerWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final index = useState<int>(0);
+    
+    final content = ref.watch(currentContentTypeProvider);
+    final contentNotifier = ref.read(currentContentTypeProvider.notifier);
 
     final drawer = Drawer(
       backgroundColor: Colors.grey[200] ,
       child: SideMenuWidget(),
     );
 
-    final contentIndex = ref.watch(homeContentIndexProvider);
-    final recipeId = ref.watch(recipeIdProvider);
-
-    debugPrint("===============recipeId: $recipeId=================");
-
-    final contents = [
-      const GenerateWidget(),
-      RecipeWidget(recipeId: recipeId),
-    ];
-
-    final content = contents[contentIndex.index];
-
     final screens = [
-      content,
+      const GenerateWidget(),
       const SearchWidget(),
+      const RecipeWidget(),
     ];
 
     final generateItem = BottomNavigationBarItem(
       icon: const Icon(Icons.add),
       label: "generate",
-    );
-
+    );    
+    
     final searchItem = BottomNavigationBarItem(
       icon: const Icon(Icons.search),
       label: "search",
+    );
+    
+    final recipeItem = BottomNavigationBarItem(
+      icon: const Icon(Icons.receipt),
+      label: "recipe",
     );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Recipe AI"),
       ),
-      body: screens[index.value],
+      body: screens[content.index],
       drawer: drawer,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: index.value,
-        onTap: (idx) { 
-          index.value = idx;
-          if(idx == 0) {
-            ref.read(homeContentIndexProvider.notifier).state = Content.generate;
-          }
-        },
+        currentIndex: content.index,
+        onTap: (idx) => contentNotifier.state = ContentType.values[idx],
         items: [
           generateItem,
           searchItem,
+          recipeItem
         ],
       ),
     );
