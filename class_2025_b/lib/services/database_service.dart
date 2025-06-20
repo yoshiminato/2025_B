@@ -1,31 +1,38 @@
+import 'package:firebase_core/firebase_core.dart';
+import '../firebase_options.dart';
+import 'package:flutter/material.dart';
+
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class DatabaseService{
+
+  final String recipeCollectionPath = 'recipes';
 
   // 生成したレシピを追加するメソッド
   Future<String?> addRecipe(Recipe recipe) async {
 
-    return Future.delayed(const Duration(seconds: 2), () => "sampleRecipeId");
+    // return Future.delayed(const Duration(seconds: 2), () => "sampleRecipeId");
 
-    // try{
-    //   // テーブルの取得
-    //   CollectionReference recipes = FirebaseFirestore.instance.collection('recipes');
+    try{
+      // テーブルの取得
+      CollectionReference recipes = FirebaseFirestore.instance.collection(recipeCollectionPath);
 
-    //   // レシピをMap形式(Firestoreのデータ形式)に変換
-    //   Map<String, dynamic> recipeData = recipe.toMap();
+      // レシピをMap形式(Firestoreのデータ形式)に変換
+      Map<String, dynamic> recipeData = recipe.toMap();
 
-    //   // レシピを追加してDBにおけるIDを取得
-    //   DocumentReference docRef = await recipes.add(recipeData);
+      // レシピを追加してDBにおけるIDを取得
+      DocumentReference docRef = await recipes.add(recipeData);
 
-    //   // 追加したレシピのIDを返す
-    //   return docRef.id;   
+      // 追加したレシピのIDを返す
+      return docRef.id;   
       
-    // }
-    // catch (e) {
-    //   // エラーが発生した場合はnullを返す
-    //   return null;
-    // }
+    }
+    catch (e) {
+      // エラーが発生した場合はnullを返す
+      return null;
+    }
   } 
 
   // レシピをIDで取得するメソッド
@@ -35,7 +42,7 @@ class DatabaseService{
 
     // try {
     //   // テーブルの取得
-    //   CollectionReference recipes = FirebaseFirestore.instance.collection('recipes');
+    //   CollectionReference recipes = FirebaseFirestore.instance.collection(recipeCollectionPath);
 
     //   // IDでレシピを取得
     //   DocumentSnapshot docSnapshot = await recipes.doc(recipeId).get();
@@ -52,4 +59,181 @@ class DatabaseService{
     // }
   }
 
+  // データベースに登録されているすべてのレシピを削除
+  Future<void> clearRecipes() async {
+    final collection = FirebaseFirestore.instance.collection(recipeCollectionPath);
+    final snapshots = await collection.get();
+
+    for (final doc in snapshots.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  Future<void> addMockRecipes() async {
+    // モックレシピを追加する処理を実装
+    final recipes = sampleRecipesForTest;
+    for (final recipe in recipes) {
+      await addRecipe(recipe);
+    }
+  }
+
+  // 引数で受け取ったユーザIDをもとにユーザのレシピを取得するメソッド
+  Future<List<Recipe>> getUsersRecipes(String userId) async {
+
+    /* 
+      仮の戻り値(エラー回避) 実際にコードを書き始めたら削除してください 
+    */
+    return Future.delayed(const Duration(seconds: 2), () => [sampleRecipeForTest1, sampleRecipeForTest2]);
+
+    /*
+      ここにユーザーごとのレシピを取得する処理を追加してください
+    */
+  }
+
 }
+
+
+
+// テスト用main関数
+void main() async{
+  
+  final lh = "localhost";
+
+  // Firebaseの初期化　おまじない
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  try {
+    // エミュレータの設定
+    FirebaseFirestore.instance.useFirestoreEmulator(lh, 8080);
+   } catch (e) {
+    debugPrint(e.toString());
+   }
+
+  final dbService = DatabaseService();
+
+  // レシピのクリア 
+  await dbService.clearRecipes();
+
+  // モックレシピの追加
+  await dbService.addMockRecipes();
+
+  // レシピの取得
+  for (final user in testUsers) {
+    final recipes = await dbService.getUsersRecipes(user);
+    debugPrint("ユーザ: $user, レシピの数: ${recipes.length}");
+    for (final recipe in recipes) {
+      debugPrint("レシピ: ${recipe.title}");
+    }
+  }
+}
+
+// テスト用のユーザデータ
+final testUsers = [
+  "User1",
+  "User2",
+  "User3",
+];
+
+// テスト用のレシピデータ
+final sampleRecipeForTest1 = Recipe(
+  title: "Sample Recipe 1",
+  description: "This is a sample recipe description.",
+  imageUrl: "https://example.com/sample.jpg",
+  ingredients: {"Ingredient 1": "1 cup", "Ingredient 2": "2 tbsp", "Ingredient 3": "3 tsp"},
+  steps: ["Step 1", "Step 2", "Step 3"],
+  time: "30分",
+  cost: "1000円",
+  createdAt: DateTime.now(),
+  userId: "User1",
+  id: "sampleRecipeId",
+  reviewCount: 0,
+  likeCount: 0,
+);
+
+final sampleRecipeForTest2 = Recipe(
+  title: "Sample Recipe 2",
+  description: "This is another sample recipe description.",
+  imageUrl: "https://example.com/sample2.jpg",
+  ingredients: {"Ingredient A": "2 cups", "Ingredient B": "1 tbsp"},
+  steps: ["Step A", "Step B"],
+  time: "45分",
+  cost: "1500円",
+  createdAt: DateTime.now(),
+  userId: "User2",
+  id: "sampleRecipeId2",
+  reviewCount: 0,
+  likeCount: 0,
+);
+
+final sampleRecipeForTest3 = Recipe(
+  title: "Sample Recipe 3",
+  description: "This is yet another sample recipe description.",
+  imageUrl: "https://example.com/sample3.jpg",
+  ingredients: {"Ingredient X": "1 cup", "Ingredient Y": "2 tsp"},
+  steps: ["Step X", "Step Y"],
+  time: "20分",
+  cost: "800円",
+  createdAt: DateTime.now(),
+  userId: "User3",
+  id: "sampleRecipeId3",
+  reviewCount: 0,
+  likeCount: 0,
+);
+
+final sampleRecipeForTest4 = Recipe(
+  title: "Sample Recipe 4",
+  description: "This is a sample recipe for testing.",
+  imageUrl: "https://example.com/sample4.jpg",
+  ingredients: {"Ingredient M": "1 cup", "Ingredient N": "3 tbsp"},
+  steps: ["Step M", "Step N"],
+  time: "15分",
+  cost: "500円",
+  createdAt: DateTime.now(),
+  userId: "User1",
+  id: "sampleRecipeId4",
+  reviewCount: 0,
+  likeCount: 0,
+);
+
+final sampleRecipeForTest5 = Recipe(
+  title: "Sample Recipe 5",
+  description: "This is a sample recipe for testing.",
+  imageUrl: "https://example.com/sample5.jpg",
+  ingredients: {"Ingredient P": "2 cups", "Ingredient Q": "1 tbsp"},
+  steps: ["Step P", "Step Q"],
+  time: "10分",
+  cost: "300円",
+  createdAt: DateTime.now(),
+  userId: "User2",
+  id: "sampleRecipeId5",
+  reviewCount: 0,
+  likeCount: 0,
+);
+
+final sampleRecipeForTest6 = Recipe(
+  title: "Sample Recipe 6",
+  description: "This is a sample recipe description.",
+  imageUrl: "https://example.com/sample.jpg",
+  ingredients: {"Ingredient 1": "1 cup", "Ingredient 2": "2 tbsp", "Ingredient 3": "3 tsp"},
+  steps: ["Step 1", "Step 2", "Step 3"],
+  time: "30分",
+  cost: "1000円",
+  createdAt: DateTime.now(),
+  userId: "User1",
+  id: "sampleRecipeId1",
+  reviewCount: 0,
+  likeCount: 0,
+);
+
+// テスト用のレシピリスト
+final sampleRecipesForTest = [
+  sampleRecipeForTest1,
+  sampleRecipeForTest2,
+  sampleRecipeForTest3,
+  sampleRecipeForTest4,
+  sampleRecipeForTest5,
+  sampleRecipeForTest6,
+];

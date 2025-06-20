@@ -11,7 +11,7 @@ class Recipe{
   String cost;                     // 予算（コスト）
   DateTime? createdAt;             // 作成日時
   String? userId;                  // 作成者のUID
-  int reviwewCount;                // レビュー数（初期値は0）
+  int reviewCount;                // レビュー数（初期値は0）
   int likeCount;                   // いいね数（初期値は0）
   
   
@@ -26,9 +26,15 @@ class Recipe{
     required this.cost,
     this.createdAt,
     this.userId,
-    this.reviwewCount = 0,
+    this.reviewCount = 0,
     this.likeCount = 0,
   });
+
+  // レシピ生成時刻とユーザIDを新たに登録するメゾッド
+  addAdditionalInfo({String? userid}) {
+    createdAt = DateTime.now();
+    userId = userid;
+  }
 
   // RecipeオブジェクトをMapに変換（Firestore保存用）
   Map<String, dynamic> toMap() {
@@ -43,7 +49,7 @@ class Recipe{
       'cost': cost,
       'createdAt': createdAt?.millisecondsSinceEpoch,
       'userId': userId,
-      'reviwewCount': reviwewCount,
+      'reviewCount': reviewCount,
       'likeCount': likeCount,
     };
   }
@@ -63,7 +69,7 @@ class Recipe{
           ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
           : null,
       userId: map['userId'] as String?,
-      reviwewCount: map['reviwewCount'] as int? ?? 0,
+      reviewCount: map['reviewCount'] as int? ?? 0,
       likeCount: map['likeCount'] as int? ?? 0,
     );
   }
@@ -81,7 +87,7 @@ class Recipe{
       'cost': cost,
       'createdAt': createdAt?.toIso8601String(),
       'userId': userId,
-      'reviwewCount': reviwewCount,
+      'reviewCount': reviewCount,
       'likeCount': likeCount,
     };
   }
@@ -101,7 +107,7 @@ class Recipe{
           ? DateTime.parse(json['createdAt'] as String)
           : null,
       userId: json['userId'] as String?,
-      reviwewCount: json['reviwewCount'] as int? ?? 0,
+      reviewCount: json['reviewCount'] as int? ?? 0,
       likeCount: json['likeCount'] as int? ?? 0,
     );
   }
@@ -125,7 +131,7 @@ final sampleRecipe1 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId",
   id: "sampleRecipeId",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -140,7 +146,7 @@ final sampleRecipe2 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId2",
   id: "sampleRecipeId2",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -155,7 +161,7 @@ final sampleRecipe3 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId3",
   id: "sampleRecipeId3",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -170,7 +176,7 @@ final sampleRecipe4 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId4",
   id: "sampleRecipeId4",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -185,7 +191,7 @@ final sampleRecipe5 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId5",
   id: "sampleRecipeId5",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -200,7 +206,7 @@ final sampleRecipe6 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId6",
   id: "sampleRecipeId6",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -215,7 +221,7 @@ final sampleRecipe7 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId7",
   id: "sampleRecipeId7",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -230,7 +236,7 @@ final sampleRecipe8 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId8",
   id: "sampleRecipeId8",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -245,7 +251,7 @@ final sampleRecipe9 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId9",
   id: "sampleRecipeId9",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
@@ -260,7 +266,7 @@ final sampleRecipe10 = Recipe(
   createdAt: DateTime.now(),
   userId: "sampleUserId10",
   id: "sampleRecipeId10",
-  reviwewCount: 0,
+  reviewCount: 0,
   likeCount: 0,
 );
 
