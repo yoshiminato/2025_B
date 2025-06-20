@@ -1,12 +1,13 @@
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
+import 'package:class_2025_b/states/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/services/function_service.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
-import 'package:class_2025_b/states/home_content_index_provider.dart';
+import 'package:class_2025_b/states/recipeId_state.dart';
 
 class GenerateWidget extends HookConsumerWidget {
   const GenerateWidget({super.key});
@@ -17,11 +18,11 @@ class GenerateWidget extends HookConsumerWidget {
     // レシピ生成中かどうかのフラグフック
     final isGenerating = useState(false);
 
+
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("レシピ生成画面"),
-        SizedBox(height: 20),
+        Text("レシピ生成画面"),
         isGenerating.value
             ? 
             // レシピ生成中はインジケータ表示
@@ -73,11 +74,14 @@ class GenerateWidget extends HookConsumerWidget {
                       ),
                     );
                   }
-                  final contentNotifier = ref.read(homeContentIndexProvider.notifier);
-                  contentNotifier.state = Content.recipe; // ホーム画面のレシピ一覧に戻る
+                  
+                  // レシピIDを状態管理に保存
                   final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-                  recipeIdNotifier.state = recipeId; // 生成されたレシピのIDを
-                  // AppRouter.goToRecipe(context, recipeId!);
+                  recipeIdNotifier.state = recipeId;
+
+                  // レシピの詳細画面に遷移
+                  final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+                  contentNotifier.state = ContentType.recipe;
                 }
                 catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -86,9 +90,6 @@ class GenerateWidget extends HookConsumerWidget {
                     ),
                   );
                 }
-
-                
-
                 isGenerating.value = false;
               },
 
@@ -98,7 +99,7 @@ class GenerateWidget extends HookConsumerWidget {
       ],
     );
     return Center(
-      child: column,
+        child: column,
     );
   }
 }

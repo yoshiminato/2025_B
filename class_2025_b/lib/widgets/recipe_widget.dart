@@ -1,15 +1,21 @@
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
-import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:class_2025_b/states/recipeId_state.dart';
 
-class RecipeWidget extends StatelessWidget {
-  final String? recipeId;
+class RecipeWidget extends ConsumerWidget {
+  // final String? recipeId;
   
-  const RecipeWidget({super.key, this.recipeId});
+  const RecipeWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final recipeId = ref.watch(recipeIdProvider);
+    if (recipeId == null) {
+      return const Center(child: Text("ﾚｼﾋﾟが選択されていません"));
+    }
 
     // DBからデータ取得
     final dbService = DatabaseService();
@@ -80,26 +86,17 @@ class RecipeWidget extends StatelessWidget {
                   ),
                 );
               }),
-              
             ],
           );
         }
       },
     );
 
-    // ホームに戻るボタン
-    final homeButton = ElevatedButton(
-      onPressed: () => AppRouter.goToHome(context),
-      child: const Text("ﾎｰﾑに戻る")
-    );
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(30.0),
       child: Column(
         children: [
-          futureBuilder, 
-          SizedBox(height: 20),
-          homeButton
+          futureBuilder,
         ],
       )    
     );   
