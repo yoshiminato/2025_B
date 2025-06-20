@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/services/function_service.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 
 class GenerateWidget extends HookConsumerWidget {
   const GenerateWidget({super.key});
@@ -21,7 +22,7 @@ class GenerateWidget extends HookConsumerWidget {
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("レシピ生成画面"),
+        RecipeFilterWidget(),
         isGenerating.value
         ? 
         // レシピ生成中はインジケータ表示
