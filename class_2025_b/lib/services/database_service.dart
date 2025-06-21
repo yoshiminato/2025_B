@@ -16,18 +16,18 @@ class DatabaseService{
     // return Future.delayed(const Duration(seconds: 2), () => "sampleRecipeId");
 
     try{
+
       // テーブルの取得
-      CollectionReference recipes = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      CollectionReference recipesTable = FirebaseFirestore.instance.collection(recipeCollectionPath);
 
       // レシピをMap形式(Firestoreのデータ形式)に変換
       Map<String, dynamic> recipeData = recipe.toMap();
 
       // レシピを追加してDBにおけるIDを取得
-      DocumentReference docRef = await recipes.add(recipeData);
+      DocumentReference docRef = await recipesTable.add(recipeData);
 
       // 追加したレシピのIDを返す
       return docRef.id;   
-      
     }
     catch (e) {
       // エラーが発生した場合はnullを返す
