@@ -47,12 +47,20 @@ class RecipeWidget extends ConsumerWidget {
 
         // データが存在する場合はレシピの詳細を表示
         else {
-          final recipe = snapshot.data!;          
+          final recipe = snapshot.data!; 
+        
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに変更
             children: [
-              // タイトルは中央揃えにしたい場合
+              SizedBox(
+                child: Image.network(
+                  recipe.imageUrl!,
+                  fit: BoxFit.cover,
+                  width: double.infinity, // 横幅いっぱいに広げる
+                )
+              ),
+              const SizedBox(height: 20), 
               Center(
                 child: Text(recipe.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               ),
