@@ -1,5 +1,6 @@
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
+import 'package:class_2025_b/services/storage_service.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -31,20 +32,25 @@ class GenerateWidget extends HookConsumerWidget {
         ElevatedButton(
           //生成ボタンが押された場合の処理
           onPressed: () async {
+
             // レシピ生成中のフラグをたてる
             isGenerating.value = true;
+
             // レシピ生成処理
             final functionService = FunctionService();
+
             // サンプルフィルターを使用(開発段階では固定値を使用)
             // 後でユーザーが入力した値を使用するように変更する
             final Filter filter = sampleFilter;
+
             // 生成されたレシピを格納する変数
             late final Recipe? recipe;
+
             // レシピ生成を試みる
             try {
                recipe = await functionService.generateRecipe(filter);
-               debugPrint("生成されたレシピ: ${recipe?.toMap()}");
             } 
+
             catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -55,10 +61,31 @@ class GenerateWidget extends HookConsumerWidget {
               isGenerating.value = false;
               return;
             }
+
+            // レシピ画像をstorage保存を試みる
+            final storageService = StorageService();
+            try{
+              recipe!.imageBase64 ??= "";
+              final base64String = recipe!.imageBase64!;
+
+              final String? imageUrl = await storageService.storeRecipeImageAndGetUrl(base64String, "recipe");
+              recipe.imageUrl = imageUrl;
+            }
+            catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("レシピ画像の保存に失敗しました: ${e.toString()}"),
+                ),
+              );
+              // 画像保存に失敗したら生成中フラグを下げて処理中断
+              isGenerating.value = false;
+              return;
+            }
+
             // レシピのDB登録を試みる
             final dbService = DatabaseService();
             try {
-              final String? recipeId = await dbService.addRecipe(recipe!);
+              final String? recipeId = await dbService.addRecipe(recipe);
               if (recipeId == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
