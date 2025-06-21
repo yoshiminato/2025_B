@@ -15,6 +15,7 @@ class RecipeScreen extends StatelessWidget {
     final dbService = DatabaseService();
     final Future<Recipe?> futureRecipe = dbService.getRecipeById(recipeId!);
 
+
     // FutureBuilderを使用して非同期データを扱う
     final futureBuilder = FutureBuilder<Recipe?>(
       

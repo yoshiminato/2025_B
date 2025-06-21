@@ -10,23 +10,23 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 void main() async {
 
-  // final ip = "192.168.10.102";
+  final ip = "localhost";
 
-  // // Firebaseの初期化　おまじない
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  // Firebaseの初期化　おまじない
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // try {
-  //   // エミュレータの設定
-  //   FirebaseFirestore.instance.useFirestoreEmulator(ip, 8080);
-  //   FirebaseFunctions.instance.useFunctionsEmulator(ip, 5001);
-  //   FirebaseStorage.instance.useStorageEmulator(ip, 9199);
-  //   await FirebaseAuth.instance.useAuthEmulator(ip, 9099);
-  //  } catch (e) {
-  //   debugPrint(e.toString());
-  //  }
+  try {
+    // エミュレータの設定
+    FirebaseFirestore.instance.useFirestoreEmulator(ip, 8080);
+    FirebaseFunctions.instance.useFunctionsEmulator(ip, 5001);
+    FirebaseStorage.instance.useStorageEmulator(ip, 9199);
+    await FirebaseAuth.instance.useAuthEmulator(ip, 9099);
+   } catch (e) {
+    debugPrint(e.toString());
+   }
 
   final scope = ProviderScope(child: RecipeAI());
   runApp(scope);

@@ -1,7 +1,6 @@
 // Cloud Functions 第2世代（公式で推奨）
 import { onRequest } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions/v2';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleGenAI, Modality } from "@google/genai";
 import 'dotenv/config'; // .envファイルを読み込み
 import { debug } from 'firebase-functions/logger';
@@ -101,7 +100,7 @@ export const generateRecipe = onRequest(async (request, response) => {
 
     // レスポンスを分析
     for (const part of result.candidates[0].content.parts) {
-      
+
       if (part.text) {
 
         // logger.info("Gemini API応答テキスト:", part.text);
@@ -162,4 +161,4 @@ export const generateRecipe = onRequest(async (request, response) => {
   } catch (error) {
     response.status(500).json({ error: error.message, errorStack: error.stack, errorName: error.name });
   }
-});
+});git 
