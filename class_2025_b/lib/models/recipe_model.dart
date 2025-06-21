@@ -1,3 +1,5 @@
+
+
 // レシピクラス
 class Recipe{
 
@@ -5,11 +7,12 @@ class Recipe{
   String title;                    // レシピのタイトル
   String description;              // レシピの説明
   String? imageUrl;                // レシピの画像URL（Firebase StorageのURLなど）
+  String? imageBase64;             // レシピの画像のBase64エンコードされた文字列（生成AIの出力受取用）
   Map<String, String> ingredients; // 材料のリスト
   List<String> steps;              // 調理手順のリスト {手順: 所要時間}
   String time;                     // 総所要時間
   String cost;                     // 予算（コスト）
-  DateTime? createdAt;             // 作成日時
+  DateTime createdAt;              // 作成日時
   String? userId;                  // 作成者のUID
   int reviwewCount;                // レビュー数（初期値は0）
   int likeCount;                   // いいね数（初期値は0）
@@ -24,11 +27,11 @@ class Recipe{
     required this.steps,
     required this.time,
     required this.cost,
-    this.createdAt,
-    this.userId,
-    this.reviwewCount = 0,
-    this.likeCount = 0,
-  });
+    required this.createdAt,
+    required this.userId,
+    required this.reviwewCount,
+    required this.likeCount ,
+  }); 
 
   // RecipeオブジェクトをMapに変換（Firestore保存用）
   Map<String, dynamic> toMap() {
@@ -41,13 +44,12 @@ class Recipe{
       'steps': steps,
       'time': time,
       'cost': cost,
-      'createdAt': createdAt?.millisecondsSinceEpoch,
+      'createdAt': createdAt.millisecondsSinceEpoch,
       'userId': userId,
       'reviwewCount': reviwewCount,
       'likeCount': likeCount,
     };
   }
-
   // MapからRecipeオブジェクトを作成（Firestore読み込み用）
   factory Recipe.fromMap(Map<String, dynamic> map) {
     return Recipe(
@@ -59,9 +61,7 @@ class Recipe{
       steps: List<String>.from(map['steps'] as List),
       time: map['time'] as String,
       cost: map['cost'] as String,
-      createdAt: map['createdAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
-          : null,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
       userId: map['userId'] as String?,
       reviwewCount: map['reviwewCount'] as int? ?? 0,
       likeCount: map['likeCount'] as int? ?? 0,
@@ -79,7 +79,7 @@ class Recipe{
       'steps': steps,
       'time': time,
       'cost': cost,
-      'createdAt': createdAt?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
       'userId': userId,
       'reviwewCount': reviwewCount,
       'likeCount': likeCount,
@@ -97,9 +97,7 @@ class Recipe{
       steps: List<String>.from(json['steps'] as List),
       time: json['time'] as String,
       cost: json['cost'] as String,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'] as String)
-          : null,
+      createdAt: DateTime.parse(json['createdAt'] as String),
       userId: json['userId'] as String?,
       reviwewCount: json['reviwewCount'] as int? ?? 0,
       likeCount: json['likeCount'] as int? ?? 0,
