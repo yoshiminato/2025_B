@@ -80,14 +80,26 @@ class DatabaseService{
   // 引数で受け取ったユーザIDをもとにユーザのレシピを取得するメソッド
   Future<List<Recipe>> getUsersRecipes(String userId) async {
 
-    /* 
-      仮の戻り値(エラー回避) 実際にコードを書き始めたら削除してください 
-    */
-    return Future.delayed(const Duration(seconds: 2), () => [sampleRecipeForTest1, sampleRecipeForTest2]);
+    final dbService = DatabaseService();
 
-    /*
-      ここにユーザーごとのレシピを取得する処理を追加してください
-    */
+    //レシピのクリア
+    await dbService.clearRecipes();
+
+    //モックレシピの追加
+    await dbService.addMockRecipes();
+
+    //データベースからuserIdと一緒のものをqueryに代入
+    final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).get();
+
+    //queryをrecipe型に直してrecipesに代入
+    List<Recipe> recipes = query.docs.map((doc){
+      final data = doc.data() as Map<String,dynamic>;
+      return Recipe.fromMap(data);
+    }).toList();
+
+    //条件に合うrecipesをかえす
+    return recipes;
+
   }
 
 }
