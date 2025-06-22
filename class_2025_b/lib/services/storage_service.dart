@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
 
 class StorageService{
 
-  Future<String> storeRecipeImageAndGetUrl(String base64String, String folder) async {
+  // base64形式の画像をFirebase Storageに保存し、ダウンロードURLを返すメソッド
+  Future<String> storeBase64ImageAndGetUrl(String base64String, String folder) async {
     
     try{
       
@@ -36,7 +38,7 @@ class StorageService{
   }
 
 
-  Future<String> storeCommentImageAndGetUrl(String base64String, String folder) async {
+  Future<String> storeImageAndGetUrl(File image, String folder) async {
     
     // モックデータを返す
     return Future.value("https://picsum.photos/300/200");

@@ -69,7 +69,7 @@ class GenerateWidget extends HookConsumerWidget {
               recipe!.imageBase64 ??= "";
               final base64String = recipe.imageBase64!;
 
-              final String? imageUrl = await storageService.storeRecipeImageAndGetUrl(base64String, "recipe");
+              final String? imageUrl = await storageService.storeBase64ImageAndGetUrl(base64String, "recipe");
               recipe.imageUrl = imageUrl;
             }
             catch (e) {

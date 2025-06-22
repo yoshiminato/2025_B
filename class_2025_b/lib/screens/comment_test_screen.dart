@@ -7,7 +7,6 @@ import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/services/storage_service.dart';
 import 'package:class_2025_b/models/comment_model.dart';
 
-import 'package:sqflite/sqflite.dart';
 
 // 撮影した画像を共有するためのProvider
 final selectedImageProvider = StateProvider<File?>((ref) => null);
@@ -125,11 +124,8 @@ class CommentTestScreen extends HookConsumerWidget {
                     late final String? imageUrl;
                     
                     if(selectedImage != null) {
-                      // 画像をBase64に変換
-                      final base64String = selectedImage.readAsBytesSync().map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
-                      
                       // 画像をストレージに保存
-                      imageUrl = await storageService.storeCommentImageAndGetUrl(base64String, "comments");
+                      imageUrl = await storageService.storeImageAndGetUrl(selectedImage, "comments");
                     }
                     else {
                       // 画像が選択されていない場合はnullを設定
@@ -164,7 +160,7 @@ class CommentTestScreen extends HookConsumerWidget {
                 child: const Text('投稿'),
               ),
             ),
-            
+
             comments.hasData
             ? 
             Column(
