@@ -30,7 +30,8 @@ class Recipe{
     required this.createdAt,
     required this.userId,
     required this.reviwewCount,
-    required this.likeCount,
+    required this.likeCount ,
+
   }); 
 
   // RecipeオブジェクトをMapに変換（Firestore保存用
@@ -50,7 +51,6 @@ class Recipe{
       'likeCount': likeCount,
     };
   }
-
   // MapからRecipeオブジェクトを作成（Firestore読み込み用）
   factory Recipe.fromMap(Map<String, dynamic> map) {
     return Recipe(
@@ -62,7 +62,7 @@ class Recipe{
       steps: List<String>.from(map['steps'] as List),
       time: map['time'] as String,
       cost: map['cost'] as String,
-      createdAt: map['createdAt'],
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
       userId: map['userId'] as String?,
       reviwewCount: map['reviwewCount'] as int? ?? 0,
       likeCount: map['likeCount'] as int? ?? 0,
@@ -80,7 +80,7 @@ class Recipe{
       'steps': steps,
       'time': time,
       'cost': cost,
-      'createdAt': createdAt?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
       'userId': userId,
       'reviwewCount': reviwewCount,
       'likeCount': likeCount,
