@@ -18,29 +18,29 @@ class CommentTestScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-
+    // データベースサービスとストレージサービスのインスタンスを取得
     final dbService = DatabaseService();
-                        final storageService = StorageService();
+    final storageService = StorageService();
+
+    // テキスト入力用のコントローラーを定義
     final textController = useTextEditingController();
+
+    // 画像のプロバイダから値を取得
     final selectedImage = ref.watch(selectedImageProvider);
 
+    // 入力文字列の
     final textState = useState<String>('');
 
+    // データベースからコメントのリストを取得
     final  comments = useFuture(dbService.getComments('sample_recipe_id'));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('コメントテスト'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+    // 画面のコンテンツ
+    final content = Padding(
+      padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // コメントリストの表示
             
-            const SizedBox(height: 20),
-            
-            // テキストフィールド
+            // テキストフィールド(コメント入力用)
             TextField(
               controller: textController,
               decoration: const InputDecoration(
@@ -51,6 +51,7 @@ class CommentTestScreen extends HookConsumerWidget {
               maxLines: 3,
               onChanged: (value) => textState.value = value,
             ),
+
             const SizedBox(height: 20),
             
             // 撮影ボタン
@@ -118,97 +119,111 @@ class CommentTestScreen extends HookConsumerWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: (selectedImage != null || textController.text.isNotEmpty)
-                    ? () async {
+                  ? () async {
 
-                        late final String? imageUrl;
-                        
-                        if(selectedImage != null) {
-                          // 画像をBase64に変換
-                          final base64String = selectedImage.readAsBytesSync().map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
-                          
-                          // 画像をストレージに保存
-                          imageUrl = await storageService.storeCommentImageAndGetUrl(base64String, "comments");
-                        }
-                        else {
-                          imageUrl = null;
-                        }
-                        // コメントモデルを作成
-                        final comment = Comment(
-                          id: null,
-                          recipeId: 'example_recipe_id', // ここは実際のレシピIDに置き換える
-                          userId: 'example_user_id', // ここは実際のユーザーIDに置き換える
-                          content: textController.text,
-                          imageUrl: imageUrl,
-                          timestamp: DateTime.now(),
-                        );
-                        
-                        // コメントをDBに保存
-                        await dbService.addComment(comment);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('コメントが投稿されました')),
-                        );
-                        textController.clear();
-                        textState.value = '';
-                        ref.read(selectedImageProvider.notifier).state = null; // 画像選択をリセット
-                      }
-                    : null, // 条件を満たさない場合はnullにしてボタンを無効化
+                    // 画像URLを格納する変数
+                    late final String? imageUrl;
+                    
+                    if(selectedImage != null) {
+                      // 画像をBase64に変換
+                      final base64String = selectedImage.readAsBytesSync().map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+                      
+                      // 画像をストレージに保存
+                      imageUrl = await storageService.storeCommentImageAndGetUrl(base64String, "comments");
+                    }
+                    else {
+                      // 画像が選択されていない場合はnullを設定
+                      imageUrl = null;
+                    }
+
+                    // コメントモデルを作成(実際にはユーザID,レシピIDともに適切な値に置き換える必要があります)
+                    final comment = Comment(
+                      id: null,
+                      recipeId: 'example_recipe_id', // ここは実際のレシピIDに置き換える
+                      userId: 'example_user_id', // ここは実際のユーザーIDに置き換える
+                      content: textController.text,
+                      imageUrl: imageUrl,
+                      timestamp: DateTime.now(),
+                    );
+                    
+                    // コメントをDBに保存
+                    await dbService.addComment(comment);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('コメントが投稿されました')),
+                    );
+
+                    // リセット
+                    textController.clear();
+                    textState.value = '';
+                    ref.read(selectedImageProvider.notifier).state = null;
+                  }
+
+                : null, // 条件を満たさない場合はnullにしてボタンを無効化
+
+
                 child: const Text('投稿'),
               ),
             ),
-             Expanded(
-              child: comments.hasData
-                  ? ListView.builder(
-                      itemCount: comments.data!.length,
-                      itemBuilder: (context, index) {
-                        final comment = comments.data![index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8.0),                          
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              children: [
-                                // 画像部分 - シンプルな固定サイズ
-                                SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: (comment.imageUrl != null) 
-                                    ? Image.network(
-                                        comment.imageUrl!,
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Container(
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.image),
-                                      ),
+            
+            comments.hasData
+            ? 
+            Column(
+              children: [
+                for(final comment in comments.data!)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8.0),                          
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        children: [
+                          // 画像部分 - シンプルな固定サイズ
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: (comment.imageUrl != null) 
+                              ? Image.network(
+                                  comment.imageUrl!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.image),
                                 ),
-                                const SizedBox(width: 12),
-                                // テキスト部分
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(comment.content),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        comment.timestamp.toString(),
-                                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
+                          ),
+                          const SizedBox(width: 12),
+                          // テキスト部分
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(comment.content),
+                                const SizedBox(height: 4),
+                                Text(
+                                  comment.timestamp.toString(),
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    )
-                  : const Center(child: CircularProgressIndicator()),
-            ),
-
-            
+                        ],
+                      ),
+                    ),
+                  )
+              ]
+            )
+            : 
+            const Center(child: CircularProgressIndicator()),
           ],
         ),
+      );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('コメントテスト'),
       ),
+      body: SingleChildScrollView(
+        child: content,
+      ),  
     );
   }
 }
