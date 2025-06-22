@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
 
 class StorageService{
 
-  Future<String> storeImageAndGetUrl(String base64String, String folder) async {
+  Future<String> storeRecipeImageAndGetUrl(String base64String, String folder) async {
     
     try{
       

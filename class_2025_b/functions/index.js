@@ -7,7 +7,6 @@ import { debug } from 'firebase-functions/logger';
 
 // Gemini API Keyを環境変数から取得
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY})
 
@@ -128,9 +127,6 @@ export const generateRecipe = onRequest(async (request, response) => {
           logger.info("JSONパース成功");
           // レスポンスの構造を確認（画像データを除く）
           const debugResponse = { ...recipeJson };
-          if (debugResponse.imageData) {
-            debugResponse.imageData = `[画像データ: ${debugResponse.imageData.length}文字]`;
-          }
           logger.info("パースされたレシピデータ:", debugResponse);
         }
         catch (jsonError) {
@@ -161,4 +157,4 @@ export const generateRecipe = onRequest(async (request, response) => {
   } catch (error) {
     response.status(500).json({ error: error.message, errorStack: error.stack, errorName: error.name });
   }
-});git 
+});
