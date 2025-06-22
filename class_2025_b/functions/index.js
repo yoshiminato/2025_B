@@ -84,6 +84,8 @@ export const generateRecipe = onRequest(async (request, response) => {
     // // モックデータを返す
     // response.status(200).json(mockRecipe);
 
+    // Gemini APIを呼び出してレシピを生成
+    logger.info("Gemini APIを呼び出してレシピを生成中...", { prompt });
 
     const result = await ai.models.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
@@ -92,6 +94,8 @@ export const generateRecipe = onRequest(async (request, response) => {
         responseModalities: [Modality.TEXT, Modality.IMAGE],
       },
     });
+
+    logger.info("Gemini API応答:");
 
 
     let recipeJson = {};
@@ -119,6 +123,7 @@ export const generateRecipe = onRequest(async (request, response) => {
         if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
           cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
         } else {
+          logger.error(cleanedResponse.substring(0, 100));
           throw new Error('有効なJSONが見つかりませんでした');
         }
 
