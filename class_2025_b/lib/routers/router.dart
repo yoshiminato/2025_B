@@ -5,6 +5,7 @@ import 'package:class_2025_b/screens/register_screen.dart';
 import 'package:class_2025_b/screens/home_screen.dart';
 import 'package:class_2025_b/screens/recipe_screen.dart';
 import 'package:class_2025_b/screens/custom_setting_screen.dart';
+import 'package:class_2025_b/screens/comment_test_screen.dart';
 
 final _loginRoute = GoRoute(
   path: "/login",
@@ -34,6 +35,11 @@ final _customSettingRoute = GoRoute(
   builder: (BuildContext context, GoRouterState state) => CustomSettingScreen()
 );
 
+final _commentTestRoute = GoRoute(
+  path: "/commentTest",
+  builder: (BuildContext context, GoRouterState state) => const CommentTestScreen()
+);
+
 
 final GoRouter _router = GoRouter(
 
@@ -44,7 +50,8 @@ final GoRouter _router = GoRouter(
     _registerRoute,
     _homeRoute,
     _recipeRoute,
-    _customSettingRoute
+    _customSettingRoute,
+    _commentTestRoute,
   ]
 
 );
@@ -70,6 +77,10 @@ class AppRouter{
 
   static void goToRegister(BuildContext context) {
     context.go("/register");
+  }
+
+  static void goToCommentTest(BuildContext context) {
+    context.go("/commentTest");
   }
 
 }

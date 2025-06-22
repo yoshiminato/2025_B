@@ -35,4 +35,16 @@ class StorageService{
     }
   }
 
+
+  Future<String> storeCommentImageAndGetUrl(String base64String, String folder) async {
+    
+    // モックデータを返す
+    return Future.value("https://picsum.photos/300/200");
+  }
+
+}
+
+
+void main(){
+  debugPrint("StorageServiceが初期化されました");
 }
