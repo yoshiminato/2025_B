@@ -27,6 +27,7 @@ dependencies:
   cloud_functions: 
   sqflite: ^2.3.0
   path_provider: ^2.1.0
+  uuid:
 
 dev_dependencies:
   flutter_test:
