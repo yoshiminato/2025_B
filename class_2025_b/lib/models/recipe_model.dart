@@ -31,9 +31,10 @@ class Recipe{
     required this.userId,
     required this.reviwewCount,
     required this.likeCount ,
+
   }); 
 
-  // RecipeオブジェクトをMapに変換（Firestore保存用）
+  // RecipeオブジェクトをMapに変換（Firestore保存用
   Map<String, dynamic> toMap() {
     return {
       'id': id,
