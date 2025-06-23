@@ -38,16 +38,20 @@ class Recipe{
     createdAt = DateTime.now();
     userId = userid;
   }
-
   // RecipeオブジェクトをMapに変換（Firestore保存用）
-
   Map<String, dynamic> toMap() {
+    // ingredientsMapを2つの配列に分けて保存
+    List<String> ingredientNames = ingredients.keys.toList();
+    List<String> ingredientAmounts = ingredients.values.toList();
+    
     return {
       'id': id,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
-      'ingredients': ingredients,
+      'ingredients': ingredients, // 従来のMap形式も保持（互換性のため）
+      'ingredientNames': ingredientNames, // 検索用の材料名配列
+      'ingredientAmounts': ingredientAmounts, // 分量配列
       'steps': steps,
       'time': time,
       'cost': cost,
@@ -56,15 +60,31 @@ class Recipe{
       'reviewCount': reviewCount,
       'likeCount': likeCount,
     };
-  }
-  // MapからRecipeオブジェクトを作成（Firestore読み込み用）
+  }  // MapからRecipeオブジェクトを作成（Firestore読み込み用）
   factory Recipe.fromMap(Map<String, dynamic> map) {
+    Map<String, String> ingredients = {};
+    
+    // 新しい形式（ingredientNames + ingredientAmounts）がある場合
+    if (map.containsKey('ingredientNames') && map.containsKey('ingredientAmounts')) {
+      List<String> names = List<String>.from(map['ingredientNames'] as List);
+      List<String> amounts = List<String>.from(map['ingredientAmounts'] as List);
+      
+      // 2つの配列を組み合わせてMapを作成
+      for (int i = 0; i < names.length && i < amounts.length; i++) {
+        ingredients[names[i]] = amounts[i];
+      }
+    } 
+    // 従来の形式（ingredients Map）がある場合（後方互換性）
+    else if (map.containsKey('ingredients')) {
+      ingredients = Map<String, String>.from(map['ingredients'] as Map);
+    }
+    
     return Recipe(
       id: map['id'] as String?,
       title: map['title'] as String,
       description: map['description'] as String,
       imageUrl: map['imageUrl'] as String?,
-      ingredients: Map<String, String>.from(map['ingredients'] as Map),
+      ingredients: ingredients,
       steps: List<String>.from(map['steps'] as List),
       time: map['time'] as String,
       cost: map['cost'] as String,
@@ -74,15 +94,20 @@ class Recipe{
       likeCount: map['likeCount'] as int? ?? 0,
     );
   }
-
   // RecipeオブジェクトをJSONに変換（API用）?? ユーザの評価履歴をもとにプロンプトするなら使うかも
   Map<String, dynamic> toJson() {
+    // ingredientsMapを2つの配列に分けて保存
+    List<String> ingredientNames = ingredients.keys.toList();
+    List<String> ingredientAmounts = ingredients.values.toList();
+    
     return {
       'id': id,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
-      'ingredients': ingredients,
+      'ingredients': ingredients, // 従来のMap形式も保持（互換性のため）
+      'ingredientNames': ingredientNames, // 検索用の材料名配列
+      'ingredientAmounts': ingredientAmounts, // 分量配列
       'steps': steps,
       'time': time,
       'cost': cost,
@@ -92,15 +117,31 @@ class Recipe{
       'likeCount': likeCount,
     };
   }
-
   // JSONからRecipeオブジェクトを作成（API用）
   factory Recipe.fromJson(Map<String, dynamic> json) {
+    Map<String, String> ingredients = {};
+    
+    // 新しい形式（ingredientNames + ingredientAmounts）がある場合
+    if (json.containsKey('ingredientNames') && json.containsKey('ingredientAmounts')) {
+      List<String> names = List<String>.from(json['ingredientNames'] as List);
+      List<String> amounts = List<String>.from(json['ingredientAmounts'] as List);
+      
+      // 2つの配列を組み合わせてMapを作成
+      for (int i = 0; i < names.length && i < amounts.length; i++) {
+        ingredients[names[i]] = amounts[i];
+      }
+    } 
+    // 従来の形式（ingredients Map）がある場合（後方互換性）
+    else if (json.containsKey('ingredients')) {
+      ingredients = Map<String, String>.from(json['ingredients'] as Map);
+    }
+    
     return Recipe(
       id: json['id'] as String?,
       title: json['title'] as String,
       description: json['description'] as String,
       imageUrl: json['imageUrl'] as String?,
-      ingredients: Map<String, String>.from(json['ingredients'] as Map),
+      ingredients: ingredients,
       steps: List<String>.from(json['steps'] as List),
       time: json['time'] as String,
       cost: json['cost'] as String,
