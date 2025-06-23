@@ -1,5 +1,6 @@
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 
 class DatabaseService{
@@ -75,8 +76,6 @@ class DatabaseService{
   // 引数で受け取ったユーザIDをもとにユーザのレシピを取得するメソッド
   Future<List<Recipe>> getUsersRecipes(String userId) async {
 
-    final dbService = DatabaseService();
-
     //データベースからuserIdと一緒のものをqueryに代入
     final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).get();
 
@@ -88,28 +87,79 @@ class DatabaseService{
 
     //条件に合うrecipesをかえす
     return recipes;
+  } 
+
+  // キーワードに一致するレシピを取得するメソッド
+  Future<List<Recipe>> getKeywordRecipes(String keywords) async {
+    try {
+      List<String> keywordsList = keywords.split(' ').map((keyword) => keyword.trim().toLowerCase()).toList();
+
+      // 新しい構造のingredientNamesフィールドで検索
+      final recipesRef = FirebaseFirestore.instance.collection('recipes');
+      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).get();
+
+      List<Recipe> recipes = query.docs.map((doc) {
+        final data = doc.data();
+        return Recipe.fromMap(data);
+      }).toList();
+
+      return recipes;
+      
+    } catch (e) {
+      debugPrint("Error in getKeywordRecipes: $e");
+      return [];
+    }
   }
+
+  // // 部分一致検索のためのフォールバックメソッド
+  // // arrayContainsAnyは完全一致のみなので、部分一致が必要な場合はこちらを使用
+  // Future<List<Recipe>> getKeywordRecipesPartialMatch(String keywords) async {
+  //   try {
+  //     List<String> keywordsList = keywords.split(' ').map((keyword) => keyword.trim().toLowerCase()).toList();
+
+  //     // 全てのレシピを取得してクライアント側でフィルタリング
+  //     final recipesRef = FirebaseFirestore.instance.collection('recipes');
+  //     final allRecipesQuery = await recipesRef.get();
+
+  //     List<Recipe> matchedRecipes = [];
+
+  //     for (var doc in allRecipesQuery.docs) {
+  //       final data = doc.data();
+  //       final recipe = Recipe.fromMap(data);
+        
+  //       // ingredientNamesフィールドがある場合はそれを使用、なければingredientsのキーを使用
+  //       List<String> ingredientNames = [];
+  //       if (data.containsKey('ingredientNames')) {
+  //         ingredientNames = List<String>.from(data['ingredientNames'] as List);
+  //       } else {
+  //         ingredientNames = recipe.ingredients.keys.toList();
+  //       }
+        
+  //       // 材料名を小文字に変換
+  //       final lowerIngredients = ingredientNames.map((name) => name.toLowerCase()).toList();
+        
+  //       // キーワードのいずれかが材料名に含まれているかチェック（部分一致）
+  //       bool hasMatchingIngredient = keywordsList.any((keyword) {
+  //         return lowerIngredients.any((ingredient) => ingredient.contains(keyword));
+  //       });
+
+  //       if (hasMatchingIngredient) {
+  //         matchedRecipes.add(recipe);
+  //       }
+  //     }
+
+  //     return matchedRecipes;
+      
+  //   } catch (e) {
+  //     print("Error in getKeywordRecipesPartialMatch: $e");
+  //     return [];
+  //   }
+  // }
+
 }
 
 
-  Future<List<Recipe>> getKeywordRecipes(String keywords) async {
-
-    // キーワードに一致するレシピを取得するメソッド
-    List<String> keywordsList = keywords.split(' ');
-
-    // データベースからキーワードに一致するレシピを取得
-    final recipesRef = await FirebaseFirestore.instance.collection('recipes');
-        
-    final query = await recipesRef.where('ingridients', arrayContainsAny: keywordsList).get();
-
-    //queryをrecipe型に直してrecipesに代入
-    List<Recipe> recipes = query.docs.map((doc){
-      final data = doc.data();
-      return Recipe.fromMap(data);
-    }).toList();
-
-    return recipes;
-  }
+  
 
 
 
