@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/services/database_service.dart';
+import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/home_state.dart';
 
 class SearchWidget extends HookWidget {
   
@@ -137,13 +139,13 @@ class UsersRecipesWidget extends ConsumerWidget {
   }
 }
 
-class SearchResultWidget extends StatelessWidget {
+class SearchResultWidget extends ConsumerWidget {
   const SearchResultWidget({super.key, required this.searchResult});
 
   final List<Recipe> searchResult;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         const Text("検索結果"),
@@ -157,8 +159,14 @@ class SearchResultWidget extends StatelessWidget {
                 title: Text(recipe.title),
                 subtitle: Text(recipe.description),
                 onTap: () {
+
                   // レシピの詳細画面に遷移する処理を追加
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeDetailScreen(recipe: recipe)));
+                  // レシピIDを状態管理に保存
+                  final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+                  recipeIdNotifier.state = recipe.id;
+                  // レシピの詳細画面に遷移
+                  final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+                  contentNotifier.state = ContentType.recipe;
                 },
               );
             },
