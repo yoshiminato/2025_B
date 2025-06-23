@@ -12,7 +12,7 @@ class Recipe{
   List<String> steps;              // 調理手順のリスト {手順: 所要時間}
   String time;                     // 総所要時間
   String cost;                     // 予算（コスト）
-  DateTime? createdAt;              // 作成日時
+  DateTime createdAt;              // 作成日時
   String? userId;                  // 作成者のUID
   int reviewCount;                // レビュー数（初期値は0）
   int likeCount;                   // いいね数（初期値は0）
@@ -27,7 +27,7 @@ class Recipe{
     required this.steps,
     required this.time,
     required this.cost,
-    this.createdAt,
+    required this.createdAt,
     this.userId,
     this.reviewCount = 0,
     this.likeCount = 0,

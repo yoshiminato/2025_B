@@ -10,12 +10,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 void main() async {
 
-<<<<<<< HEAD
   // final ip = "localhost";
   final ip = "10.0.2.2";
-=======
-  final ip = "localhost";
->>>>>>> database
+
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
