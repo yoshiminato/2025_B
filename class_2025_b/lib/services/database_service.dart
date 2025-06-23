@@ -13,8 +13,6 @@ class DatabaseService{
   // 生成したレシピを追加するメソッド
   Future<String?> addRecipe(Recipe recipe) async {
 
-    // return Future.delayed(const Duration(seconds: 2), () => "sampleRecipeId");
-
     try{
 
       // テーブルの取得
@@ -37,56 +35,48 @@ class DatabaseService{
 
   // レシピをIDで取得するメソッド
   Future<Recipe?> getRecipeById(String recipeId) async {
-    return Future.delayed(const Duration(seconds: 2), () => sampleRecipe1);
 
+    try {
+      // テーブルの取得
+      CollectionReference recipes = FirebaseFirestore.instance.collection(recipeCollectionPath);
 
-    // try {
-    //   // テーブルの取得
-    //   CollectionReference recipes = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      // IDでレシピを取得
+      DocumentSnapshot docSnapshot = await recipes.doc(recipeId).get();
 
-    //   // IDでレシピを取得
-    //   DocumentSnapshot docSnapshot = await recipes.doc(recipeId).get();
-
-    //   // レシピが存在する場合はRecipeオブジェクトを返す
-    //   if (docSnapshot.exists) {
-    //     return Recipe.fromMap(docSnapshot.data() as Map<String, dynamic>);
-    //   } else {
-    //     return null; // レシピが存在しない場合はnullを返す
-    //   }
-    // } catch (e) {
-    //   // エラーが発生した場合はnullを返す
-    //   return null;
-    // }
-  }
-
-  // データベースに登録されているすべてのレシピを削除
-  Future<void> clearRecipes() async {
-    final collection = FirebaseFirestore.instance.collection(recipeCollectionPath);
-    final snapshots = await collection.get();
-
-    for (final doc in snapshots.docs) {
-      await doc.reference.delete();
+      // レシピが存在する場合はRecipeオブジェクトを返す
+      if (docSnapshot.exists) {
+        return Recipe.fromMap(docSnapshot.data() as Map<String, dynamic>);
+      } else {
+        return null; // レシピが存在しない場合はnullを返す
+      }
+    } catch (e) {
+      // エラーが発生した場合はnullを返す
+      return null;
     }
   }
 
-  Future<void> addMockRecipes() async {
-    // モックレシピを追加する処理を実装
-    final recipes = sampleRecipesForTest;
-    for (final recipe in recipes) {
-      await addRecipe(recipe);
-    }
-  }
+  // // データベースに登録されているすべてのレシピを削除
+  // Future<void> clearRecipes() async {
+  //   final collection = FirebaseFirestore.instance.collection(recipeCollectionPath);
+  //   final snapshots = await collection.get();
+
+  //   for (final doc in snapshots.docs) {
+  //     await doc.reference.delete();
+  //   }
+  // }
+
+  // Future<void> addMockRecipes() async {
+  //   // モックレシピを追加する処理を実装
+  //   final recipes = sampleRecipesForTest;
+  //   for (final recipe in recipes) {
+  //     await addRecipe(recipe);
+  //   }
+  // }
 
   // 引数で受け取ったユーザIDをもとにユーザのレシピを取得するメソッド
   Future<List<Recipe>> getUsersRecipes(String userId) async {
 
     final dbService = DatabaseService();
-
-    //レシピのクリア
-    await dbService.clearRecipes();
-
-    //モックレシピの追加
-    await dbService.addMockRecipes();
 
     //データベースからuserIdと一緒のものをqueryに代入
     final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).get();
@@ -106,41 +96,6 @@ class DatabaseService{
 
 
 
-// テスト用main関数
-void main() async{
-  
-  final lh = "localhost";
-
-  // Firebaseの初期化　おまじない
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  try {
-    // エミュレータの設定
-    FirebaseFirestore.instance.useFirestoreEmulator(lh, 8080);
-   } catch (e) {
-    debugPrint(e.toString());
-   }
-
-  final dbService = DatabaseService();
-
-  // レシピのクリア 
-  await dbService.clearRecipes();
-
-  // モックレシピの追加
-  await dbService.addMockRecipes();
-
-  // レシピの取得
-  for (final user in testUsers) {
-    final recipes = await dbService.getUsersRecipes(user);
-    debugPrint("ユーザ: $user, レシピの数: ${recipes.length}");
-    for (final recipe in recipes) {
-      debugPrint("レシピ: ${recipe.title}");
-    }
-  }
-}
 
 // テスト用のユーザデータ
 final testUsers = [
