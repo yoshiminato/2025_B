@@ -45,7 +45,6 @@ class Recipe{
     List<String> ingredientAmounts = ingredients.values.toList();
     
     return {
-      'id': id,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -101,7 +100,6 @@ class Recipe{
     List<String> ingredientAmounts = ingredients.values.toList();
     
     return {
-      'id': id,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -152,12 +150,6 @@ class Recipe{
     );
   }
 
-
-  // デバッグ用のtoString()メソッド
-  @override
-  String toString() {
-    return 'Recipe(id: $id, title: $title, description: $description, time: $time, cost: $cost)';
-  }
 }
 
 final sampleRecipe1 = Recipe(
