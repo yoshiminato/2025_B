@@ -45,7 +45,12 @@ class DatabaseService{
 
       // レシピが存在する場合はRecipeオブジェクトを返す
       if (docSnapshot.exists) {
-        return Recipe.fromMap(docSnapshot.data() as Map<String, dynamic>);
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        
+        // FirestoreのドキュメントIDを明示的に設定
+        data['id'] = docSnapshot.id;
+        
+        return Recipe.fromMap(data);
       } else {
         return null; // レシピが存在しない場合はnullを返す
       }
@@ -81,7 +86,11 @@ class DatabaseService{
 
     //queryをrecipe型に直してrecipesに代入
     List<Recipe> recipes = query.docs.map((doc){
-      final data = doc.data() as Map<String,dynamic>;
+      final data = doc.data();
+      
+      // FirestoreのドキュメントIDを明示的に設定
+      data['id'] = doc.id;
+      
       return Recipe.fromMap(data);
     }).toList();
 
@@ -100,6 +109,10 @@ class DatabaseService{
 
       List<Recipe> recipes = query.docs.map((doc) {
         final data = doc.data();
+        
+        // FirestoreのドキュメントIDを明示的に設定
+        data['id'] = doc.id;
+        
         return Recipe.fromMap(data);
       }).toList();
 
