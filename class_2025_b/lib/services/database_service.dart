@@ -1,11 +1,5 @@
-import 'package:firebase_core/firebase_core.dart';
-import '../firebase_options.dart';
-import 'package:flutter/material.dart';
-
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 
 class DatabaseService{
@@ -18,13 +12,13 @@ class DatabaseService{
     try{
 
       // テーブルの取得
-      CollectionReference recipesTable = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      CollectionReference recipesRef = FirebaseFirestore.instance.collection(recipeCollectionPath);
 
       // レシピをMap形式(Firestoreのデータ形式)に変換
       Map<String, dynamic> recipeData = recipe.toMap();
 
       // レシピを追加してDBにおけるIDを取得
-      DocumentReference docRef = await recipesTable.add(recipeData);
+      DocumentReference docRef = await recipesRef.add(recipeData);
 
       // 追加したレシピのIDを返す
       return docRef.id;   
@@ -42,11 +36,11 @@ class DatabaseService{
     try {
       // テーブルの取得
 
-      CollectionReference recipes = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      CollectionReference recipesRef = FirebaseFirestore.instance.collection(recipeCollectionPath);
 
 
       // IDでレシピを取得
-      DocumentSnapshot docSnapshot = await recipes.doc(recipeId).get();
+      DocumentSnapshot docSnapshot = await recipesRef.doc(recipeId).get();
 
       // レシピが存在する場合はRecipeオブジェクトを返す
       if (docSnapshot.exists) {
@@ -94,10 +88,28 @@ class DatabaseService{
 
     //条件に合うrecipesをかえす
     return recipes;
-
   }
-
 }
+
+
+  Future<List<Recipe>> getKeywordRecipes(String keywords) async {
+
+    // キーワードに一致するレシピを取得するメソッド
+    List<String> keywordsList = keywords.split(' ');
+
+    // データベースからキーワードに一致するレシピを取得
+    final recipesRef = await FirebaseFirestore.instance.collection('recipes');
+        
+    final query = await recipesRef.where('ingridients', arrayContainsAny: keywordsList).get();
+
+    //queryをrecipe型に直してrecipesに代入
+    List<Recipe> recipes = query.docs.map((doc){
+      final data = doc.data();
+      return Recipe.fromMap(data);
+    }).toList();
+
+    return recipes;
+  }
 
 
 

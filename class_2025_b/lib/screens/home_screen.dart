@@ -22,9 +22,9 @@ class HomeScreen extends ConsumerWidget {
     );
 
     final screens = [
-      const GenerateWidget(),
-      const SearchWidget(),
-      const RecipeWidget(),
+      GenerateWidget(),
+      SearchWidget(),
+      RecipeWidget(),
     ];
 
     final generateItem = BottomNavigationBarItem(
