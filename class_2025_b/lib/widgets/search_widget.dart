@@ -33,8 +33,16 @@ class SearchWidget extends HookWidget {
         // テキストが変更されたら状態を更新
         searchTextState.value = value;
       },
-      onSubmitted: (value) {
+      onSubmitted: (value) async {
         // 検索処理をsearchTextStateの値を使ってsearchResultに格納
+        final dbService = DatabaseService();
+        final results = await dbService.getKeywordRecipes(value);
+
+        debugPrint("SearchWidget: 検索キーワード: $value");
+        debugPrint("SearchWidget: 検索結果の数: ${results.length}");
+
+        searchResult.value = results;
+
         hasSearchResult.value = true; // 検索結果があるかどうかのフラグを初期化
       },
     );
@@ -136,8 +144,27 @@ class SearchResultWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text("検索結果"),
+    return Column(
+      children: [
+        const Text("検索結果"),
+        const SizedBox(height: 20),
+        Expanded(
+          child: ListView.builder(
+            itemCount: searchResult.length,
+            itemBuilder: (context, index) {
+              final recipe = searchResult[index];
+              return ListTile(
+                title: Text(recipe.title),
+                subtitle: Text(recipe.description),
+                onTap: () {
+                  // レシピの詳細画面に遷移する処理を追加
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) => RecipeDetailScreen(recipe: recipe)));
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
