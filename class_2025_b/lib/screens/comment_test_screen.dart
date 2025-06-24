@@ -12,14 +12,12 @@ import 'package:class_2025_b/models/comment_model.dart';
 final selectedImageProvider = StateProvider<File?>((ref) => null);
 
 class CommentTestScreen extends HookConsumerWidget {
-  const CommentTestScreen({super.key});
-
-  @override
+  const CommentTestScreen({super.key});  @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    // データベースサービスとストレージサービスのインスタンスを取得
-    final dbService = DatabaseService();
-    final storageService = StorageService();
+    // サービスをuseMemoizedで固定（再描画トリガーを防ぐ）
+    final dbService = useMemoized(() => DatabaseService(), []);
+    final storageService = useMemoized(() => StorageService(), []);    final refreshTrigger = useState<int>(0);
 
     // テキスト入力用のコントローラーを定義
     final textController = useTextEditingController();
@@ -30,8 +28,8 @@ class CommentTestScreen extends HookConsumerWidget {
     // 入力文字列の
     final textState = useState<String>('');
 
-    // データベースからコメントのリストを取得
-    final  comments = useFuture(dbService.getComments('sample_recipe_id'));
+    // データベースからコメントのリストを取得（refreshTriggerで再取得をトリガー）
+    final comments = useFuture(useMemoized(() => dbService.getComments('sample_recipe_id'), [refreshTrigger.value]));
 
     // 画面のコンテンツ
     final content = Padding(
@@ -130,12 +128,10 @@ class CommentTestScreen extends HookConsumerWidget {
                     else {
                       // 画像が選択されていない場合はnullを設定
                       imageUrl = null;
-                    }
-
-                    // コメントモデルを作成(実際にはユーザID,レシピIDともに適切な値に置き換える必要があります)
+                    }                    // コメントモデルを作成(実際にはユーザID,レシピIDともに適切な値に置き換える必要があります)
                     final comment = Comment(
                       id: null,
-                      recipeId: 'example_recipe_id', // ここは実際のレシピIDに置き換える
+                      recipeId: 'sample_recipe_id', // ここは実際のレシピIDに置き換える
                       userId: 'example_user_id', // ここは実際のユーザーIDに置き換える
                       content: textController.text,
                       imageUrl: imageUrl,
@@ -147,6 +143,9 @@ class CommentTestScreen extends HookConsumerWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('コメントが投稿されました')),
                     );
+
+                    // 再取得をトリガー（カウンターをインクリメント）
+                    refreshTrigger.value++;
 
                     // リセット
                     textController.clear();
