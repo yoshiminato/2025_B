@@ -40,8 +40,23 @@ class StorageService{
 
   Future<String> storeImageAndGetUrl(File image, String folder) async {
     
-    // モックデータを返す
-    return Future.value("https://picsum.photos/300/200");
+    debugPrint("storeImageAndGetUrl");
+    //画像のIDを生成
+    final uuid = Uuid().v4();
+
+    //folderという保存しているところへの道を参照
+    final storageRef = FirebaseStorage.instance.ref().child(folder).child(uuid);
+
+    //imageをfolderへ保存
+    await storageRef.putFile(image);
+
+
+    final url = await storageRef.getDownloadURL();
+    debugPrint("取得したURLは$url");
+
+    //保存した画像へのURLを返す
+    return url;
+
   }
 
 }
