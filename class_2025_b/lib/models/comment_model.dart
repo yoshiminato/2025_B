@@ -14,7 +14,6 @@ class Comment{
     required this.timestamp,
     required this.imageUrl,
   });
-
   // Map形式に変換するメソッド
   Map<String, dynamic> toMap() {
     return {
@@ -23,6 +22,7 @@ class Comment{
       'userId': userId,
       'content': content,
       'timestamp': timestamp.toIso8601String(),
+      'imageUrl': imageUrl,
     };
   }
 
