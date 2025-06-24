@@ -158,57 +158,61 @@ class CommentTestScreen extends HookConsumerWidget {
 
 
                 child: const Text('投稿'),
-              ),
-            ),
+              ),            ),
 
-            comments.hasData
-            ? 
-            Column(
-              children: [
-                for(final comment in comments.data!)
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 8.0),                          
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          // 画像部分 - シンプルな固定サイズ
-                          SizedBox(
-                            width: 60,
-                            height: 60,
-                            child: (comment.imageUrl != null) 
-                              ? Image.network(
-                                  comment.imageUrl!,
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(
-                                  color: Colors.grey[300],
-                                  child: const Icon(Icons.image),
-                                ),
+            // コメントリスト表示
+            if (comments.hasData) ...[
+              const SizedBox(height: 20),
+              const Text(
+                'コメント一覧',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ...comments.data!.map((comment) => 
+                Card(
+                  margin: const EdgeInsets.only(bottom: 8.0),                          
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        // 画像部分 - シンプルな固定サイズ
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: (comment.imageUrl != null) 
+                            ? Image.network(
+                                comment.imageUrl!,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.image),
+                              ),
+                        ),
+                        const SizedBox(width: 12),
+                        // テキスト部分
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(comment.content),
+                              const SizedBox(height: 4),
+                              Text(
+                                comment.timestamp.toString(),
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          // テキスト部分
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(comment.content),
-                                const SizedBox(height: 4),
-                                Text(
-                                  comment.timestamp.toString(),
-                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  )
-              ]
-            )
-            : 
-            const Center(child: CircularProgressIndicator()),
+                  ),
+                )
+              ),
+            ] else ...[
+              const SizedBox(height: 20),
+              const Center(child: CircularProgressIndicator()),
+            ],
           ],
         ),
       );
