@@ -61,25 +61,33 @@ class DatabaseService{
 
   Future<void> addComment(Comment comment) async {
     
-    // コメントをデータベースに追加する処理を実装
+    debugPrint("addComment");
+    //debugPrint(comment.toString());
+    
+    //Commentテーブルにコメント(comment)を保存
+    await FirebaseFirestore.instance.collection('Comment').add(comment.toMap());
+
+
 
     return;
   }
 
   Future<List<Comment>> getComments(String recipeId) async {
     
-    // コメントのデータベース取得処理を実装
+    //debugPrint("getComments");
+    //recipeIdのコメントがあるコメント配列をqueryに
+    final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).get();
 
-    return [
-      Comment(
-        id: "sample_id",
-        recipeId: "sample_recipe_id",
-        userId: "sample_user_id",
-        content: "サンプルコメント",
-        timestamp: DateTime.now(),
-        imageUrl: "https://picsum.photos/300/200"
-      )
-    ];
+    //queryをComment型に変形
+    List<Comment> comment = query.docs.map((doc){
+      final data = doc.data() as Map<String,dynamic>;
+      return Comment.fromMap(data);
+    }).toList();
+
+    //debugPrint("コメントは$comment");
+
+    return comment;
+
   }
 
 }
