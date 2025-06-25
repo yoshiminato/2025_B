@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/widgets/comment_widget.dart';
 
 class RecipeWidget extends ConsumerWidget {
   // final String? recipeId;
@@ -19,7 +20,7 @@ class RecipeWidget extends ConsumerWidget {
 
     // DBからデータ取得
     final dbService = DatabaseService();
-    final Future<Recipe?> futureRecipe = dbService.getRecipeById(recipeId!);
+    final Future<Recipe?> futureRecipe = dbService.getRecipeById(recipeId);
 
     // FutureBuilderを使用して非同期データを扱う
     final futureBuilder = FutureBuilder<Recipe?>(
@@ -94,6 +95,9 @@ class RecipeWidget extends ConsumerWidget {
                   ),
                 );
               }),
+              const SizedBox(height: 20),
+              CommentsWidget(recipeId: recipeId)
+              
             ],
           );
         }

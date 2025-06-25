@@ -72,7 +72,7 @@ class DatabaseService{
     return;
   }
 
-  Future<List<Comment>> getComments(String recipeId) async {
+  Future<List<Comment>> getCommentsByRecipeId(String recipeId) async {
     
     //debugPrint("getComments");
     //recipeIdのコメントがあるコメント配列をqueryに
