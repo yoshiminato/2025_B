@@ -3,9 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:class_2025_b/screens/login_screen.dart';
 import 'package:class_2025_b/screens/register_screen.dart';
 import 'package:class_2025_b/screens/home_screen.dart';
-import 'package:class_2025_b/screens/recipe_screen.dart';
+// import 'package:class_2025_b/screens/recipe_screen.dart';
 import 'package:class_2025_b/screens/custom_setting_screen.dart';
-import 'package:class_2025_b/screens/comment_test_screen.dart';
+// import 'package:class_2025_b/screens/comment_test_screen.dart';
+import 'package:class_2025_b/screens/camera_capture_screen.dart';
 
 final _loginRoute = GoRoute(
   path: "/login",
@@ -22,22 +23,15 @@ final _homeRoute = GoRoute(
   builder: (BuildContext context, GoRouterState state) => HomeScreen()
 );
 
-final _recipeRoute = GoRoute(
-  path: "/recipe/:recipeId",
-  builder: (BuildContext context, GoRouterState state) {
-    final recipeId = state.pathParameters['recipeId'];
-    return RecipeScreen(recipeId: recipeId);
-  }
-);
-
 final _customSettingRoute = GoRoute(
   path: "/customSettings",
   builder: (BuildContext context, GoRouterState state) => CustomSettingScreen()
 );
 
-final _commentTestRoute = GoRoute(
-  path: "/commentTest",
-  builder: (BuildContext context, GoRouterState state) => const CommentTestScreen()
+
+final _cameraCaptureRoute = GoRoute(
+  path: "/cameraCapture",
+  builder: (BuildContext context, GoRouterState state) => CameraCaptureScreen()
 );
 
 
@@ -49,9 +43,8 @@ final GoRouter _router = GoRouter(
     _loginRoute,
     _registerRoute,
     _homeRoute,
-    _recipeRoute,
     _customSettingRoute,
-    _commentTestRoute,
+    _cameraCaptureRoute,
   ]
 
 );
@@ -67,10 +60,6 @@ class AppRouter{
     context.go("/");
   }
 
-  static void goToRecipe(BuildContext context, String recipeId) {
-    context.go("/recipe/$recipeId");
-  }
-
   static void goToCustomSetting(BuildContext context) {
     context.go("/customSettings");
   }
@@ -79,8 +68,8 @@ class AppRouter{
     context.go("/register");
   }
 
-  static void goToCommentTest(BuildContext context) {
-    context.go("/commentTest");
-  }
 
+  static void goToCameraCapture(BuildContext context) {
+    context.go("/cameraCapture");
+  }
 }

@@ -56,11 +56,6 @@ class SideMenuWidget extends ConsumerWidget {
       onTap: () => AppRouter.goToCustomSetting(context),
     );
 
-    final commentTestTile = ListTile(
-      leading: const Icon(Icons.comment),
-      title: const Text("コメントテスト"),
-      onTap: () => AppRouter.goToCommentTest(context),
-    );
 
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -69,7 +64,6 @@ class SideMenuWidget extends ConsumerWidget {
         loginTile,
         logoutTile,
         customizeTile,
-        commentTestTile,
       ],
     );
     return column;
