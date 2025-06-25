@@ -14,6 +14,7 @@ class DatabaseService{
     try{
 
       debugPrint("レシピをデータベースに追加します");
+      debugPrint("レシピ作成者: ${recipe.userId}");
 
       // テーブルの取得
       CollectionReference recipesRef = FirebaseFirestore.instance.collection(recipeCollectionPath);
@@ -24,7 +25,7 @@ class DatabaseService{
       debugPrint("レシピデータ変換完了: ${recipeData.keys.toList()}");
 
       // レシピを追加してDBにおけるIDを取得
-      DocumentReference docRef = await recipes.add(recipeData);
+      DocumentReference docRef = await recipesRef.add(recipeData);
 
       debugPrint("レシピ追加完了: ${docRef.id}");
 
