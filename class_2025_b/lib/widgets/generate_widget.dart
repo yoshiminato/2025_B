@@ -20,6 +20,9 @@ class GenerateWidget extends HookConsumerWidget {
     // レシピ生成中かどうかのフラグフック
     final isGenerating = useState(false);
 
+    // レシピ作成者情報をレシピに追加
+    final user = ref.watch(userProvider);
+
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -51,8 +54,6 @@ class GenerateWidget extends HookConsumerWidget {
             try {
                recipe = await functionService.generateRecipe(filter);
 
-               // レシピ作成者情報をレシピに追加
-               final user = ref.read(userProvider);
                if(user != null) {;
                  recipe!.userId = user.uid;
                }
