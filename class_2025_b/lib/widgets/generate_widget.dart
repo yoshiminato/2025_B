@@ -8,6 +8,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/services/function_service.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 
 class GenerateWidget extends HookConsumerWidget {
@@ -49,6 +50,13 @@ class GenerateWidget extends HookConsumerWidget {
             // レシピ生成を試みる
             try {
                recipe = await functionService.generateRecipe(filter);
+
+               // レシピ作成者情報をレシピに追加
+               final user = ref.read(userProvider);
+               if(user != null) {;
+                 recipe!.userId = user.uid;
+               }
+               
             } 
 
             catch (e) {
