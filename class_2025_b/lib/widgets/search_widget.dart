@@ -83,7 +83,7 @@ class DefaultSearchWidget extends ConsumerWidget {
   }
 }
 
-class UsersRecipesWidget extends ConsumerWidget {
+class UsersRecipesWidget extends HookConsumerWidget {
   const UsersRecipesWidget({super.key});
 
   @override
@@ -103,32 +103,44 @@ class UsersRecipesWidget extends ConsumerWidget {
     } 
     // ログインしている場合
     else {
-      final futureUsersRecipe = useFuture(dbService.getUsersRecipes(userId));
-      
-      if(futureUsersRecipe.connectionState == ConnectionState.waiting) {
-        content = const Center(child: CircularProgressIndicator());
-      } 
-      else if(futureUsersRecipe.hasError) {
-        content = Center(child: Text("Error: ${futureUsersRecipe.error}"));
-      } 
-      else if(futureUsersRecipe.hasData && futureUsersRecipe.data!.isNotEmpty) {
-        final recipes = futureUsersRecipe.data!;
-        content = ListView.builder(
-          itemCount: recipes.length,
-          itemBuilder: (context, index) {
-            final recipe = recipes[index];
-            // レシピのリスト表示部分　レイアウトは要検討
-            return ListTile(
-              title: Text(recipe.title),
-              subtitle: Text(recipe.description),
+      content = FutureBuilder(
+        future: dbService.getUsersRecipes(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } 
+          else if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          } 
+          else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            final recipes = snapshot.data!;
+            return ListView.builder(
+              itemCount: recipes.length,
+              itemBuilder: (context, index) {
+                final recipe = recipes[index];
+                // レシピのリスト表示部分　レイアウトは要検討
+                return ListTile(
+                  title: Text(recipe.title),
+                  subtitle: Text(recipe.description),
+                  onTap: () {
+                    // レシピの詳細画面に遷移する処理を追加
+                    final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+                    recipeIdNotifier.state = recipe.id;
+                    // レシピの詳細画面に遷移
+                    final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+                    contentNotifier.state = ContentType.recipe;
+                  },
+                );
+              },
             );
-          },
-        );
-      } 
-      else {
-        content = const Center(child: Text("ユーザの作成したレシピが見つかりませんでした"));
-      }
+          } 
+          else {
+            return const Center(child: Text("ユーザの作成したレシピが見つかりませんでした"));
+          }
+        },
+      );
     }    
+
     return Column(
       children: [
         Text("ユーザのレシピ一覧"),
