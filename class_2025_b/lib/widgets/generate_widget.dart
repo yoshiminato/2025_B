@@ -101,6 +101,7 @@ class GenerateWidget extends HookConsumerWidget {
               // レシピの詳細画面に遷移
               final contentNotifier = ref.read(currentContentTypeProvider.notifier);
               contentNotifier.state = ContentType.recipe;
+              
             }
             catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(

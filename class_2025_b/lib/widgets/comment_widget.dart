@@ -8,6 +8,7 @@ import 'package:class_2025_b/screens/camera_capture_screen.dart';
 import 'package:class_2025_b/services/storage_service.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/user_state.dart';
+import 'package:class_2025_b/states/comment_state.dart';
 
 
 class CommentsWidget extends HookConsumerWidget {
@@ -22,7 +23,8 @@ class CommentsWidget extends HookConsumerWidget {
     // テキスト入力用のコントローラーを定義
     final textController = useTextEditingController();
 
-    final currentCommentState = useState<String>("");    
+    textController.text = ref.read(commentProvider);
+
     final selectedImage = ref.watch(selectedImageProvider);
 
     // ログイン状態を監視（読み取り専用ではなく監視）
@@ -35,6 +37,7 @@ class CommentsWidget extends HookConsumerWidget {
 
     // コメント結果を状態として管理
     final commentResult = useState<Widget>(const Center(child: CircularProgressIndicator()));
+    
 
     useEffect(() {
       final futureComment = dbService.getCommentsByRecipeId(recipeId);
@@ -72,7 +75,7 @@ class CommentsWidget extends HookConsumerWidget {
       height: 0,
     )
     :
-    Container(
+    SizedBox(
       width: 100,
       height: 100,
       child: Stack(
@@ -132,7 +135,7 @@ class CommentsWidget extends HookConsumerWidget {
         labelText: "コメントを入力",
         border: OutlineInputBorder(),
       ),
-      onChanged: (value) => currentCommentState.value = value,
+      onChanged: (value) => ref.read(commentProvider.notifier).state = value,
       minLines: 1,
       maxLines: 5,
     );
@@ -146,8 +149,10 @@ class CommentsWidget extends HookConsumerWidget {
     final submitButton = ElevatedButton(
       onPressed: signedIn ?
       () async {
+        final commentText = ref.read(commentProvider);
+
         // コメントを送信する処理
-        if (currentCommentState.value.isNotEmpty || selectedImage != null) {
+        if (commentText.isNotEmpty || selectedImage != null) {
           // ここでコメントを送信する処理を実装
           // 例えば、APIにPOSTリクエストを送るなど
 
@@ -176,7 +181,7 @@ class CommentsWidget extends HookConsumerWidget {
             timestamp: DateTime.now(),
           );
 
-          debugPrint("コメント送信: ${currentCommentState.value}");
+          debugPrint("コメント送信: $commentText");
             // コメントをDBに保存
           await dbService.addComment(comment);
           
@@ -189,7 +194,7 @@ class CommentsWidget extends HookConsumerWidget {
 
           // 入力フィールドをクリア
           textController.clear();
-          currentCommentState.value = "";
+          ref.read(commentProvider.notifier).state = ""; // コメントもクリア
           ref.read(selectedImageProvider.notifier).state = null; // 画像もクリア
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
