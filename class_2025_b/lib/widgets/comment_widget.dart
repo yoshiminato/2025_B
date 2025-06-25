@@ -65,48 +65,83 @@ class CommentsWidget extends HookConsumerWidget {
       return null;
     }, [refreshTrigger.value]);
 
-    final imageContainer = Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: selectedImage == null
-        ? const Center(child: Text("画像が選択されていません"))
-        : ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              selectedImage,
-              fit: BoxFit.cover,
+    final imageContainer = selectedImage == null 
+    ?
+    SizedBox(
+      width: 0,
+      height: 0,
+    )
+    :
+    Container(
+      width: 100,
+      height: 100,
+      child: Stack(
+        children: [
+          // 画像本体
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                selectedImage!,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
+          // 削除ボタン（右上に配置）
+          Positioned(
+            top: -8,
+            right: -8,
+            child: IconButton(
+              onPressed: () {
+                // selectedImageをnullに初期化
+                ref.read(selectedImageProvider.notifier).state = null;
+              },
+              icon: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 24,
+                minHeight: 24,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+
 
     final textField = TextField(
       controller: textController,
+      keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
         labelText: "コメントを入力",
         border: OutlineInputBorder(),
       ),
       onChanged: (value) => currentCommentState.value = value,
-      maxLines: 4,
+      minLines: 1,
+      maxLines: 5,
     );
-
-    final textFieldContainer = Container(
-      // width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
-      child: textField,
-    );    
     
-    final imageButton = ElevatedButton(
-      onPressed: () async {
-        AppRouter.goToCameraCapture(context);
-      },
-      child: const Icon(Icons.camera, size: 30, color: Colors.white),
-    );
 
-    
+    final captureButton = IconButton(
+      icon: const Icon(Icons.camera_alt, size: 30, color: Colors.grey),
+      onPressed: () => AppRouter.goToCameraCapture(context)
+      );
 
     final submitButton = ElevatedButton(
       onPressed: signedIn ?
@@ -117,7 +152,6 @@ class CommentsWidget extends HookConsumerWidget {
           // 例えば、APIにPOSTリクエストを送るなど
 
           final user = ref.read(userProvider);
-
 
           // 画像URLを格納する変数
           late final String? imageUrl;
@@ -164,8 +198,20 @@ class CommentsWidget extends HookConsumerWidget {
         }
       } :
       null,
-      child: const Text("送信"),
+      style: ElevatedButton.styleFrom(
+       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+       minimumSize: const Size(65, 40),  // 最小サイズを指定
+       backgroundColor: Colors.blue[100],   // ボタンの背景色),
+      ),
+      child: const Text("送信", style: TextStyle(fontSize: 10), textAlign: TextAlign.center,),
     );
+
+    final submitButtonContainer = SizedBox(
+      width: 60,
+      child: submitButton,
+    );
+
+    
 
     final commentsContainer = Container(
       width: double.infinity,
@@ -178,11 +224,11 @@ class CommentsWidget extends HookConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              imageButton,
+              captureButton,
               Expanded(
-                child: textFieldContainer,
+                child: textField,
               ),
-              submitButton,
+              submitButtonContainer,
             ],
           ),
           const SizedBox(height: 16),
