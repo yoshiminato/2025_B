@@ -60,6 +60,7 @@ class GenerateWidget extends HookConsumerWidget {
             } 
 
             catch (e) {
+              debugPrint("レシピ生成に失敗: ${e.toString()}");
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("レシピ生成に失敗しました: ${e.toString()}"),
@@ -74,9 +75,9 @@ class GenerateWidget extends HookConsumerWidget {
             final storageService = StorageService();
             try{
               recipe!.imageBase64 ??= "";
-              final base64String = recipe!.imageBase64!;
+              final base64String = recipe.imageBase64!;
 
-              final String? imageUrl = await storageService.storeRecipeImageAndGetUrl(base64String, "recipe");
+              final String? imageUrl = await storageService.storeBase64ImageAndGetUrl(base64String, "recipe");
               recipe.imageUrl = imageUrl;
             }
             catch (e) {
@@ -108,6 +109,7 @@ class GenerateWidget extends HookConsumerWidget {
               // レシピの詳細画面に遷移
               final contentNotifier = ref.read(currentContentTypeProvider.notifier);
               contentNotifier.state = ContentType.recipe;
+              
             }
             catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(

@@ -6,4 +6,5 @@
         <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
     <base-config cleartextTrafficPermitted="false" />
+    
 </network-security-config>

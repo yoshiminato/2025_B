@@ -56,13 +56,14 @@ class SideMenuWidget extends ConsumerWidget {
       onTap: () => AppRouter.goToCustomSetting(context),
     );
 
+
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         header,
         loginTile,
         logoutTile,
-        customizeTile
+        customizeTile,
       ],
     );
     return column;
