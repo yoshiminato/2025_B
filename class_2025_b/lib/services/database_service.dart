@@ -1,6 +1,7 @@
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/models/comment_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -34,7 +35,21 @@ class DatabaseService{
 
     }
     catch (e) {
-      // エラーが発生した場合はnullを返す
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      
+      // その他のエラーの場合
       debugPrint("データベースエラー: ${e.toString()}");
       debugPrint("エラータイプ: ${e.runtimeType}");
       return null;
@@ -65,6 +80,21 @@ class DatabaseService{
         return null; // レシピが存在しない場合はnullを返す
       }
     } catch (e) {
+
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+
       // エラーが発生した場合はnullを返す
       return null;
     }
@@ -73,31 +103,63 @@ class DatabaseService{
   Future<void> addComment(Comment comment) async {
     
     debugPrint("addComment");
-    //debugPrint(comment.toString());
-    
-    //Commentテーブルにコメント(comment)を保存
-    await FirebaseFirestore.instance.collection('Comment').add(comment.toMap());
-
-
-
+    try{
+      //Commentテーブルにコメント(comment)を保存
+      await FirebaseFirestore.instance.collection('Comment').add(comment.toMap());
+    }
+    catch (e) {
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+    }
     return;
   }
 
   Future<List<Comment>> getCommentsByRecipeId(String recipeId) async {
     
-    //debugPrint("getComments");
-    //recipeIdのコメントがあるコメント配列をqueryに
-    final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).get();
+    debugPrint("getComments");
 
-    //queryをComment型に変形
-    List<Comment> comment = query.docs.map((doc){
-      final data = doc.data() as Map<String,dynamic>;
-      return Comment.fromMap(data);
-    }).toList();
+    try{
+      final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).get();
 
-    //debugPrint("コメントは$comment");
+      //queryをComment型に変形
+      List<Comment> comment = query.docs.map((doc){
+        final data = doc.data() as Map<String,dynamic>;
+        return Comment.fromMap(data);
+      }).toList();
 
-    return comment;
+      debugPrint("コメントは$comment");
+
+      return comment;
+    }
+    catch (e) {
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+
+      return [];
+    }
+    
 
   }
 
@@ -122,21 +184,40 @@ class DatabaseService{
   // 引数で受け取ったユーザIDをもとにユーザのレシピを取得するメソッド
   Future<List<Recipe>> getUsersRecipes(String userId) async {
 
-    //データベースからuserIdと一緒のものをqueryに代入
-    final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).get();
+    try{
+      //データベースからuserIdと一緒のものをqueryに代入
+      final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).get();
 
-    //queryをrecipe型に直してrecipesに代入
-    List<Recipe> recipes = query.docs.map((doc){
-      final data = doc.data();
-      
-      // FirestoreのドキュメントIDを明示的に設定
-      data['id'] = doc.id;
-      
-      return Recipe.fromMap(data);
-    }).toList();
+      //queryをrecipe型に直してrecipesに代入
+      List<Recipe> recipes = query.docs.map((doc){
+        final data = doc.data();
 
-    //条件に合うrecipesをかえす
-    return recipes;
+        // FirestoreのドキュメントIDを明示的に設定
+        data['id'] = doc.id;
+
+        return Recipe.fromMap(data);
+      }).toList();
+
+      //条件に合うrecipesをかえす
+      return recipes;
+    }
+    catch(e){
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      return [];
+    }
+    
   } 
 
   // キーワードに一致するレシピを取得するメソッド
@@ -159,8 +240,22 @@ class DatabaseService{
 
       return recipes;
       
-    } catch (e) {
-      debugPrint("Error in getKeywordRecipes: $e");
+    } 
+    catch (e) {
+
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+
       return [];
     }
   }

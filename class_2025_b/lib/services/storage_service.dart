@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class StorageService{
 
@@ -25,15 +26,16 @@ class StorageService{
 
       debugPrint("画像アップロード成功: $downloadUrl");
 
-      return downloadUrl;
-    }
+      return downloadUrl;    }
     catch (e) {
-      // エラーが発生した場合はサンプル画像URLを返す
-      debugPrint("画像アップロードでエラー: $e");
-      debugPrint("エラータイプ: ${e.runtimeType}");
-      final fallbackImageUrl = "https://picsum.photos/300/200";
-      debugPrint("フォールバック画像URL: $fallbackImageUrl");
-      return fallbackImageUrl;
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("Firebase Storage認証エラーが発生しました: $e");
+        // 認証エラーの場合は例外を投げる
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      throw Exception('画像の保存に失敗しました: ${e.toString()}');
     }
   }
 
@@ -44,19 +46,36 @@ class StorageService{
     //画像のIDを生成
     final uuid = Uuid().v4();
 
-    //folderという保存しているところへの道を参照
-    final storageRef = FirebaseStorage.instance.ref().child(folder).child(uuid);
+    try{
+      //folderという保存しているところへの道を参照
+      final storageRef = FirebaseStorage.instance.ref().child(folder).child(uuid);
 
-    //imageをfolderへ保存
-    await storageRef.putFile(image);
+      //imageをfolderへ保存
+      await storageRef.putFile(image);
 
 
-    final url = await storageRef.getDownloadURL();
-    debugPrint("取得したURLは$url");
+      final url = await storageRef.getDownloadURL();
+      debugPrint("取得したURLは$url");
 
-    //保存した画像へのURLを返す
-    return url;
+      //保存した画像へのURLを返す
+      return url;
+    }
+    catch (e) {
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      throw Exception('画像の保存に失敗しました: ${e.toString()}');
 
+    }
   }
 
 }
