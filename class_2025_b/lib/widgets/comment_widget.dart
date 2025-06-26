@@ -49,6 +49,13 @@ class CommentsWidget extends HookConsumerWidget {
           }
           
           if (snapshot.hasError) {
+            if(snapshot.error.toString().contains("認証エラー")){
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("認証エラー発生, 自動ログアウトしました"),
+                ),
+              );
+            }
             return Center(child: Text("エラーが発生しました: ${snapshot.error}"));
           }
 
@@ -163,7 +170,16 @@ class CommentsWidget extends HookConsumerWidget {
           
           if(selectedImage != null) {
             // 画像をストレージに保存
-            imageUrl = await storageService.storeImageAndGetUrl(selectedImage, "comments");
+            try{
+              imageUrl = await storageService.storeImageAndGetUrl(selectedImage, "comments");
+            } 
+            catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("画像の保存に失敗しました: ${e.toString()}"),
+                ),
+              );
+            }
           }
 
           else {
@@ -182,8 +198,26 @@ class CommentsWidget extends HookConsumerWidget {
           );
 
           debugPrint("コメント送信: $commentText");
+
+          try{
             // コメントをDBに保存
-          await dbService.addComment(comment);
+            await dbService.addComment(comment);
+          }
+          catch (e) {
+            if(e.toString().contains("認証エラー")){
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("認証エラー発生, 自動ログアウトしました"),
+                ),
+              );
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("コメントの保存に失敗しました: ${e.toString()}"),
+              ),
+            );
+            return;
+          }
           
           // 更新をトリガー
           refreshTrigger.value++;

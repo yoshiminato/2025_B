@@ -110,9 +110,17 @@ class GenerateWidget extends HookConsumerWidget {
               // レシピの詳細画面に遷移
               final contentNotifier = ref.read(currentContentTypeProvider.notifier);
               contentNotifier.state = ContentType.recipe;
-              
             }
             catch (e) {
+              // 認証エラーの場合は特別なメッセージを表示
+              if (e.toString().contains('認証エラー')) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("認証エラー発生,自動ログアウトしました"),
+                  ),
+                );
+                return;
+              }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("レシピの保存に失敗しました: ${e.toString()}"),

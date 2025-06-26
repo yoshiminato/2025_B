@@ -20,7 +20,15 @@ class RecipeWidget extends ConsumerWidget {
 
     // DBからデータ取得
     final dbService = DatabaseService();
-    final Future<Recipe?> futureRecipe = dbService.getRecipeById(recipeId);
+    late final Future<Recipe?> futureRecipe;
+
+    try{
+      futureRecipe = dbService.getRecipeById(recipeId);
+    }
+    catch (e) {
+      debugPrint("RecipeWidget: DBからのデータ取得に失敗: $e");
+      return Center(child: Text("DBからのデータ取得に失敗しました: $e"));
+    }
 
     // FutureBuilderを使用して非同期データを扱う
     final futureBuilder = FutureBuilder<Recipe?>(

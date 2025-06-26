@@ -38,14 +38,23 @@ class SearchWidget extends HookWidget {
       onSubmitted: (value) async {
         // 検索処理をsearchTextStateの値を使ってsearchResultに格納
         final dbService = DatabaseService();
-        final results = await dbService.getKeywordRecipes(value);
 
-        debugPrint("SearchWidget: 検索キーワード: $value");
-        debugPrint("SearchWidget: 検索結果の数: ${results.length}");
+        try{
+          final results = await dbService.getKeywordRecipes(value);
+          debugPrint("SearchWidget: 検索キーワード: $value");
+          debugPrint("SearchWidget: 検索結果の数: ${results.length}");
 
-        searchResult.value = results;
+          searchResult.value = results;
 
-        hasSearchResult.value = true; // 検索結果があるかどうかのフラグを初期化
+          hasSearchResult.value = true; // 検索結果があるかどうかのフラグを初期化
+        } 
+        catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("検索中にエラーが発生しました: $e")),
+          );
+        }
+
+        
       },
     );
 
@@ -110,6 +119,14 @@ class UsersRecipesWidget extends HookConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           } 
           else if (snapshot.hasError) {
+            if(snapshot.error.toString().contains('認証エラー')) {
+              // 認証エラーの場合はログアウト処理を行う
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("認証エラー発生,自動ログアウトしました"),
+                ),
+              );
+            }
             return Center(child: Text("Error: ${snapshot.error}"));
           } 
           else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
