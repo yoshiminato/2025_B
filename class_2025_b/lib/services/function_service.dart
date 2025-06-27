@@ -60,7 +60,7 @@ class FunctionService {
                             if (e.value) { return e.key; } // trueの選択肢のみ表示
                             else { return ''; }
       }).join(', ')}
-      レシピは以下の形式で出力してください:
+      レシピは以下のJSON形式で出力してください:
       {
         "title": "レシピのタイトル",
         "description": "レシピの説明",
@@ -75,8 +75,13 @@ class FunctionService {
         "time": "調理時間（分）",
         "cost": "予算（円）"
       }
-      調理手順に手順番号は含めないでください
       また、作成するレシピの完成品を俯瞰で見たときのイラストを生成し、base64エンコードした画像データを返してください。
+      最後に注意事項をまとめます
+      - レシピは日本語で記述してください
+      - レシピは必ず上に示した通りのJSON形式で出力してください
+      - レスポンスのテキスト部分には'{}'で始まり'}'で終わるJSON部分以外のテキストは含めないでください
+      - 調理手順の文字列に手順番号は含めないでください
+      - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
     ''';    
 
     // /* モックデータを返す処理(開発時のみ使用) */
@@ -144,10 +149,7 @@ class FunctionService {
 
     // return Future.delayed(const Duration(seconds: 2), () => recipe);
 
-
-
-
-        /* 実際にcloud functionを呼び出す場合 */
+    /* 実際にcloud functionを呼び出す場合 */
     try{
       // cloud functionに登録した関数の呼び出し
       final requestBody = json.encode({
@@ -161,8 +163,6 @@ class FunctionService {
       );
       
       if (res.statusCode != 200) {
-        // debugPrint("HTTP Error: ${res.statusCode}");
-        // debugPrint("Response body: ${res.body}");
         throw Exception('HTTP Error ${res.statusCode}: ${res.body}');
       }
       
@@ -194,11 +194,12 @@ class FunctionService {
       }
       catch (e) {
         debugPrint("Recipe parsing error: $e");
-        // debugPrint("Response body was: ${res.body}");
+        debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
         throw Exception('Failed to parse recipe: $e');
       }
     } 
     catch (e) {
+      debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
       rethrow;
     }
   }
