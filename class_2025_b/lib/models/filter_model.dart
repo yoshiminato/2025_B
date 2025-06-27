@@ -26,7 +26,7 @@ class Filter{
 }
 
 final sampleFilter = Filter(
-  ingredients: ["鶏肉", "玉ねぎ", "にんじん"],
+  ingredients: ["キャベツ", "ピーマン", "オレンジ"],
   moods: {
     "元気": true,
     "疲れ": false,
