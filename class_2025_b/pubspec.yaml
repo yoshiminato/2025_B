@@ -29,6 +29,7 @@ dependencies:
   path_provider: ^2.1.0
   uuid:
   camera: ^0.10.5
+  http:
 
 dev_dependencies:
   flutter_test:
