@@ -1,13 +1,10 @@
 import 'dart:io' show Platform;
 import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
 
 class FunctionService {
 
@@ -43,48 +40,7 @@ class FunctionService {
 
     debugPrint("関数呼び出し: generateRecipe");
 
-    getBaseURL();
-    final prompt = '''
-      あなたはプロの料理人です。以下の条件に基づいて、斬新なレシピを生成してください。
-      条件:
-      - 使用する食材: ${filter.ingredients.join(', ')}
-      - 気分: ${filter.moods.entries.map((e) {
-                if (e.value) { return e.key; } // trueの選択肢のみ表示
-                else { return ''; }
-      }).join(', ')}
-      - 予算: ${filter.budget}
-      - 調理時間: ${filter.time}
-      - 何人分: ${filter.servings}
-      - アレルギー: ${filter.allergy.join(', ')}
-      - 使用可能な調理器具: ${filter.isToolAvailable.entries.map((e) {
-                            if (e.value) { return e.key; } // trueの選択肢のみ表示
-                            else { return ''; }
-      }).join(', ')}
-      レシピは以下のJSON形式で出力してください:
-      {
-        "title": "レシピのタイトル",
-        "description": "レシピの説明",
-        "ingredients": {
-          "材料名1": "分量1",
-          "材料名2": "分量2"
-        },
-        "steps": [
-          "調理手順1",
-          "調理手順2"
-        ],
-        "time": "調理時間（分）",
-        "cost": "予算（円）"
-      }
-      また、作成するレシピの完成品を俯瞰で見たときのイラストを生成し、base64エンコードした画像データを返してください。
-      最後に注意事項をまとめます
-      - レシピは日本語で記述してください
-      - レシピは必ず上に示した通りのJSON形式で出力してください
-      - レスポンスのテキスト部分には'{}'で始まり'}'で終わるJSON部分以外のテキストは含めないでください
-      - 調理手順の文字列に手順番号は含めないでください
-      - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
-    ''';    
-
-    // /* モックデータを返す処理(開発時のみ使用) */
+    // /* モックデータを返す */
     // final responseText = '''
     // {
     //   "title": "本格四川風麻婆豆腐",
@@ -128,27 +84,55 @@ class FunctionService {
     //   "reviwewCount": 0,
     //   "likeCount": 0    }
     // ''';        
-    
-    // String base64String = '';
-
-    // // モック画像データ
-    // try {
-    //   ByteData bytes = await rootBundle.load('assets/images/noImage.png');
-    //   Uint8List imageBytes = bytes.buffer.asUint8List();
-    //   base64String = base64Encode(imageBytes);
-    //   // debugPrint("画像をBase64に変換しました: 長さ=${base64String.length}, 最初の50文字=${base64String.substring(0, base64String.length > 50 ? 50 : base64String.length)}");
-    // } catch (e) {
-    //   debugPrint("アセット画像の読み込みに失敗しました: $e");
-
-    // }
 
     // final recipe = Recipe.fromJson(json.decode(responseText));
 
-    // recipe.imageBase64 = base64String;
-
-
     // return Future.delayed(const Duration(seconds: 2), () => recipe);
 
+
+    getBaseURL();
+    final prompt = '''
+      後で示すレシピの条件に基づいて、斬新なレシピを以下のJSON形式で出力してください
+      
+      レスポンステキストの形式(JSON形式):
+      {
+        "title": "レシピのタイトル",
+        "description": "レシピの説明",
+        "ingredients": {
+          "材料名1": "分量1",
+          "材料名2": "分量2"
+        },
+        "steps": [
+          "調理手順1",
+          "調理手順2"
+        ],
+        "time": "調理時間（分）",
+        "cost": "予算（円）"
+      }
+
+      条件:
+      - 使用する食材: ${filter.ingredients.join(', ')}
+      - 気分: ${filter.moods.entries.map((e) {
+                if (e.value) { return e.key; } // trueの選択肢のみ表示
+                else { return ''; }
+      }).join(', ')}
+      - 予算: ${filter.budget}
+      - 調理時間: ${filter.time}
+      - 何人分: ${filter.servings}
+      - アレルギー: ${filter.allergy.join(', ')}
+      - 使用可能な調理器具: ${filter.isToolAvailable.entries.map((e) {
+                            if (e.value) { return e.key; } // trueの選択肢のみ表示
+                            else { return ''; }
+      }).join(', ')}
+
+      最後に注意事項をまとめます
+      - レシピは日本語で記述してください
+      - レシピは必ず上に示した通りのJSON形式で出力してください
+      - レスポンスのテキストには前述したような構造をもつ'{'で始まり'}'で終わるJSONのみを含むこと. JSONの外側に余計な文字列や説明文は含めないでください.
+      - 調理手順の文字列に手順番号は含めないでください
+      - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
+    ''';    
+    
     /* 実際にcloud functionを呼び出す場合 */
     try{
       // cloud functionに登録した関数の呼び出し
@@ -163,11 +147,13 @@ class FunctionService {
       );
       
       if (res.statusCode != 200) {
-        throw Exception('HTTP Error ${res.statusCode}: ${res.body}');
+        debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
+        return null;
       }
       
       if (res.body.isEmpty) {
-        throw Exception('Empty response body');
+        debugPrint("Empty response body");
+        return null;
       }
         
       try {
@@ -175,33 +161,88 @@ class FunctionService {
         
         // レスポンスの構造をデバッグ出力（画像データを除く）
         final debugResponse = Map<String, dynamic>.from(responseJson);
-        if (debugResponse.containsKey('imageData')) {
-          debugResponse['imageData'] = '[画像データ: ${(debugResponse['imageData'] as String?)?.length ?? 0}文字]';
-        }
+      
         debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
         
         // テキストデータ（レシピ情報）の処理
         final Recipe recipe = Recipe.fromJson(responseJson);
-        String? imageData;
-        if (responseJson.containsKey('imageData')) {
-          imageData = responseJson['imageData'] as String?;
-          // 画像データを変数に格納するだけ（今後の処理のため）
-          debugPrint("画像データを受信しました: ${imageData?.substring(0, 50) ?? 'null'}...");
-          recipe.imageBase64 = imageData;
-        } 
+
+        debugPrint("正常にデータを返します");
         
         return recipe;
       }
       catch (e) {
         debugPrint("Recipe parsing error: $e");
         debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
-        throw Exception('Failed to parse recipe: $e');
+        return null;
       }
     } 
     catch (e) {
       debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
-      rethrow;
+      return null;
     }
+  }
+
+  Future<String?> generateBase64Image(Recipe recipe) async {
+
+    debugPrint("FunctionService: getBase64Image()");
+
+    // /* モックデータを返す */
+    // const base64Image = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC";
+    // return Future.delayed(const Duration(seconds: 2), () => base64Image);
+
+    getBaseURL();
+
+    final prompt = '''
+      以下のレシピの完成品を俯瞰で見たときのイラストを生成し、base64エンコードした画像データを返してください。
+      レシピ情報:
+      - タイトル: ${recipe.title}
+      - 説明: ${recipe.description}
+      - 材料: ${recipe.ingredients.entries.map((e) => '${e.key}: ${e.value}').join(', ')}
+      - 手順: ${recipe.steps.join(', ')}
+    ''';
+
+    // cloud functionに登録した関数の呼び出し
+    final requestBody = json.encode({
+      "prompt": prompt
+    });
+
+    final res = await http.post(
+      Uri.parse("$basePath/generateBase64Image"),
+      headers: {"Content-Type": "application/json"},
+      body: requestBody
+    );
+
+    if (res.statusCode != 200) {
+      debugPrint("getBase64Image: HTTP Error ${res.statusCode}: ${res.body}");
+      return null;
+    }
+
+    if (res.body.isEmpty) {
+      debugPrint("getBase64Image: Empty response body");
+      return null;
+    }
+
+    try {
+      debugPrint("getBase64Image: Response body: ${res.body.substring(0, res.body.length > 200 ? 200 : res.body.length)}");
+
+      final responseJson = json.decode(res.body);
+
+      debugPrint("getBase64Image: Cloud Functionsからのレスポンス: ${responseJson.toString().substring(0, 100)}");
+      
+      debugPrint("imageDataの中身： ${responseJson['imageData'].toString().substring(0, 20)}..."); // 先頭20文字だけ表示
+      return responseJson['imageData'] as String;
+      // if (responseJson.containsKey('imageData')){
+        
+      //   return responseJson['imageData'] as String;
+      // }
+      return null;
+    } 
+    catch (e) {
+      debugPrint("getBase64Image parsing error: $e");
+      return null;
+    }
+
   }
 
 }
