@@ -8,13 +8,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 class StorageService{
 
   // base64形式の画像をFirebase Storageに保存し、ダウンロードURLを返すメソッド
-  Future<String> storeBase64ImageAndGetUrl(String base64String, String folder) async {
+  Future<String?> storeBase64ImageAndGetUrl(String base64String, String folder) async {
     
     try{
       
       // Base64文字列の検証
       if (base64String.isEmpty) {
-        throw Exception("Base64文字列が空です");
+        debugPrint("Base64文字列が空です。画像を保存できません。");
+        return null; // 空の文字列の場合はnullを返す
       }
       
       Uint8List imageBytes = base64Decode(base64String);
@@ -32,6 +33,13 @@ class StorageService{
       if (e.toString().contains('UNAUTHENTICATED') || 
           e.toString().contains('INVALID_REFRESH_TOKEN')) {
         debugPrint("Firebase Storage認証エラーが発生しました: $e");
+        try{
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+          }
+        catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
         // 認証エラーの場合は例外を投げる
         throw Exception('認証エラー: 再ログインしてください');
       }
@@ -42,7 +50,6 @@ class StorageService{
 
   Future<String> storeImageAndGetUrl(File image, String folder) async {
     
-    debugPrint("storeImageAndGetUrl");
     //画像のIDを生成
     final uuid = Uuid().v4();
 

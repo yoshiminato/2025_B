@@ -250,8 +250,6 @@ class CommentsWidget extends HookConsumerWidget {
       child: submitButton,
     );
 
-    
-
     final commentsContainer = Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),

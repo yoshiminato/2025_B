@@ -305,6 +305,34 @@ class DatabaseService{
   //   }
   // }
 
+  /// imageUrlがnullのレシピをすべて削除する
+  Future<void> deleteInvalidData() async {
+    try {
+      debugPrint("deleteInvalidData: imageUrlがnullのレシピを削除します");
+      final collection = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      final querySnapshot = await collection.where('imageUrl', isNull: true).get();
+
+      for (final doc in querySnapshot.docs) {
+        await doc.reference.delete();
+        debugPrint("削除: ${doc.id}");
+      }
+      debugPrint("deleteInvalidData: 完了");
+    } catch (e) {
+      debugPrint("deleteInvalidData エラー: ${e.toString()}");
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') ||
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+    }
+  }
+
 }
 
 

@@ -39,6 +39,8 @@ class SearchWidget extends HookWidget {
         // 検索処理をsearchTextStateの値を使ってsearchResultに格納
         final dbService = DatabaseService();
 
+        dbService.deleteInvalidData();
+
         try{
           final results = await dbService.getKeywordRecipes(value);
           debugPrint("SearchWidget: 検索キーワード: $value");

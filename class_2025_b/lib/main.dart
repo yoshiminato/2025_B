@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:cloud_functions/cloud_functions.dart";
 import 'package:firebase_storage/firebase_storage.dart';
 
+
 void main() async {
 
   // final ip = "localhost";
@@ -24,12 +25,11 @@ void main() async {
     FirebaseFirestore.instance.useFirestoreEmulator(ip, 8080);
     FirebaseFunctions.instance.useFunctionsEmulator(ip, 5001);
     FirebaseStorage.instance.useStorageEmulator(ip, 9199);
-    await FirebaseAuth.instance.useAuthEmulator(ip, 9099);
-    
-    
-   } catch (e) {
+    await FirebaseAuth.instance.useAuthEmulator(ip, 9099); 
+   } 
+   catch (e) {
     debugPrint(e.toString());
-   }
+   }   
 
   final scope = ProviderScope(child: RecipeAI());
   runApp(scope);

@@ -11,6 +11,9 @@ import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 
+
+const regenerationLimit = 1;
+
 class GenerateWidget extends HookConsumerWidget {
   const GenerateWidget({super.key});
 
@@ -48,23 +51,53 @@ class GenerateWidget extends HookConsumerWidget {
             final Filter filter = sampleFilter;
 
             // 生成されたレシピを格納する変数
-            late final Recipe? recipe;
+            Recipe? recipe;
 
             // レシピ生成を試みる
             try {
-               recipe = await functionService.generateRecipe(filter);
+              var regenerateCount = 0;
 
-               if(user != null) {;
-                 recipe!.userId = user.uid;
-               }
+              debugPrint("レシピ生成開始");
+
+              while (regenerateCount < regenerationLimit && (recipe == null)) {
+                // レシピ生成関数を呼び出す
+                debugPrint("レシピ生成中: 再生成カウント: ${regenerateCount+1}");
+                recipe = await functionService.generateRecipe(filter);
+                regenerateCount++;
+              }
+
+              debugPrint("レシピ生成完了: ${recipe.toString()}");
+
+              if (recipe == null) {
+                 throw Exception("レシピ生成に失敗しました");
+              }
+
+              regenerateCount = 0; // 再生成カウントをリセット
+              String? base64Image;
+              
+              while (regenerateCount < regenerationLimit && (base64Image == null)) {
+                // 画像生成関数を呼び出す
+                debugPrint("レシピ画像生成中: 再生成カウント: ${regenerateCount+1}");
+                base64Image = await functionService.generateBase64Image(recipe);
+                debugPrint("生成された画像のbase64: ${base64Image.toString().substring(0,4)}..."); // 先頭20文字だけ表示
+                regenerateCount++;
+              }
+
+              // 画像生成に成功した場合はレシピに画像を追加
+              recipe.imageBase64 = base64Image;
+              
+              // レシピに作成者情報を付加
+              if(user != null) {
+                recipe.userId = user.uid;
+              }
                
             } 
 
             catch (e) {
-              debugPrint("レシピ生成に失敗: ${e.toString()}");
+              debugPrint("レシピ生成に失敗しました: $e");
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text("レシピ生成に失敗しました: ${e.toString()}"),
+                  content: Text("レシピ生成に失敗しました"),
                 ),
               );
               // レシピ生成に失敗したら生成中フラグを下げて処理中断
@@ -75,7 +108,7 @@ class GenerateWidget extends HookConsumerWidget {
             // レシピ画像をstorage保存を試みる
             final storageService = StorageService();
             try{
-              recipe!.imageBase64 ??= "";
+              recipe.imageBase64 ??= "";
               final base64String = recipe.imageBase64!;
 
               final String? imageUrl = await storageService.storeBase64ImageAndGetUrl(base64String, "recipe");
@@ -107,6 +140,7 @@ class GenerateWidget extends HookConsumerWidget {
               // レシピIDを状態管理に保存
               final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
               recipeIdNotifier.state = recipeId;
+
               // レシピの詳細画面に遷移
               final contentNotifier = ref.read(currentContentTypeProvider.notifier);
               contentNotifier.state = ContentType.recipe;
