@@ -62,8 +62,18 @@ class RecipeWidget extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに変更
             children: [
+              recipe.imageUrl == null
+              ? 
+              const Center(child: Text("画像がありません"))
+              :
               SizedBox(
-                child: Image.network(
+                child: 
+                recipe.imageUrl == null ?
+                Image.asset(
+                  "assets/images/no_image.png", 
+                  fit: BoxFit.cover, 
+                  width: double.infinity):
+                Image.network(
                   recipe.imageUrl!,
                   fit: BoxFit.cover,
                   width: double.infinity, // 横幅いっぱいに広げる
