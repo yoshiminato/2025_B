@@ -92,6 +92,62 @@ class DefaultSearchWidget extends ConsumerWidget {
   }
 }
 
+class CarouselCard extends ConsumerWidget {
+  final Recipe recipe;
+
+  const CarouselCard({super.key, required this.recipe});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final imageContainer = SizedBox(
+      width: 70,
+      height: 70,
+      child: recipe.imageUrl != null
+          ? Image.network(recipe.imageUrl!, fit: BoxFit.cover)
+          : Image.asset(
+              "assets/images/noImage.png",
+              fit: BoxFit.cover,
+            ),
+    );
+
+    final column = Column(
+      children: [
+        imageContainer,
+        Text(
+          recipe.title, 
+          style: const TextStyle(fontSize: 9),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2, // 1行だけ表示
+        ),
+      ],
+    );
+
+
+    return Card(
+      
+      child: InkWell(
+        onTap: () {
+          // レシピの詳細画面に遷移する処理を追加
+          final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+          recipeIdNotifier.state = recipe.id;
+
+          // レシピの詳細画面に遷移
+          final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+          contentNotifier.state = ContentType.recipe;
+
+        },
+        child: Padding(
+          padding: EdgeInsets.all(5.0),
+          child: column,
+        
+        ),
+      ),
+      
+    );
+  }
+}
+
 class UsersRecipesWidget extends HookConsumerWidget {
   const UsersRecipesWidget({super.key});
 
@@ -106,14 +162,68 @@ class UsersRecipesWidget extends HookConsumerWidget {
 
     late final Widget content;
 
-    // ログインしていない場合
-    if(userId == null) {
-      content = const Center(child: Text("ログインしていません"));
-    } 
-    // ログインしている場合
-    else {
-      content = FutureBuilder(
-        future: dbService.getUsersRecipes(userId),
+    // // ログインしていない場合
+    // if(userId == null) {
+    //   content = const Center(child: Text("ログインしていません"));
+    // } 
+    // // ログインしている場合
+    // else {
+    //   content = FutureBuilder(
+    //     future: dbService.getUsersRecipes(userId),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return const Center(child: CircularProgressIndicator());
+    //       } 
+    //       else if (snapshot.hasError) {
+    //         if(snapshot.error.toString().contains('認証エラー')) {
+    //           // 認証エラーの場合はログアウト処理を行う
+    //           ScaffoldMessenger.of(context).showSnackBar(
+    //             SnackBar(
+    //               content: Text("認証エラー発生,自動ログアウトしました"),
+    //             ),
+    //           );
+    //         }
+    //         return Center(child: Text("Error: ${snapshot.error}"));
+    //       } 
+    //       else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+    //         final recipes = snapshot.data!;
+    //         return ListView.builder(
+    //           itemCount: recipes.length,
+    //           itemBuilder: (context, index) {
+    //             final recipe = recipes[index];
+    //             // レシピのリスト表示部分　レイアウトは要検討
+    //             return ListTile(
+    //               title: Text(recipe.title),
+    //               subtitle: Text(recipe.description),
+    //               onTap: () {
+    //                 // レシピの詳細画面に遷移する処理を追加
+    //                 final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+    //                 recipeIdNotifier.state = recipe.id;
+    //                 // レシピの詳細画面に遷移
+    //                 final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+    //                 contentNotifier.state = ContentType.recipe;
+    //               },
+    //             );
+    //           },
+    //         );
+    //       } 
+    //       else {
+    //         return const Center(child: Text("ユーザの作成したレシピが見つかりませんでした"));
+    //       }
+    //     },
+    //   );
+    // } 
+       
+    // final userRecipes = dbService.getUsersRecipes(userId!);
+
+   
+
+    if (userId == null) {
+      content =  const Center(child: Text("ログインしていません"));
+    }
+    else{
+      content = FutureBuilder<List<Recipe>>(
+        future: dbService.getUsersRecipes(userId!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -131,22 +241,14 @@ class UsersRecipesWidget extends HookConsumerWidget {
           } 
           else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final recipes = snapshot.data!;
-            return ListView.builder(
+            return PageView.builder(
+              controller: PageController(viewportFraction: 0.3),
               itemCount: recipes.length,
               itemBuilder: (context, index) {
                 final recipe = recipes[index];
-                // レシピのリスト表示部分　レイアウトは要検討
-                return ListTile(
-                  title: Text(recipe.title),
-                  subtitle: Text(recipe.description),
-                  onTap: () {
-                    // レシピの詳細画面に遷移する処理を追加
-                    final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-                    recipeIdNotifier.state = recipe.id;
-                    // レシピの詳細画面に遷移
-                    final contentNotifier = ref.read(currentContentTypeProvider.notifier);
-                    contentNotifier.state = ContentType.recipe;
-                  },
+                return Container(
+                  padding: const EdgeInsets.all(5.0),
+                  child: CarouselCard(recipe: recipe)
                 );
               },
             );
@@ -156,13 +258,23 @@ class UsersRecipesWidget extends HookConsumerWidget {
           }
         },
       );
-    }    
+    }
+
+    
+
+
+    final userRecipesContainer = Container(
+      padding: const EdgeInsets.all(16.0),
+      width: double.infinity,
+      height: 160,
+      child: content
+    );
 
     return Column(
       children: [
         Text("ユーザのレシピ一覧"),
         SizedBox(height: 20),
-        Expanded(child: content),
+        userRecipesContainer,
       ],
     );
   }
@@ -176,6 +288,8 @@ class SearchResultWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center, // 左寄せに変更
       children: [
         const Text("検索結果"),
         const SizedBox(height: 20),
@@ -193,6 +307,7 @@ class SearchResultWidget extends ConsumerWidget {
                   // レシピIDを状態管理に保存
                   final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
                   recipeIdNotifier.state = recipe.id;
+
                   // レシピの詳細画面に遷移
                   final contentNotifier = ref.read(currentContentTypeProvider.notifier);
                   contentNotifier.state = ContentType.recipe;
