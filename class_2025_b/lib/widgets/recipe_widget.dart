@@ -1,9 +1,10 @@
-import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
-import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:class_2025_b/services/database_service.dart';
+import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/widgets/comment_widget.dart';
+import 'package:class_2025_b/widgets/favorite_button_widget.dart';
 
 class RecipeWidget extends ConsumerWidget {
   // final String? recipeId;
@@ -12,6 +13,7 @@ class RecipeWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
 
     final recipeId = ref.watch(recipeIdProvider);
     if (recipeId == null) {
@@ -29,6 +31,7 @@ class RecipeWidget extends ConsumerWidget {
       debugPrint("RecipeWidget: DBからのデータ取得に失敗: $e");
       return Center(child: Text("DBからのデータ取得に失敗しました: $e"));
     }
+
 
     // FutureBuilderを使用して非同期データを扱う
     final futureBuilder = FutureBuilder<Recipe?>(
@@ -56,6 +59,7 @@ class RecipeWidget extends ConsumerWidget {
 
         // データが存在する場合はレシピの詳細を表示
         else {
+
           final recipe = snapshot.data!; 
         
           return Column(
@@ -113,8 +117,6 @@ class RecipeWidget extends ConsumerWidget {
                   ),
                 );
               }),
-              const SizedBox(height: 20),
-              CommentsWidget(recipeId: recipeId)
               
             ],
           );
@@ -127,6 +129,10 @@ class RecipeWidget extends ConsumerWidget {
       child: Column(
         children: [
           futureBuilder,
+          const SizedBox(height: 20),
+          FavoriteButtonWidget(recipeId: recipeId),
+          const SizedBox(height: 20),
+          CommentsWidget(recipeId: recipeId)
         ],
       )    
     );   

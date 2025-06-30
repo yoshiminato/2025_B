@@ -162,62 +162,6 @@ class UsersRecipesWidget extends HookConsumerWidget {
 
     late final Widget content;
 
-    // // ログインしていない場合
-    // if(userId == null) {
-    //   content = const Center(child: Text("ログインしていません"));
-    // } 
-    // // ログインしている場合
-    // else {
-    //   content = FutureBuilder(
-    //     future: dbService.getUsersRecipes(userId),
-    //     builder: (context, snapshot) {
-    //       if (snapshot.connectionState == ConnectionState.waiting) {
-    //         return const Center(child: CircularProgressIndicator());
-    //       } 
-    //       else if (snapshot.hasError) {
-    //         if(snapshot.error.toString().contains('認証エラー')) {
-    //           // 認証エラーの場合はログアウト処理を行う
-    //           ScaffoldMessenger.of(context).showSnackBar(
-    //             SnackBar(
-    //               content: Text("認証エラー発生,自動ログアウトしました"),
-    //             ),
-    //           );
-    //         }
-    //         return Center(child: Text("Error: ${snapshot.error}"));
-    //       } 
-    //       else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-    //         final recipes = snapshot.data!;
-    //         return ListView.builder(
-    //           itemCount: recipes.length,
-    //           itemBuilder: (context, index) {
-    //             final recipe = recipes[index];
-    //             // レシピのリスト表示部分　レイアウトは要検討
-    //             return ListTile(
-    //               title: Text(recipe.title),
-    //               subtitle: Text(recipe.description),
-    //               onTap: () {
-    //                 // レシピの詳細画面に遷移する処理を追加
-    //                 final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-    //                 recipeIdNotifier.state = recipe.id;
-    //                 // レシピの詳細画面に遷移
-    //                 final contentNotifier = ref.read(currentContentTypeProvider.notifier);
-    //                 contentNotifier.state = ContentType.recipe;
-    //               },
-    //             );
-    //           },
-    //         );
-    //       } 
-    //       else {
-    //         return const Center(child: Text("ユーザの作成したレシピが見つかりませんでした"));
-    //       }
-    //     },
-    //   );
-    // } 
-       
-    // final userRecipes = dbService.getUsersRecipes(userId!);
-
-   
-
     if (userId == null) {
       content =  const Center(child: Text("ログインしていません"));
     }

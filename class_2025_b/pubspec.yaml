@@ -30,6 +30,7 @@ dependencies:
   uuid:
   camera: ^0.10.5
   http:
+  shared_preferences: 
 
 dev_dependencies:
   flutter_test:

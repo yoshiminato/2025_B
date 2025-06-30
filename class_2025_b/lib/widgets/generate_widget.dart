@@ -12,7 +12,7 @@ import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 
 
-const regenerationLimit = 1;
+const regenerationLimit = 3;
 
 class GenerateWidget extends HookConsumerWidget {
   const GenerateWidget({super.key});
