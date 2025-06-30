@@ -17,7 +17,6 @@ class DatabaseService{
     try{
 
       debugPrint("レシピをデータベースに追加します");
-      debugPrint("レシピ作成者: ${recipe.userId}");
 
       // テーブルの取得
       CollectionReference recipesRef = FirebaseFirestore.instance.collection(recipeCollectionPath);
