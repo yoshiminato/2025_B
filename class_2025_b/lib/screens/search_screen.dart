@@ -6,24 +6,22 @@ import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
+import 'package:class_2025_b/states/search_state.dart';
 
-class SearchWidget extends HookWidget {
+const imageSize = 70.0; // カルーセルカードの画像サイズ
+
+class SearchWidget extends HookConsumerWidget {
   
   SearchWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
 
     // テキストのコントローラ
-    final searchTextController = useTextEditingController();
+    final searchTextController = useTextEditingController(text: ref.read(searchTextProvider));
 
-    // テキストの状態管理
-    final searchTextState = useState<String>("");
-
-    // 検索結果有無による表示変更のための状態管理
-    final hasSearchResult = useState<bool>(false);
-
-    final searchResult = useState<List<Recipe>>([]);
+    // 検索結果の有無で画面更新
+    final hasResult = ref.watch(hasSearchResultProvider);
 
     final searchTextField = TextField(
       controller: searchTextController,
@@ -31,30 +29,43 @@ class SearchWidget extends HookWidget {
         labelText: "検索キーワード",
         border: OutlineInputBorder(),
       ),
+
+      
+      /* テキストの変更をプロバイダに伝達 */
       onChanged: (value) {
-        // テキストが変更されたら状態を更新
-        searchTextState.value = value;
+
+        // プロバイダのNotifierを取得
+        final searchTextNotifier = ref.read(searchTextProvider.notifier);
+
+        // Notifierを使ってプロバイダの値を更新
+        searchTextNotifier.state = value;
+
       },
+
+      /* 検索文字列が提出されたら検索処理 */
+
       onSubmitted: (value) async {
-        // 検索処理をsearchTextStateの値を使ってsearchResultに格納
-        final dbService = DatabaseService();
 
         try{
-          final results = await dbService.getKeywordRecipes(value);
-          debugPrint("SearchWidget: 検索キーワード: $value");
-          debugPrint("SearchWidget: 検索結果の数: ${results.length}");
+          
+          // 検索結果プロバイダのNotifierを取得
+          final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
 
-          searchResult.value = results;
+          // 検索結果を有で更新
+          ref.read(hasSearchResultProvider.notifier).state = true;
 
-          hasSearchResult.value = true; // 検索結果があるかどうかのフラグを初期化
+          // 検索処理
+          await searchResultNotifier.updateSearchResult();
+
         } 
         catch (e) {
+
+          // エラーが発生した場合はスナックバーで通知
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("検索中にエラーが発生しました: $e")),
           );
-        }
 
-        
+        }
       },
     );
 
@@ -71,9 +82,9 @@ class SearchWidget extends HookWidget {
         searchTextFieldContainer,
         // 検索結果がある場合はSearchResultWidgetを表示
         Expanded(
-          child: hasSearchResult.value
+          child: hasResult
           ?
-          SearchResultWidget(searchResult: searchResult.value)
+          SearchResultWidget()
           :
           DefaultSearchWidget(),
         ),
@@ -101,8 +112,8 @@ class CarouselCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
     final imageContainer = SizedBox(
-      width: 70,
-      height: 70,
+      width: imageSize,
+      height: imageSize,
       child: recipe.imageUrl != null
           ? Image.network(recipe.imageUrl!, fit: BoxFit.cover)
           : Image.asset(
@@ -154,10 +165,11 @@ class UsersRecipesWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    // ユーザ情報を取得
     final user = ref.watch(userProvider);
-
     final userId = (user!=null) ? user.uid : null;
 
+    // DatabaseServiceのインスタンスを取得
     final dbService = DatabaseService();
 
     late final Widget content;
@@ -167,7 +179,7 @@ class UsersRecipesWidget extends HookConsumerWidget {
     }
     else{
       content = FutureBuilder<List<Recipe>>(
-        future: dbService.getUsersRecipes(userId!),
+        future: dbService.getUsersRecipes(userId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -204,6 +216,7 @@ class UsersRecipesWidget extends HookConsumerWidget {
       );
     }
 
+    final userRecipeHeader = Text("ユーザの作成したレシピ一覧");
     
 
 
@@ -216,8 +229,8 @@ class UsersRecipesWidget extends HookConsumerWidget {
 
     return Column(
       children: [
-        Text("ユーザのレシピ一覧"),
-        SizedBox(height: 20),
+        userRecipeHeader,
+        SizedBox(height: 10),
         userRecipesContainer,
       ],
     );
@@ -225,41 +238,73 @@ class UsersRecipesWidget extends HookConsumerWidget {
 }
 
 class SearchResultWidget extends ConsumerWidget {
-  const SearchResultWidget({super.key, required this.searchResult});
-
-  final List<Recipe> searchResult;
+  const SearchResultWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    // 検索結果をプロバイダから取得
+    final searchResult = ref.watch(searchResultNotifierProvider);
+
+    final searchText = ref.read(searchTextProvider);
+
+    final backIcon = IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        // 検索結果をクリア
+        ref.read(searchResultNotifierProvider.notifier).clearSearchResult();
+        // 検索テキストをクリア
+        ref.read(searchTextProvider.notifier).state = "";
+        // 検索結果がない状態に戻す
+        ref.read(hasSearchResultProvider.notifier).state = false;
+      },
+    );
+
+    final searchResultHeader = Row(
+      children: [backIcon, Text("「$searchText」の検索結果"),],
+    );
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center, // 左寄せに変更
       children: [
-        const Text("検索結果"),
+
+        searchResultHeader,
         const SizedBox(height: 20),
-        Expanded(
-          child: ListView.builder(
-            itemCount: searchResult.length,
-            itemBuilder: (context, index) {
-              final recipe = searchResult[index];
-              return ListTile(
-                title: Text(recipe.title),
-                subtitle: Text(recipe.description),
-                onTap: () {
+        searchResult.when(
+          data: (recipes) {
+            if (recipes.isEmpty) {
+              return const Center(child: Text("検索結果がありません"));
+            }
+            return
+            Expanded(
+              child: ListView.builder(
+                itemCount: recipes.length,
+                itemBuilder: (context, index) {
+                  final recipe = recipes[index];
+                  return ListTile(
+                    title: Text(recipe.title),
+                    subtitle: Text(recipe.description),
+                    onTap: () {
+                    
+                      // レシピの詳細画面に遷移する処理を追加
+                      // レシピIDを状態管理に保存
+                      final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+                      recipeIdNotifier.state = recipe.id;
 
-                  // レシピの詳細画面に遷移する処理を追加
-                  // レシピIDを状態管理に保存
-                  final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-                  recipeIdNotifier.state = recipe.id;
-
-                  // レシピの詳細画面に遷移
-                  final contentNotifier = ref.read(currentContentTypeProvider.notifier);
-                  contentNotifier.state = ContentType.recipe;
+                      // レシピの詳細画面に遷移
+                      final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+                      contentNotifier.state = ContentType.recipe;
+                    },
+                  );
                 },
-              );
-            },
-          ),
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text("Error: $error")),
         ),
+        
       ],
     );
   }
