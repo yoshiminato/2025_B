@@ -1,3 +1,4 @@
+import 'package:class_2025_b/screens/ingredients_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/screens/generate_screen.dart';
@@ -25,21 +26,27 @@ class HomeScreen extends ConsumerWidget {
       GenerateScreen(),
       SearchScreen(),
       RecipeScreen(),
+      IngredientsScreen()
     ];
 
     final generateItem = BottomNavigationBarItem(
-      icon: const Icon(Icons.add),
+      icon: const Icon(Icons.add, color: Colors.grey),
       label: "generate",
     );    
     
     final searchItem = BottomNavigationBarItem(
-      icon: const Icon(Icons.search),
+      icon: const Icon(Icons.search, color: Colors.grey),
       label: "search",
     );
     
     final recipeItem = BottomNavigationBarItem(
-      icon: const Icon(Icons.receipt),
+      icon: const Icon(Icons.receipt, color: Colors.grey),
       label: "recipe",
+    );
+
+    final ingredientsItem = BottomNavigationBarItem(
+      icon: const Icon(Icons.kitchen, color: Colors.grey,),
+      label: "ingredients",
     );
 
     return Scaffold(
@@ -54,8 +61,13 @@ class HomeScreen extends ConsumerWidget {
         items: [
           generateItem,
           searchItem,
-          recipeItem
+          recipeItem,
+          ingredientsItem
         ],
+        selectedItemColor: Colors.grey[500],
+        unselectedItemColor: Colors.grey[100],
+        selectedLabelStyle: TextStyle(color: Colors.grey[500]), // ラベルのスタイル
+        unselectedLabelStyle: TextStyle(color: Colors.grey[100]),
       ),
     );
   }

@@ -4,6 +4,7 @@ enum ContentType{
   generate,
   search,
   recipe,
+  ingredients,
 }
 
 // ホーム画面のコンテンツの状態を管理するプロバイダ

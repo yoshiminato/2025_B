@@ -14,7 +14,7 @@ class Recipe{
   String cost;                     // 予算（コスト）
   DateTime createdAt;              // 作成日時
   String? userId;                  // 作成者のUID
-  int reviewCount;                // レビュー数（初期値は0）
+  int reviewCount;                 // レビュー数（初期値は0）
   int likeCount;                   // いいね数（初期値は0）
   
   
