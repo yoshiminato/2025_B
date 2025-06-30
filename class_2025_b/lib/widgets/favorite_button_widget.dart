@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/states/favorite_recipe_id_state.dart';
+import 'package:class_2025_b/states/recipe_id_state.dart';
 
 /* いいねボタンウィジェット */
 class FavoriteButtonWidget extends ConsumerWidget {
 
-  final String recipeId;
-
-  const FavoriteButtonWidget({super.key, required this.recipeId});
+  const FavoriteButtonWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+    final recipeId = ref.watch(recipeIdProvider);
+
+    if(recipeId == null) {
+      return const SizedBox.shrink(); // レシピIDがない場合は何も表示しない
+    }
 
     // いいね状態を取得するためのプロバイダを監視
     final favoriteRecipeIds = ref.watch(favoriteRecipeIdNotifierProvider);
