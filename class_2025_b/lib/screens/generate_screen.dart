@@ -14,8 +14,8 @@ import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 
 const regenerationLimit = 3;
 
-class GenerateWidget extends HookConsumerWidget {
-  const GenerateWidget({super.key});
+class GenerateScreen extends HookConsumerWidget {
+  const GenerateScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

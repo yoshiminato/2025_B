@@ -11,9 +11,9 @@ import 'package:class_2025_b/states/favorite_recipe_id_state.dart';
 
 const imageSize = 70.0; // カルーセルカードの画像サイズ
 
-class SearchWidget extends HookConsumerWidget {
+class SearchScreen extends HookConsumerWidget {
   
-  const SearchWidget({super.key});
+  const SearchScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
