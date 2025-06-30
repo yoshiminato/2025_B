@@ -7,6 +7,7 @@ import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/search_state.dart';
+import 'package:class_2025_b/states/favorite_recipe_id_state.dart';
 
 const imageSize = 70.0; // カルーセルカードの画像サイズ
 
@@ -99,7 +100,18 @@ class DefaultSearchWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    return UsersRecipesWidget();
+    final column = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center, // 左寄せに変更
+      children: [
+        FavoriteRecipesWidget(),
+        const SizedBox(height: 20),
+        UsersRecipesWidget(),
+      ],
+    );
+    return SingleChildScrollView(
+      child: column,
+    );
   }
 }
 
@@ -159,6 +171,139 @@ class CarouselCard extends ConsumerWidget {
   }
 }
 
+
+/* todo: 
+   - RecentRecipesWidgetの実装
+*/
+
+// class RecentRecipesWidget extends HookConsumerWidget {
+//   const RecentRecipesWidget({super.key});
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+
+//     // DatabaseServiceのインスタンスを取得
+//     final dbService = DatabaseService();
+
+//     // 最近のレシピを取得
+//     final recentRecipes = dbService.getRecentRecipes();
+
+//     final content = FutureBuilder<List<Recipe>>(
+//       future: recentRecipes,
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         } 
+//         else if (snapshot.hasError) {
+//           return Center(child: Text("エラーが発生しました: ${snapshot.error}"));
+//         } 
+//         else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+//           final recipes = snapshot.data!;
+//           return PageView.builder(
+//             controller: PageController(viewportFraction: 0.3),
+//             itemCount: recipes.length,
+//             itemBuilder: (context, index) {
+//               final recipe = recipes[index];
+//               return Container(
+//                 padding: const EdgeInsets.all(5.0),
+//                 child: CarouselCard(recipe: recipe)
+//               );
+//             },
+//           );
+//         } 
+//         else {
+//           return const Center(child: Text("最近のレシピが見つかりませんでした"));
+//         }
+//       },
+//     );
+
+//     final recentRecipeHeader = Text("最近のレシピ一覧");
+  
+//     final recentRecipesContainer = Container(
+//       padding: const EdgeInsets.all(16.0),
+//       width: double.infinity,
+//       height: 160,
+//       child: content
+//     );
+
+//     return Column(
+//       children: [
+//         recentRecipeHeader,
+//         SizedBox(height: 10),
+//         recentRecipesContainer,
+//       ],
+//     );
+//   }
+// }
+
+class FavoriteRecipesWidget extends HookConsumerWidget {
+  const FavoriteRecipesWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    // お気に入りのレシピの取得
+    final favoriteRecipeIds = ref.watch(favoriteRecipeIdNotifierProvider);
+
+    // コンテンツ部分(レシピ一覧, エラー、ローディングマーク)
+    final content = favoriteRecipeIds.when(
+      data: (recipeIds) {
+
+        // お気に入りのレシピがない場合の処理
+        if (recipeIds.isEmpty) {
+          return const Center(child: Text("お気に入りのレシピが登録されていません"));
+        }
+
+        // お気に入りのレシピがある場合はカルーセルを表示
+        return PageView.builder(
+          controller: PageController(viewportFraction: 0.3),
+          itemCount: recipeIds.length,
+          itemBuilder: (context, index) {
+            final recipeId = recipeIds[index];
+            final dbService = DatabaseService();
+            return FutureBuilder<Recipe?>(
+              future: dbService.getRecipeById(recipeId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data == null) {
+                  // レシピが見つからない場合は何も表示しない or プレースホルダー
+                  return const SizedBox.shrink();
+                }
+                final recipe = snapshot.data!;
+                return Container(
+                  padding: const EdgeInsets.all(5.0),
+                  child: CarouselCard(recipe: recipe),
+                );
+              },
+          );
+          },
+        );
+      }, 
+      error: (error, stack) => Text("エラーが発生しました: $error"), 
+      loading: () => const Center(child: CircularProgressIndicator())
+    );
+
+    final favoriteRecipeHeader = Text("お気に入りレシピ一覧");
+  
+    final favoriteRecipesContainer = Container(
+      padding: const EdgeInsets.all(16.0),
+      width: double.infinity,
+      height: 160,
+      child: content
+    );
+
+    return Column(
+      children: [
+        favoriteRecipeHeader,
+        SizedBox(height: 5),
+        favoriteRecipesContainer,
+      ],
+    );
+  }
+}
+
 class UsersRecipesWidget extends HookConsumerWidget {
   const UsersRecipesWidget({super.key});
 
@@ -210,16 +355,14 @@ class UsersRecipesWidget extends HookConsumerWidget {
             );
           } 
           else {
-            return const Center(child: Text("ユーザの作成したレシピが見つかりませんでした"));
+            return const Center(child: Text("ユーザの作成したレシピが見つかりませんでした", style: TextStyle(fontSize: 8)));
           }
         },
       );
     }
 
     final userRecipeHeader = Text("ユーザの作成したレシピ一覧");
-    
-
-
+  
     final userRecipesContainer = Container(
       padding: const EdgeInsets.all(16.0),
       width: double.infinity,

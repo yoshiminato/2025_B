@@ -6,20 +6,23 @@ part 'favorite_recipe_id_state.g.dart';
 class FavoriteRecipeIdNotifier extends _$FavoriteRecipeIdNotifier {
   @override
   Future<List<String>> build() async {
-    return getFavoriteRecipeIds();
+    final kvService = KVService();
+    return kvService.getFavoriteRecipeIds();
   }
 
   // レシピIDを設定するメソッド
   Future<void> addRecipeId(String recipeId) async {
-    await addFavoriteRecipeId(recipeId);
-    final List<String> favoriteRecipeIds = await getFavoriteRecipeIds();
+    final kvService = KVService();
+    await kvService.addFavoriteRecipeId(recipeId);
+    final List<String> favoriteRecipeIds = await kvService.getFavoriteRecipeIds();
     state = AsyncData(favoriteRecipeIds);
   }
 
   // レシピIDを消去するメソッド
   Future<void> removeRecipeId(String recipeId) async {
-    await removeFavoriteRecipeId(recipeId);
-    final List<String> favoriteRecipeIds = await getFavoriteRecipeIds();
+    final kvService = KVService();
+    await kvService.removeFavoriteRecipeId(recipeId);
+    final List<String> favoriteRecipeIds = await kvService.getFavoriteRecipeIds();
     state = AsyncData(favoriteRecipeIds);
   }
 }
