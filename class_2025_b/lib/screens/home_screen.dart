@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:class_2025_b/widgets/generate_widget.dart';
-import 'package:class_2025_b/widgets/search_widget.dart';
+import 'package:class_2025_b/screens/generate_screen.dart';
+import 'package:class_2025_b/screens/search_screen.dart';
 import 'package:class_2025_b/widgets/side_menu.dart';
-import 'package:class_2025_b/widgets/recipe_widget.dart';
+import 'package:class_2025_b/screens/recipe_screen.dart';
 import 'package:class_2025_b/states/home_state.dart';
 
 
