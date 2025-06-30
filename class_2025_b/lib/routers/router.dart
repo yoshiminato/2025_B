@@ -37,7 +37,7 @@ final _cameraCaptureRoute = GoRoute(
 
 final GoRouter _router = GoRouter(
 
-  initialLocation: "/",
+  initialLocation: "/login",
 
   routes: <GoRoute>[
     _loginRoute,
