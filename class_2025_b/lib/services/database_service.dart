@@ -186,7 +186,7 @@ class DatabaseService{
 
     try{
       //データベースからuserIdと一緒のものをqueryに代入
-      final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).get();
+      final query = await FirebaseFirestore.instance.collection(recipeCollectionPath).where('userId',isEqualTo:userId).orderBy("createdAt").get();
 
       //queryをrecipe型に直してrecipesに代入
       List<Recipe> recipes = query.docs.map((doc){
@@ -236,7 +236,7 @@ class DatabaseService{
 
       // 新しい構造のingredientNamesフィールドで検索
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
-      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).get();
+      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy("createdAt").get();
 
       List<Recipe> recipes = query.docs.map((doc) {
         final data = doc.data();
