@@ -223,7 +223,16 @@ class DatabaseService{
   // キーワードに一致するレシピを取得するメソッド
   Future<List<Recipe>> getKeywordRecipes(String keywords) async {
     try {
-      List<String> keywordsList = keywords.split(' ').map((keyword) => keyword.trim().toLowerCase()).toList();
+      List<String> keywordsList = keywords
+        .split(RegExp(r'\s+')) // 半角・全角スペース、タブなどすべての空白で分割
+        .map((keyword) => keyword.trim().toLowerCase())
+        .where((keyword) => keyword.isNotEmpty)
+        .toList();
+      
+      for (var keyword in keywordsList) {
+        debugPrint("キーワード: $keyword");
+      }
+      
 
       // 新しい構造のingredientNamesフィールドで検索
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
