@@ -9,6 +9,8 @@ class DatabaseService{
 
   final String recipeCollectionPath = 'recipes';
 
+  final int limit = 10; // レシピの取得数の制限
+
   // 生成したレシピを追加するメソッド
   Future<String?> addRecipe(Recipe recipe) async {
 
@@ -339,6 +341,38 @@ class DatabaseService{
         }
         throw Exception('認証エラー: 再ログインしてください');
       }
+    }
+  }
+
+  Future<List<Recipe>> getRecentRecipes() async {
+    try {
+      final recipesRef = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      final querySnapshot = await recipesRef.orderBy("createdAt").limit(limit).get();
+
+      List<Recipe> recipes = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        
+        // FirestoreのドキュメントIDを明示的に設定
+        data['id'] = doc.id;
+        
+        return Recipe.fromMap(data);
+      }).toList();
+
+      return recipes;
+    } catch (e) {
+      debugPrint("getAllRecipes エラー: ${e.toString()}");
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') ||
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      return [];
     }
   }
 
