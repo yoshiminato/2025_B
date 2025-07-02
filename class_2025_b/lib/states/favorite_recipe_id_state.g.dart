@@ -7,7 +7,7 @@ part of 'favorite_recipe_id_state.dart';
 // **************************************************************************
 
 String _$favoriteRecipeIdNotifierHash() =>
-    r'aeea8151ec3eea7f700b847f0ab784b489116b4d';
+    r'029e8106a4f75e88340dcd1b0bcfb4641589edcc';
 
 /// See also [FavoriteRecipeIdNotifier].
 @ProviderFor(FavoriteRecipeIdNotifier)
@@ -26,5 +26,5 @@ final favoriteRecipeIdNotifierProvider =
     );
 
 typedef _$FavoriteRecipeIdNotifier = AutoDisposeAsyncNotifier<List<String>>;
-String _$kVRecipeIdNotifierHash() =>
-    r'4c142ec57c30e4227b7c801447517c756ce992e3';
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

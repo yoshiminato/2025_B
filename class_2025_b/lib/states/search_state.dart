@@ -2,6 +2,7 @@ import "package:hooks_riverpod/hooks_riverpod.dart";
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
+import 'package:class_2025_b/states/search_sort_state.dart';
 part 'search_state.g.dart';
 
 // 検索文字列を保持するプロバイダ
@@ -34,6 +35,8 @@ class SearchResultNotifier extends _$SearchResultNotifier {
 
   // 検索結果を更新するメソッド
   Future<void> updateSearchResult() async {
+
+    final sortType = ref.watch(sortStateProvider);
     
     // DatabaseServiceのインスタンスを取得
     final dbService = DatabaseService();
@@ -42,7 +45,7 @@ class SearchResultNotifier extends _$SearchResultNotifier {
     final searchText = ref.read(searchTextProvider);
 
     // dbから検索
-    final searchResult = await dbService.getKeywordRecipes(searchText);
+    final searchResult = await dbService.getKeywordRecipes(searchText, sortType);
 
     // 検索結果を更新
     state = AsyncData(searchResult);

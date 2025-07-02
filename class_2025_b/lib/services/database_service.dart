@@ -1,5 +1,6 @@
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/models/comment_model.dart';
+import 'package:class_2025_b/states/search_sort_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -222,7 +223,10 @@ class DatabaseService{
   } 
 
   // キーワードに一致するレシピを取得するメソッド
-  Future<List<Recipe>> getKeywordRecipes(String keywords) async {
+  Future<List<Recipe>> getKeywordRecipes(String keywords, SortType type) async {
+
+    debugPrint("SortType: $type");
+
     try {
       List<String> keywordsList = keywords
         .split(RegExp(r'\s+')) // 半角・全角スペース、タブなどすべての空白で分割
