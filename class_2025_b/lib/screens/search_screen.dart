@@ -182,38 +182,45 @@ class SearchScreen extends HookConsumerWidget {
 
 Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Color color) {
 
-  return asyncRecipe.when(
+  // ヘッダー部分
+  final header = Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+  );
+
+  // コンテンツ部分
+  final content = asyncRecipe.when(
     data: (recipes) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-          SizedBox(
-            height: 120,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: recipes.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 100,
-                  margin: EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: CarouselCard(recipe: recipes[index]),
-                );
-              },
-            ),
-          ),
-        ],
+      return SizedBox(
+        height: 120,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: recipes.length,
+          itemBuilder: (context, index) {
+            return Container(
+              width: 100,
+              margin: EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: CarouselCard(recipe: recipes[index]),
+            );
+          },
+        ),
       );
-      
     },
     error: (error, stack) => Center(child: Text("エラーが発生しました: $error")),
     loading: () => const Center(child: CircularProgressIndicator()),
+  );
+
+  // ヘッダーとコンテンツをまとめて返す
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      header,
+      content,
+    ],
   );
 }
 
@@ -283,21 +290,23 @@ class CarouselCard extends ConsumerWidget {
     );
 
     final column = Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         imageContainer,
-        Text(
-          recipe.title, 
-          style: const TextStyle(fontSize: 9),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2, // 1行だけ表示
+        Center(
+          child: Text(
+            recipe.title, 
+            style: const TextStyle(fontSize: 9),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2, // 1行だけ表示
+          ),
         ),
+        
       ],
     );
 
-
-    return Card(
-      
-      child: InkWell(
+    return InkWell(
         onTap: () {
           // レシピの詳細画面に遷移する処理を追加
           final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
@@ -313,9 +322,29 @@ class CarouselCard extends ConsumerWidget {
           child: column,
         
         ),
-      ),
+      );
+
+    // return Card(
       
-    );
+    //   child: InkWell(
+    //     onTap: () {
+    //       // レシピの詳細画面に遷移する処理を追加
+    //       final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+    //       recipeIdNotifier.state = recipe.id;
+
+    //       // レシピの詳細画面に遷移
+    //       final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+    //       contentNotifier.state = ContentType.recipe;
+
+    //     },
+    //     child: Padding(
+    //       padding: EdgeInsets.all(5.0),
+    //       child: column,
+        
+    //     ),
+    //   ),
+      
+    // );
   }
 }
 
