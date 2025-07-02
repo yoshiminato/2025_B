@@ -2,33 +2,59 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const String favoriteRecipeIdKey = 'favorite_recipe_ids';
 
+enum KeyType {
+  favoriteRecipeId('favorite_recipe_ids'),
+  historyRecipeId('history_recipe_ids');
+
+  final String value;
+  const KeyType(this.value);
+}
+
 class KVService {
 
-  Future<void> addFavoriteRecipeId(String value) async {
+  Future<void> addRecipeId(KeyType keyType, String value) async {
+
+    final String key = keyType.value;
 
     final prefs = await SharedPreferences.getInstance();
 
-    final List<String> favoriteRecipeIds = prefs.getStringList(favoriteRecipeIdKey) ?? [];
+    final List<String> list = prefs.getStringList(key) ?? [];
 
-    favoriteRecipeIds.add(value);
+    list.add(value);
 
-    await prefs.setStringList(favoriteRecipeIdKey, favoriteRecipeIds);
+    await prefs.setStringList(key, list);
   }
 
+  Future<void> removeRecipeId(KeyType keyType, String value) async {
 
-  Future<void> removeFavoriteRecipeId(String value) async {
+    final String key = keyType.value;
+
     final prefs = await SharedPreferences.getInstance();
-    // 既存リストを取得（なければ空リスト）
-    List<String> list = prefs.getStringList(favoriteRecipeIdKey) ?? [];
-    // 指定の要素を削除
+
+    final List<String> list = prefs.getStringList(key) ?? [];
+
     list.remove(value);
-    // 保存
-    await prefs.setStringList(favoriteRecipeIdKey, list);
+
+    await prefs.setStringList(key, list);
   }
 
-  Future<List<String>> getFavoriteRecipeIds() async {
+  
+  Future<List<String>> getRecipeIdsFromKeyType(KeyType keyType) async {
+
+    final String key = keyType.value;
+
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(favoriteRecipeIdKey) ?? [];
+    
+    return prefs.getStringList(key) ?? [];
+  }
+
+  Future<void> saveRecipeIdsForKeyType(KeyType keyType, List<String> list) async {
+
+    final String key = keyType.value;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setStringList(key, list);
   }
 
 }
