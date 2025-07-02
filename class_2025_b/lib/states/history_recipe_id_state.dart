@@ -12,7 +12,7 @@ final historyRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
 
   final kvService = KVService();
   // 既存の履歴IDリストを取得
-  List<String> historyRecipeIds = await kvService.getRecipeIdsFromKeyType(KeyType.historyRecipeId);
+  List<String> historyRecipeIds = await kvService.getValuesFromKeyType(KeyType.historyRecipeId);
 
   // 新しい閲覧IDがnullでなければ履歴リストを更新
   if (recipeId != null && recipeId.isNotEmpty) {
@@ -31,7 +31,7 @@ final historyRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
     }
 
     // 保存
-    await kvService.saveRecipeIdsForKeyType(KeyType.historyRecipeId, historyRecipeIds);
+    await kvService.saveValuesForKeyType(KeyType.historyRecipeId, historyRecipeIds);
   }
 
   // 履歴IDリストから順にRecipeを取得

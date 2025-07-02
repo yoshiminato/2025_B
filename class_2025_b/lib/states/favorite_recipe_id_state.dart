@@ -7,22 +7,22 @@ class FavoriteRecipeIdNotifier extends _$FavoriteRecipeIdNotifier {
   @override
   Future<List<String>> build() async {
     final kvService = KVService();
-    return kvService.getRecipeIdsFromKeyType(KeyType.favoriteRecipeId);
+    return kvService.getValuesFromKeyType(KeyType.favoriteRecipeId);
   }
 
   // レシピIDを設定するメソッド
-  Future<void> addRecipeId(String recipeId) async {
+  Future<void> addValue(String recipeId) async {
     final kvService = KVService();
-    await kvService.addRecipeId(KeyType.favoriteRecipeId, recipeId);
-    final List<String> favoriteRecipeIds = await kvService.getRecipeIdsFromKeyType(KeyType.favoriteRecipeId);
+    await kvService.addValue(KeyType.favoriteRecipeId, recipeId);
+    final List<String> favoriteRecipeIds = await kvService.getValuesFromKeyType(KeyType.favoriteRecipeId);
     state = AsyncData(favoriteRecipeIds);
   }
 
   // レシピIDを消去するメソッド
-  Future<void> removeRecipeId(String recipeId) async {
+  Future<void> removeValue(String recipeId) async {
     final kvService = KVService();
-    await kvService.removeRecipeId(KeyType.favoriteRecipeId, recipeId);
-    final List<String> favoriteRecipeIds = await kvService.getRecipeIdsFromKeyType(KeyType.favoriteRecipeId);
+    await kvService.removeValue(KeyType.favoriteRecipeId, recipeId);
+    final List<String> favoriteRecipeIds = await kvService.getValuesFromKeyType(KeyType.favoriteRecipeId);
     state = AsyncData(favoriteRecipeIds);
   }
 }

@@ -38,9 +38,9 @@ class FavoriteButtonWidget extends ConsumerWidget {
       onPressed: () {
         final notifier = ref.read(favoriteRecipeIdNotifierProvider.notifier);
         if (isFavorite) {
-          notifier.removeRecipeId(recipeId);
+          notifier.removeValue(recipeId);
         } else {
-          notifier.addRecipeId(recipeId);
+          notifier.addValue(recipeId);
         }
       },
     );

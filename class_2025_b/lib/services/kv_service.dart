@@ -4,7 +4,9 @@ const String favoriteRecipeIdKey = 'favorite_recipe_ids';
 
 enum KeyType {
   favoriteRecipeId('favorite_recipe_ids'),
-  historyRecipeId('history_recipe_ids');
+  historyRecipeId('history_recipe_ids'),
+  servings('servings'),
+  allergys('allergys');
 
   final String value;
   const KeyType(this.value);
@@ -12,7 +14,7 @@ enum KeyType {
 
 class KVService {
 
-  Future<void> addRecipeId(KeyType keyType, String value) async {
+  Future<void> addValue(KeyType keyType, String value) async {
 
     final String key = keyType.value;
 
@@ -25,7 +27,7 @@ class KVService {
     await prefs.setStringList(key, list);
   }
 
-  Future<void> removeRecipeId(KeyType keyType, String value) async {
+  Future<void> removeValue(KeyType keyType, String value) async {
 
     final String key = keyType.value;
 
@@ -39,7 +41,9 @@ class KVService {
   }
 
   
-  Future<List<String>> getRecipeIdsFromKeyType(KeyType keyType) async {
+
+  
+  Future<List<String>> getValuesFromKeyType(KeyType keyType) async {
 
     final String key = keyType.value;
 
@@ -48,7 +52,7 @@ class KVService {
     return prefs.getStringList(key) ?? [];
   }
 
-  Future<void> saveRecipeIdsForKeyType(KeyType keyType, List<String> list) async {
+  Future<void> saveValuesForKeyType(KeyType keyType, List<String> list) async {
 
     final String key = keyType.value;
 
@@ -57,4 +61,15 @@ class KVService {
     await prefs.setStringList(key, list);
   }
 
+  Future<void> saveValueForKeyType(KeyType keyType, String value) async {
+    final String key = keyType.value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+  Future<String> getValueFromKeyType(KeyType keyType) async {
+    final String key = keyType.value;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key) ?? '';
+  }
 }
