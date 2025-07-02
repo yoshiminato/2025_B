@@ -2,12 +2,14 @@ import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:class_2025_b/states/user_state.dart';
-import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/search_state.dart';
-import 'package:class_2025_b/states/favorite_recipe_id_state.dart';
+import 'package:class_2025_b/states/recent_recipes_state.dart';
+import 'package:class_2025_b/states/favorite_recipes_state.dart';
+import 'package:class_2025_b/states/user_recipe_state.dart';
+import 'package:class_2025_b/states/history_recipe_id_state.dart';
+import 'package:class_2025_b/states/search_sort_state.dart';
 
 const imageSize = 70.0; // カルーセルカードの画像サイズ
 
@@ -74,9 +76,93 @@ class SearchScreen extends HookConsumerWidget {
       padding: const EdgeInsets.all(16.0),
       width: double.infinity,
       height: 80,
-      child: searchTextField,
-    );    
-    
+      child: Row(
+        children: [
+          Expanded(child: searchTextField),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            tooltip: 'ソート・フィルター',
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                builder: (context) {
+                  final sortType = ref.watch(sortStateProvider);
+                  return SafeArea(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('ソート順を選択', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('新しい順'),
+                              value: SortType.newest,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('古い順'),
+                              value: SortType.oldest,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('価格順'),
+                              value: SortType.cost,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('調理時間順'),
+                              value: SortType.time,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+
+
+
     // 検索ボックスとコンテンツを並べて返す
     return Column(
       children: [
@@ -94,21 +180,81 @@ class SearchScreen extends HookConsumerWidget {
   }
 }
 
+Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Color color) {
+
+  return asyncRecipe.when(
+    data: (recipes) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: recipes.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: 100,
+                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: CarouselCard(recipe: recipes[index]),
+                );
+              },
+            ),
+          ),
+        ],
+      );
+      
+    },
+    error: (error, stack) => Center(child: Text("エラーが発生しました: $error")),
+    loading: () => const Center(child: CircularProgressIndicator()),
+  );
+}
+
 class DefaultSearchWidget extends ConsumerWidget {
   const DefaultSearchWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    final asyncRecentRecipes = ref.watch(recentRecipesProvider);
+    final asyncFavoriteRecipes = ref.watch(favoriteRecipesProvider);
+    final asyncUsersRecipes = ref.watch(usersRecipesProvider);
+    final asyncHistryRecipes = ref.watch(historyRecipesProvider);
+
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center, // 左寄せに変更
       children: [
-        RecentRecipesWidget(),
+        buildRecipeSection(
+          "最近生成されたレシピ",
+          asyncRecentRecipes, 
+          Colors.pink,
+        ),
         const SizedBox(height: 20),
-        FavoriteRecipesWidget(),
+        buildRecipeSection(
+          "お気に入りレシピ", 
+          asyncFavoriteRecipes, 
+          Colors.blue,
+        ),
         const SizedBox(height: 20),
-        UsersRecipesWidget(),
+        buildRecipeSection(
+          "自分のレシピ", 
+          asyncUsersRecipes, 
+          Colors.green,
+        ),
+        const SizedBox(height: 20),
+        buildRecipeSection(
+          "閲覧履歴", 
+          asyncHistryRecipes, 
+          Colors.orange,
+        ),
       ],
     );
     return SingleChildScrollView(
@@ -173,218 +319,7 @@ class CarouselCard extends ConsumerWidget {
   }
 }
 
-
-class RecentRecipesWidget extends HookConsumerWidget {
-  const RecentRecipesWidget({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-
-    //ref.watch(); // ﾚｼﾋﾟ追加で自動更新されるよう設定する
-
-    // DatabaseServiceのインスタンスを取得
-    final dbService = DatabaseService();
-
-    // 最近のレシピを取得
-    final recentRecipes = dbService.getRecentRecipes();
-
-    final content = FutureBuilder<List<Recipe>>(
-      future: recentRecipes,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } 
-        else if (snapshot.hasError) {
-          return Center(child: Text("エラーが発生しました: ${snapshot.error}"));
-        } 
-        else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final recipes = snapshot.data!;
-          return PageView.builder(
-            controller: PageController(viewportFraction: 0.3),
-            padEnds: false,
-            itemCount: recipes.length,
-            itemBuilder: (context, index) {
-              final recipe = recipes[index];
-              return Container(
-                padding: const EdgeInsets.all(5.0),
-                child: CarouselCard(recipe: recipe)
-              );
-            },
-          );
-        } 
-        else {
-          return const Center(child: Text("最近のレシピが見つかりませんでした"));
-        }
-      },
-    );
-
-    final recentRecipeHeader = Text("最近のレシピ一覧");
-  
-    final recentRecipesContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      width: double.infinity,
-      height: 160,
-      child: content
-    );
-
-    return Column(
-      children: [
-        recentRecipeHeader,
-        SizedBox(height: 10),
-        recentRecipesContainer,
-      ],
-    );
-  }
-}
-
-class FavoriteRecipesWidget extends HookConsumerWidget {
-  const FavoriteRecipesWidget({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-
-    // お気に入りのレシピの取得
-    final favoriteRecipeIds = ref.watch(favoriteRecipeIdNotifierProvider);
-
-    // コンテンツ部分(レシピ一覧, エラー、ローディングマーク)
-    final content = favoriteRecipeIds.when(
-      data: (recipeIds) {
-
-        // お気に入りのレシピがない場合の処理
-        if (recipeIds.isEmpty) {
-          return const Center(child: Text("お気に入りのレシピが登録されていません"));
-        }
-
-        // お気に入りのレシピがある場合はカルーセルを表示
-        return PageView.builder(
-          controller: PageController(viewportFraction: 0.3),
-          padEnds: false,
-          itemCount: recipeIds.length,
-          itemBuilder: (context, index) {
-            final recipeId = recipeIds[index];
-            final dbService = DatabaseService();
-            return FutureBuilder<Recipe?>(
-              future: dbService.getRecipeById(recipeId),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data == null) {
-                  // レシピが見つからない場合は何も表示しない or プレースホルダー
-                  return const SizedBox.shrink();
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } 
-                else if (snapshot.hasError) {
-                  return Center(child: Text("エラーが発生しました: ${snapshot.error}"));
-                }
-                final recipe = snapshot.data!;
-                return Container(
-                  padding: const EdgeInsets.all(5.0),
-                  child: CarouselCard(recipe: recipe),
-                );
-              },
-            );
-          },
-        );
-      }, 
-      error: (error, stack) => Text("エラーが発生しました: $error"), 
-      loading: () => const Center(child: Text(""))
-    );
-
-    final favoriteRecipeHeader = Text("お気に入りレシピ一覧");
-  
-    final favoriteRecipesContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      width: double.infinity,
-      height: 160,
-      child: content
-    );
-
-    return Column(
-      children: [
-        favoriteRecipeHeader,
-        SizedBox(height: 5),
-        favoriteRecipesContainer,
-      ],
-    );
-  }
-}
-
-class UsersRecipesWidget extends HookConsumerWidget {
-  const UsersRecipesWidget({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-
-    // ユーザ情報を取得
-    final user = ref.watch(userProvider);
-    final userId = (user!=null) ? user.uid : null;
-
-    // DatabaseServiceのインスタンスを取得
-    final dbService = DatabaseService();
-
-    late final Widget content;
-
-    if (userId == null) {
-      content =  const Center(child: Text("ログインしていません", style: TextStyle(fontSize: 10)));
-    }
-    else{
-      content = FutureBuilder<List<Recipe>>(
-        future: dbService.getUsersRecipes(userId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } 
-          else if (snapshot.hasError) {
-            if(snapshot.error.toString().contains('認証エラー')) {
-              // 認証エラーの場合はログアウト処理を行う
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text("認証エラー発生,自動ログアウトしました"),
-                ),
-              );
-            }
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } 
-          else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            final recipes = snapshot.data!;
-            return PageView.builder(
-              controller: PageController(viewportFraction: 0.3),
-              padEnds: false,
-              itemCount: recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = recipes[index];
-                return Container(
-                  padding: const EdgeInsets.all(5.0),
-                  child: CarouselCard(recipe: recipe)
-                );
-              },
-            );
-          } 
-          else {
-            return const Center(child: Text("ユーザの作成したレシピが見つかりませんでした", style: TextStyle(fontSize: 10)));
-          }
-        },
-      );
-    }
-
-    final userRecipeHeader = Text("ユーザの作成したレシピ一覧");
-  
-    final userRecipesContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      width: double.infinity,
-      height: 160,
-      child: content
-    );
-
-    return Column(
-      children: [
-        userRecipeHeader,
-        SizedBox(height: 10),
-        userRecipesContainer,
-      ],
-    );
-  }
-}
+const tileImageSize = 70.0;
 
 class SearchResultWidget extends ConsumerWidget {
   const SearchResultWidget({super.key});
@@ -399,6 +334,7 @@ class SearchResultWidget extends ConsumerWidget {
 
     final backIcon = IconButton(
       icon: const Icon(Icons.arrow_back),
+      iconSize: 15,
       onPressed: () {
         // 検索結果をクリア
         ref.read(searchResultNotifierProvider.notifier).clearSearchResult();
@@ -409,8 +345,14 @@ class SearchResultWidget extends ConsumerWidget {
       },
     );
 
-    final searchResultHeader = Row(
-      children: [backIcon, Text("「$searchText」の検索結果"),],
+    final searchResultHeader = Container(
+      width: double.infinity,
+      height: 30,
+      child: Row(
+        children: [
+          SizedBox(height: 30,child: backIcon,), 
+          Text("「$searchText」の検索結果"),],
+      )
     );
 
     return Column(
@@ -425,26 +367,54 @@ class SearchResultWidget extends ConsumerWidget {
             if (recipes.isEmpty) {
               return const Center(child: Text("検索結果がありません"));
             }
-            return
-            Expanded(
+            return Expanded(
               child: ListView.builder(
                 itemCount: recipes.length,
                 itemBuilder: (context, index) {
                   final recipe = recipes[index];
-                  return ListTile(
-                    title: Text(recipe.title),
-                    subtitle: Text(recipe.description),
-                    onTap: () {
-                    
-                      // レシピの詳細画面に遷移する処理を追加
-                      // レシピIDを状態管理に保存
-                      final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-                      recipeIdNotifier.state = recipe.id;
+                  final tile = SizedBox(
+                    width: double.infinity,
+                    height: tileImageSize,
+                    child: ListTile(
+                      leading: recipe.imageUrl != null
+                        ? Image.network(recipe.imageUrl!, width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
+                        : Image.asset("assets/images/noImage.png", width: tileImageSize, height: tileImageSize, fit: BoxFit.cover),
+                      title: Text(
+                        recipe.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis, // テキストが長い場合は省略
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
+                      ),
+                      subtitle: Text(
+                        recipe.ingredients.keys.join(", "),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 8)
 
-                      // レシピの詳細画面に遷移
-                      final contentNotifier = ref.read(currentContentTypeProvider.notifier);
-                      contentNotifier.state = ContentType.recipe;
-                    },
+                      ), // 材料をカンマ区切りで表示
+                      onTap: () {
+                      
+                        // レシピの詳細画面に遷移する処理を追加
+                        // レシピIDを状態管理に保存
+                        final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+                        recipeIdNotifier.state = recipe.id;
+
+                        // レシピの詳細画面に遷移
+                        final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+                        contentNotifier.state = ContentType.recipe;
+                      },
+                    ),
+                  );
+
+                  return Card(
+                    elevation: 4, // 影の強さ
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5.0),
+                      child: tile,
+                    ),
                   );
                 },
               ),
