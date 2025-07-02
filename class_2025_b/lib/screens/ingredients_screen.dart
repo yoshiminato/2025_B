@@ -24,9 +24,9 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
               //食材リストを作る
               child: FutureBuilder<List<List<String>>>(
                 future: Future.wait([
-                  kvservice.getRecipeIdsFromKeyType(KeyType.stockitemnameId),
-                  kvservice.getRecipeIdsFromKeyType(KeyType.stockitemcountId),
-                  kvservice.getRecipeIdsFromKeyType(KeyType.stockitemexpiryId),
+                  kvservice.getValuesFromKeyType(KeyType.stockitemnameId),
+                  kvservice.getValuesFromKeyType(KeyType.stockitemcountId),
+                  kvservice.getValuesFromKeyType(KeyType.stockitemexpiryId),
                 ]),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -66,9 +66,9 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
               );
               if (result != null) {
                 print("食材追加: ${result['name']}, ${result['count']}, ${result['expiry']}");
-                await kvservice.addRecipeId(KeyType.stockitemnameId, result['name']);
-                await kvservice.addRecipeId(KeyType.stockitemcountId, result['count']);
-                await kvservice.addRecipeId(KeyType.stockitemexpiryId, result['expiry']);
+                await kvservice.addValue(KeyType.stockitemnameId, result['name']);
+                await kvservice.addValue(KeyType.stockitemcountId, result['count']);
+                await kvservice.addValue(KeyType.stockitemexpiryId, result['expiry']);
                 setState(() {}); // 追加後に再描画
               }
             },

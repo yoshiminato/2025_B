@@ -6,7 +6,11 @@ enum KeyType {
   favoriteRecipeId('favorite_recipe_ids'),
   historyRecipeId('history_recipe_ids'),
   servings('servings'),
-  allergys('allergys');
+  allergys('allergys'),
+  stockitemnameId('stockitemname_ids'),
+  stockitemcountId('stockitemcount_ids'),
+  stockitemexpiryId('stockitemexpiry_ids')
+  ;
 
   final String value;
   const KeyType(this.value);
