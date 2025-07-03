@@ -1,211 +1,172 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class RecipeFilterWidget extends ConsumerWidget {
+class RecipeFilterWidget extends ConsumerStatefulWidget {
   const RecipeFilterWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecipeFilterWidget> createState() => _RecipeFilterWidgetState();
+}
 
-    // ヘッダーの高さ(文字列「イメージ----」,「予算----」などの高さ)
-    final headerHeight = 50.0;
+class _RecipeFilterWidgetState extends ConsumerState<RecipeFilterWidget> {
+  final List<String> buttonLabels = [
+    '濃厚な', 'スパイシー', 'ジューシー',  //クイック条件となる形容詞群
+    'さっぱりした', 'こってり', '淡泊な',
+    'クセになる', 'うま味', 'まろやか',
+    'コク深い', '香ばしい', '素朴な',
+  ];
 
-    final subHeaderWidth = 100.0;
+  List<int> buttonStates = List.filled(12, 0);
+  double budgetValue = 500;
+  double timeValue = 30;
+  double servingValue = 1;
+  String searchKeyword = '';
 
-    // キーワード入力部分
-    final textField = TextField(
-      decoration: InputDecoration(
-        labelText: 'レシピ名で検索',
-        border: OutlineInputBorder(),
-      ),
-      onChanged: (value) {
-        // 検索処理をここに追加
-      },
-    );
+  void _resetFilters() {
+    setState(() {
+      buttonStates = List.filled(12, 0);
+      budgetValue = 500;
+      timeValue = 30;
+      servingValue = 1;
+      searchKeyword = '';
+    });
+  }
 
-    // キーワード入力部分のコンテナ
-    final textFieldContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      child: textField
-    );
+  void _startSearch() {
+    final Map<String, String> attributes = {};
+    for (int i = 0; i < buttonLabels.length; i++) {
+      if (buttonStates[i] == 1) {
+        attributes[buttonLabels[i]] = '強';
+      } else if (buttonStates[i] == -1) {
+        attributes[buttonLabels[i]] = '弱';
+      }
+    }
 
-    // イメージのヘッダー部分
-    final imageHeaderText = const Text(
-      'イメージ----------------------------------------',
-      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-    );
+    print('--- フィルター条件 ---');
+    print('検索キーワード: $searchKeyword');
+    print('予算: ${budgetValue.toInt()} 円');
+    print('調理時間: ${timeValue.toInt()} 分');
+    print('分量: ${servingValue.toInt()} 人前');
+    print('属性:');
+    attributes.forEach((key, value) {
+      print(' - $key : $value');  //現在の出力内容：print()で以下を出力
+    });
+  }
 
-    // イメージのヘッダー部分のコンテナ
-    final imageHeaderContainer = Container(
-      height: headerHeight,
-      child: imageHeaderText
-    ); 
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(  //検索バー
+            onChanged: (value) => setState(() => searchKeyword = value),
+            decoration: InputDecoration(
+              hintText: 'レシピを検索',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          GridView.count(  //形容詞ボタン群
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 3,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            childAspectRatio: 2.5,
+            children: List.generate(buttonLabels.length, (index) {
+              final state = buttonStates[index];
+              final color = state == 1
+                  ? Colors.red  //強化
+                  : state == -1
+                      ? Colors.blue  //抑制
+                      : Colors.grey.shade300;  //中立(初期状態)
+              final textColor = state == 0 ? Colors.black : Colors.white;
 
-    // ボタンは3列
-    const col = 3;
-
-    // ボタンは2行
-    const row = 2;
-
-    // 選択肢のボタン群
-    final imageButtons = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        for (int i = 0; i < row; i++)
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+              return ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    buttonStates[index] = (buttonStates[index] + 2) % 3 - 1; //内部属性：List<int> buttonStates で記録され、開始時に出力（強化/抑制の重みづけに活用可能）
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  shape: const StadiumBorder(),
+                ),
+                child: Text(
+                  buttonLabels[index],
+                  style: TextStyle(color: textColor),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 32),
+          Text("予算: ${budgetValue.toInt()} 円"),
+          Slider(
+            value: budgetValue,
+            min: 0,
+            max: 1500,
+            divisions: 100,
+            label: '${budgetValue.toInt()} 円',
+            activeColor: Colors.orange,
+            inactiveColor: Colors.orange.shade100,
+            onChanged: (value) => setState(() => budgetValue = value),
+          ),
+          Text("調理時間: ${timeValue.toInt()} 分"),
+          Slider(
+            value: timeValue,
+            min: 0,
+            max: 90,
+            divisions: 10,
+            label: '${timeValue.toInt()} 分',
+            activeColor: Colors.orange,
+            inactiveColor: Colors.orange.shade100,
+            onChanged: (value) => setState(() => timeValue = value),
+          ),
+          Text("分量: ${servingValue.toInt()} 人前"),
+          Slider(
+            value: servingValue,
+            min: 1,
+            max: 10,
+            divisions: 5,
+            label: '${servingValue.toInt()} 人前',
+            activeColor: Colors.orange,
+            inactiveColor: Colors.orange.shade100,
+            onChanged: (value) => setState(() => servingValue = value),
+          ),
+          const SizedBox(height: 24),
+          Row(
             children: [
-              for (int j = 0; j < col; j++)
-                ElevatedButton(
-                  onPressed: () {
-                    // 画像選択処理をここに追加
-                  },
-                  child: Text('選択肢'),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _resetFilters,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("リセット"),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(  //役割：現在の選択条件を使って検索処理（未実装）を呼び出す(53行目)
+                  onPressed: _startSearch,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("開始"),
+                ),
               ),
             ],
           ),
-      ],
-    );
-
-    // イメージのコンテナ
-    final imageContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          imageHeaderContainer,
-          imageButtons,
-        ],
-      ),
-    ); 
-
-    // コストのヘッダー部分
-    final costHeaderText = const Text(
-      'コスト----------------------------------------',
-      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-    );
-
-    // コストのヘッダー部分のコンテナ
-    final costHeaderContainer = Container(
-      height: headerHeight,
-      child: costHeaderText
-    );
-
-    // 予算のヘッダー部分
-    final budgetHeaderText = const Text(
-      '予算',
-      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-    );
-
-    // 予算のヘッダー部分のコンテナ
-    final budgetHeaderContainer = Container(
-      width: subHeaderWidth,
-      child: budgetHeaderText
-    );
-
-    // 予算のスライダー
-    final budgetSlider = Slider(
-      value: 0.0,
-      min: 0.0,
-      max: 10000.0,
-      divisions: 100,
-      label: '予算',
-      onChanged: (value) {
-        // スライダーの値変更処理をここに追加
-      },
-    );
-
-    // 予算のスライダーのコンテナ
-    final budgetSliderContainer = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: budgetSlider,
-    );
-
-    // 予算のコンテナ
-    final budgetContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          budgetHeaderContainer,
-          Expanded(child: budgetSliderContainer,)
         ],
       ),
     );
-
-    // 調理時間のヘッダー部分
-    final timeHeaderText = const Text(
-      '調理時間',
-      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-    );
-
-    // 調理時間のヘッダー部分のコンテナ
-    final timeHeaderContainer = Container(
-      width: subHeaderWidth,
-      child: timeHeaderText
-    );
-
-    // 調理時間のスライダー
-    final timeSlider = Slider(
-      value: 0.0,
-      min: 0.0,
-      max: 120.0,
-      divisions: 24,
-      label: '調理時間',
-      onChanged: (value) {
-        // スライダーの値変更処理をここに追加
-      },
-    );
-
-    // 調理時間のスライダーのコンテナ
-    final timeSliderContainer = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: timeSlider,
-    );
-
-    // 調理時間のコンテナ
-    final timeContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          timeHeaderContainer,
-          Expanded(child: timeSliderContainer,),
-        ],
-      ),
-    );
-
-    // フィルター全体のコンテナ
-    final costContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          costHeaderContainer,
-          budgetContainer,
-          timeContainer,
-        ],
-      ),
-    );
-
-    // フィルター全体のコンテナ
-    final filterContainer = Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textFieldContainer,
-          imageContainer,
-          costContainer
-        ],
-      ),
-    );
-
-    return filterContainer;
   }
 }
