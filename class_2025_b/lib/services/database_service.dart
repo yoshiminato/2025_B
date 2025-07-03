@@ -1,5 +1,6 @@
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/models/comment_model.dart';
+import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/search_sort_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -127,6 +128,7 @@ class DatabaseService{
     return;
   }
 
+
   Future<List<Comment>> getCommentsByRecipeId(String recipeId) async {
     
     debugPrint("getComments");
@@ -161,8 +163,96 @@ class DatabaseService{
 
       return [];
     }
-    
+  
+  }
 
+  Future<void> addReview(String userId, String recipeId, Review review) async {
+
+    debugPrint("addReview");
+
+    try {
+      // レビューコレクションの入手
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+
+      // 既存レビューの有無を確認
+      final querySnapshot = await reviewsRef
+          .where('recipeId', isEqualTo: recipeId)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      // 既存レビューがあれば更新
+      if (querySnapshot.docs.isNotEmpty) {
+        
+        final docId = querySnapshot.docs.first.id;
+        await reviewsRef.doc(docId).update(review.toMap(userId, recipeId));
+        debugPrint("既存レビューを更新しました: $docId");
+     
+      } 
+      // なければ新規追加
+      else {
+        await reviewsRef.add(review.toMap(userId, recipeId));
+        debugPrint("新規レビューを追加しました");
+      }
+    } catch (e) {
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') ||
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      return;
+    }
+  }
+
+  Future<Review> getReviewByRecipeIdAndUserId(String userId, String recipeId) async {
+
+    debugPrint("getReviewByRecipeId");
+
+    try {
+      // レビューコレクションの取得
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+
+      // レシピID, ユーザーIDでレビューを取得
+      final querySnapshot = await reviewsRef
+          .where('recipeId', isEqualTo: recipeId)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      if(querySnapshot.docs.length > 1) {
+        debugPrint("１つのレシピに対して複数のレビューがなされています");
+        throw Exception("複数のレビューが存在します: ${querySnapshot.docs.length}");
+      }
+
+      if (querySnapshot.docs.isEmpty) {
+        return Review(tasteRating: 0, easeRating: 0, costRating: 0); // デフォルト値を返す
+      }
+
+      final reveiwMap = querySnapshot.docs.first.data();
+      return Review.fromMap(reveiwMap);
+
+    } catch (e) {
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      throw Exception("エラー発生:$e"); // エラー時もデフォルト値を返す
+    }
   }
 
   // // データベースに登録されているすべてのレシピを削除
@@ -237,11 +327,27 @@ class DatabaseService{
       for (var keyword in keywordsList) {
         debugPrint("キーワード: $keyword");
       }
-      
 
       // 新しい構造のingredientNamesフィールドで検索
+      bool sort_tmp = false; // デフォルトは昇順
+      String sort_name = "createdAt"; // デフォルトのソートフィールド
+
+      //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
+      if(type == SortType.newest){
+        sort_tmp = true;
+        sort_name = "createdAt";
+
+      }else if(type == SortType.oldest){
+        sort_tmp = false;
+        sort_name = "createdAt";
+        
+      }else{
+        sort_tmp = false;
+        sort_name = "$type";
+      }
+
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
-      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy("createdAt", descending: true).get();
+      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy(sort_name, descending: sort_tmp).get();
 
       List<Recipe> recipes = query.docs.map((doc) {
         final data = doc.data();

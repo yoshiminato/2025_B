@@ -30,7 +30,17 @@ class FavoriteButtonWidget extends ConsumerWidget {
       },
     );
 
-    return IconButton(
+    final header = SizedBox(
+      child: const Text(
+        'お気に入り',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
+    final favoriteButton = IconButton(
       icon: Icon(
         Icons.favorite,
         color: isFavorite ? Colors.pink : Colors.grey,
@@ -43,6 +53,26 @@ class FavoriteButtonWidget extends ConsumerWidget {
           notifier.addValueForKeyType(recipeId);
         }
       },
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        header,
+        const SizedBox(height: 16),
+        Center(
+          child: favoriteButton,
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(
+            isFavorite ? 'お気に入りに追加済み' : 'お気に入りに追加',
+            style: TextStyle(
+              color: isFavorite ? Colors.pink : Colors.grey,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
