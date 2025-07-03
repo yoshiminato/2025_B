@@ -237,11 +237,27 @@ class DatabaseService{
       for (var keyword in keywordsList) {
         debugPrint("キーワード: $keyword");
       }
-      
 
       // 新しい構造のingredientNamesフィールドで検索
+      bool sort_tmp = false; // デフォルトは昇順
+      String sort_name = "createdAt"; // デフォルトのソートフィールド
+
+      //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
+      if(type == SortType.newest){
+        sort_tmp = true;
+        sort_name = "createdAt";
+
+      }else if(type == SortType.oldest){
+        sort_tmp = false;
+        sort_name = "createdAt";
+        
+      }else{
+        sort_tmp = false;
+        sort_name = "$type";
+      }
+
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
-      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy("createdAt", descending: true).get();
+      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy(sort_name, descending: sort_tmp).get();
 
       List<Recipe> recipes = query.docs.map((doc) {
         final data = doc.data();
