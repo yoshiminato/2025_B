@@ -1,4 +1,5 @@
 import 'package:class_2025_b/services/kv_service.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter/material.dart';
 
 class IngredientsScreen extends StatefulWidget {
@@ -7,6 +8,47 @@ class IngredientsScreen extends StatefulWidget {
   @override
   State<IngredientsScreen> createState() => _IngredientsScreenState();
 }
+
+class IconButtons extends StatelessWidget {
+  final int index;
+  const IconButtons({super.key, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        IconButton(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddIngredientScreen(index: index,)),
+            );
+          }, 
+          icon: Icon(Icons.edit)
+        ),
+        IconButton(
+          onPressed: () async {
+            // 削除処理を実装
+            final kvservice = KVService();
+
+            await kvservice.removeValueFromKeyTypeByIndex(KeyType.stockitemnameId, index);
+            await kvservice.removeValueFromKeyTypeByIndex(KeyType.stockitemcountId, index);
+            await kvservice.removeValueFromKeyTypeByIndex(KeyType.stockitemexpiryId, index);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('食材を削除しました')),
+            );
+            // 画面を再描画
+            (context as Element).reassemble();
+          }, 
+          icon: Icon(Icons.delete, color: Colors.red,)
+        )
+      ],
+    );
+  }
+}
+
 //食材データをsharedpreferencesから取得して表示する
 class _IngredientsScreenState extends State<IngredientsScreen> {
   @override
@@ -15,6 +57,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
   }
 
   Widget buildStockPage(BuildContext context) {
+
     return Stack(
       children: [
         Column(
@@ -44,7 +87,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       return ListTile(
                         title: Text('${names[index]}（${counts[index]}個）'),
                         subtitle: Text('賞味期限: ${expiries[index]}'),
-                        trailing: Icon(Icons.edit),
+                        trailing: IconButtons(index: index,)
                       );
                     },
                   );
@@ -66,14 +109,14 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
               );
               if (result != null) {
                 print("食材追加: ${result['name']}, ${result['count']}, ${result['expiry']}");
-                await kvservice.addValue(KeyType.stockitemnameId, result['name']);
-                await kvservice.addValue(KeyType.stockitemcountId, result['count']);
-                await kvservice.addValue(KeyType.stockitemexpiryId, result['expiry']);
+                await kvservice.addValueForKeyType(KeyType.stockitemnameId, result['name']);
+                await kvservice.addValueForKeyType(KeyType.stockitemcountId, result['count']);
+                await kvservice.addValueForKeyType(KeyType.stockitemexpiryId, result['expiry']);
                 setState(() {}); // 追加後に再描画
               }
             },
-            child: Icon(Icons.add),
             backgroundColor: Colors.orange,
+            child: const Icon(Icons.add),
           ),
         ),
       ],
@@ -84,15 +127,47 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
 final kvservice = KVService();
 
 //食材を入力してsharedpreferencesに保存する画面
-class AddIngredientScreen extends StatelessWidget {
-  const AddIngredientScreen({super.key});
+class AddIngredientScreen extends HookWidget {
+  final int index;
+  const AddIngredientScreen({super.key, int? index})
+  : index = index ?? -1;
 
   @override
   Widget build(BuildContext context) {
 
-    final nameController = TextEditingController();
-    final countController = TextEditingController();
-    final expiryController = TextEditingController();
+    final nameController   = useTextEditingController();
+    final countController  = useTextEditingController();
+    final expiryController = useTextEditingController();
+
+    final rebuildTrigger = useState(0);
+
+    useEffect(() {
+
+      debugPrint("AddIngredientScreen useEffect called with index: $index");
+      if(index != -1){
+        // 編集モードの場合、既存のデータを読み込む
+        () async {
+          final names = await kvservice.getValuesFromKeyType(KeyType.stockitemnameId);
+          final counts = await kvservice.getValuesFromKeyType(KeyType.stockitemcountId);
+          final expiries = await kvservice.getValuesFromKeyType(KeyType.stockitemexpiryId);
+
+          if (index < names.length) {
+            nameController.text = names[index];
+            countController.text = counts[index];
+            expiryController.text = expiries[index];
+          }
+
+          rebuildTrigger.value++; // コントローラーの初期化をトリガー
+        }();
+      }
+    }, [index]);
+      // else {
+      //   // 新規追加モードの場合、コントローラーを初期化
+      //   nameController.clear();
+      //   countController.clear();
+      //   expiryController.clear();
+      // }
+   
 
     return Scaffold(
       appBar: AppBar(title: Text('食材を追加')),
