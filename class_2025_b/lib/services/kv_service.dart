@@ -62,6 +62,23 @@ class KVService {
     
   }
 
+  Future<void> modifyValueFromKeyTypeByIndex(KeyType keyType, int index, String newValue) async {
+
+    final String key = keyType.value;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final List<String> list = prefs.getStringList(key) ?? [];
+
+    if(index < 0 || index >= list.length) return; // インデックスが無効な場合は何もしない
+
+    // 要素の変更
+    list[index] = newValue;
+
+    // 変更の適用
+    await prefs.setStringList(key, list);
+  }
+
   
 
   

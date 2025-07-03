@@ -11,7 +11,8 @@ class IngredientsScreen extends StatefulWidget {
 
 class IconButtons extends StatelessWidget {
   final int index;
-  const IconButtons({super.key, required this.index});
+  final VoidCallback setState;
+  const IconButtons({super.key, required this.index, required this.setState});
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +22,23 @@ class IconButtons extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () async {
-            await Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => AddIngredientScreen(index: index,)),
             );
+            if (result != null) {
+              // 編集された食材情報を更新
+              final kvservice = KVService();
+              await kvservice.modifyValueFromKeyTypeByIndex(KeyType.stockitemnameId, index, result['name']);
+              await kvservice.modifyValueFromKeyTypeByIndex(KeyType.stockitemcountId, index, result['count']);
+              await kvservice.modifyValueFromKeyTypeByIndex(KeyType.stockitemexpiryId, index, result['expiry']);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('食材を更新しました')),
+              );
+              // 画面を再描画
+              setState();
+            }
           }, 
           icon: Icon(Icons.edit)
         ),
@@ -40,7 +54,7 @@ class IconButtons extends StatelessWidget {
               SnackBar(content: Text('食材を削除しました')),
             );
             // 画面を再描画
-            (context as Element).reassemble();
+            setState();
           }, 
           icon: Icon(Icons.delete, color: Colors.red,)
         )
@@ -87,7 +101,9 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       return ListTile(
                         title: Text('${names[index]}（${counts[index]}個）'),
                         subtitle: Text('賞味期限: ${expiries[index]}'),
-                        trailing: IconButtons(index: index,)
+                        trailing: IconButtons(index: index, setState: () {
+                          setState(() {}); // 画面を再描画
+                        })
                       );
                     },
                   );
@@ -102,13 +118,11 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
           right: 16,
           child: FloatingActionButton(
             onPressed: () async {
-              print("食材追加ボタンが押されました");
               final result = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AddIngredientScreen()),
               );
               if (result != null) {
-                print("食材追加: ${result['name']}, ${result['count']}, ${result['expiry']}");
                 await kvservice.addValueForKeyType(KeyType.stockitemnameId, result['name']);
                 await kvservice.addValueForKeyType(KeyType.stockitemcountId, result['count']);
                 await kvservice.addValueForKeyType(KeyType.stockitemexpiryId, result['expiry']);
@@ -143,7 +157,6 @@ class AddIngredientScreen extends HookWidget {
 
     useEffect(() {
 
-      debugPrint("AddIngredientScreen useEffect called with index: $index");
       if(index != -1){
         // 編集モードの場合、既存のデータを読み込む
         () async {
@@ -161,12 +174,6 @@ class AddIngredientScreen extends HookWidget {
         }();
       }
     }, [index]);
-      // else {
-      //   // 新規追加モードの場合、コントローラーを初期化
-      //   nameController.clear();
-      //   countController.clear();
-      //   expiryController.clear();
-      // }
    
 
     return Scaffold(
