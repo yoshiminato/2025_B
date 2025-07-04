@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
+import 'package:class_2025_b/states/stock_item_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -91,6 +92,21 @@ class FunctionService {
 
 
     getBaseURL();
+
+    final items = await getStockItems();
+
+    final ingredientsConditionString = filter.usePantryOnly
+        ? 
+        '''
+        - 使用してよい食材情報: ${items.map((item) {
+          return '${item.name}（${item.count}個、賞味期限: ${item.expiry}）';
+        }).join(', ')}; 
+        ''' // 食糧庫の食材を取得
+        : 
+        '''
+        - 使用する食材: ${filter.ingredients.join(', ')}; 
+        ''';
+
     final prompt = '''
       後で示すレシピの条件に基づいて、斬新なレシピを以下のJSON形式で出力してください
       
@@ -111,19 +127,13 @@ class FunctionService {
       }
 
       条件:
-      - 使用する食材: ${filter.ingredients.join(', ')}
-      - 気分: ${filter.moods.entries.map((e) {
-                if (e.value) { return e.key; } // trueの選択肢のみ表示
-                else { return ''; }
-      }).join(', ')}
+      $ingredientsConditionString
+      - 属性: ${filter.attributes.join(', ')}
       - 予算: ${filter.budget}
       - 調理時間: ${filter.time}
       - 何人分: ${filter.servings}
       - アレルギー: ${filter.allergy.join(', ')}
-      - 使用可能な調理器具: ${filter.isToolAvailable.entries.map((e) {
-                            if (e.value) { return e.key; } // trueの選択肢のみ表示
-                            else { return ''; }
-      }).join(', ')}
+      - 使用可能な調理器具: ${filter.availableTools.join(', ')}
 
       最後に注意事項をまとめます
       - レシピは日本語で記述してください
@@ -132,55 +142,57 @@ class FunctionService {
       - 調理手順の文字列に手順番号は含めないでください
       - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
     ''';    
-    
-    /* 実際にcloud functionを呼び出す場合 */
-    try{
-      // cloud functionに登録した関数の呼び出し
-      final requestBody = json.encode({
-        "prompt": prompt
-      });
-      
-      final res = await http.post(
-        Uri.parse("$basePath/generateRecipe"),
-        headers: {"Content-Type": "application/json"},
-        body: requestBody
-      );
-      
-      if (res.statusCode != 200) {
-        debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
-        return null;
-      }
-      
-      if (res.body.isEmpty) {
-        debugPrint("Empty response body");
-        return null;
-      }
-        
-      try {
-        final responseJson = json.decode(res.body);
-        
-        // レスポンスの構造をデバッグ出力（画像データを除く）
-        final debugResponse = Map<String, dynamic>.from(responseJson);
-      
-        debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
-        
-        // テキストデータ（レシピ情報）の処理
-        final Recipe recipe = Recipe.fromJson(responseJson);
 
-        debugPrint("正常にデータを返します");
+    debugPrint(prompt);
+    
+    // /* 実際にcloud functionを呼び出す場合 */
+    // try{
+    //   // cloud functionに登録した関数の呼び出し
+    //   final requestBody = json.encode({
+    //     "prompt": prompt
+    //   });
+      
+    //   final res = await http.post(
+    //     Uri.parse("$basePath/generateRecipe"),
+    //     headers: {"Content-Type": "application/json"},
+    //     body: requestBody
+    //   );
+      
+    //   if (res.statusCode != 200) {
+    //     debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
+    //     return null;
+    //   }
+      
+    //   if (res.body.isEmpty) {
+    //     debugPrint("Empty response body");
+    //     return null;
+    //   }
         
-        return recipe;
-      }
-      catch (e) {
-        debugPrint("Recipe parsing error: $e");
-        debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
-        return null;
-      }
-    } 
-    catch (e) {
-      debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
-      return null;
-    }
+    //   try {
+    //     final responseJson = json.decode(res.body);
+        
+    //     // レスポンスの構造をデバッグ出力（画像データを除く）
+    //     final debugResponse = Map<String, dynamic>.from(responseJson);
+      
+    //     debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
+        
+    //     // テキストデータ（レシピ情報）の処理
+    //     final Recipe recipe = Recipe.fromJson(responseJson);
+
+    //     debugPrint("正常にデータを返します");
+        
+    //     return recipe;
+    //   }
+    //   catch (e) {
+    //     debugPrint("Recipe parsing error: $e");
+    //     debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
+    //     return null;
+    //   }
+    // } 
+    // catch (e) {
+    //   debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
+    //   return null;
+    // }
   }
 
   Future<String?> generateBase64Image(Recipe recipe) async {
