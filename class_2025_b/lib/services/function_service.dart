@@ -98,7 +98,8 @@ class FunctionService {
     final ingredientsConditionString = filter.usePantryOnly
         ? 
         '''
-        - 使用してよい食材情報: ${items.map((item) {
+        - 使用してよい食材情報(ここに記述する食材以外を使用するレシピは生成しないでください): 
+        ${items.map((item) {
           return '${item.name}（${item.count}個、賞味期限: ${item.expiry}）';
         }).join(', ')}; 
         ''' // 食糧庫の食材を取得
@@ -208,7 +209,7 @@ class FunctionService {
     getBaseURL();
 
     final prompt = '''
-      以下のレシピの完成品を俯瞰で見たときのイラストを生成し、base64エンコードした画像データを返してください。
+      以下のレシピの完成品を俯瞰で見たときのリアルな画像を生成し、base64エンコードした画像データを返してください。
       レシピ情報:
       - タイトル: ${recipe.title}
       - 説明: ${recipe.description}

@@ -13,7 +13,8 @@ class CustomizeNotifier extends _$CustomizeNotifier {
   Future<CustomizeModel> build() async {
     final kvService = KVService();
     final servingsStr = await kvService.getValueFromKeyType(KeyType.servings);
-    final servings = int.parse(servingsStr ?? '1'); // デフォルトは1人前
+    final cleanedStr = servingsStr.replaceAll(RegExp(r'[^0-9]'), '');
+    final servings = cleanedStr.isEmpty ? 1 : int.parse(cleanedStr); // デフォルトは1人前
     final allergys = await kvService.getValuesFromKeyType(KeyType.allergys);
     final tools = await kvService.getValuesFromKeyType(KeyType.tools);
     return CustomizeModel(
