@@ -1,68 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class RecipeFilterWidget extends ConsumerStatefulWidget {
+class RecipeFilterWidget extends HookConsumerWidget {
   const RecipeFilterWidget({super.key});
 
   @override
-  ConsumerState<RecipeFilterWidget> createState() => _RecipeFilterWidgetState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final buttonLabels = [
+      '濃厚な', 'スパイシー', 'ジューシー',
+      'さっぱりした', 'こってり', '淡泊な',
+      'クセになる', 'うま味', 'まろやか',
+      'コク深い', '香ばしい', '素朴な',
+    ];
+    final buttonStates = useState(List<int>.filled(12, 0));
+    final budgetValue = useState(500.0);
+    final timeValue = useState(30.0);
+    final servingValue = useState(1.0);
+    final searchKeyword = useState('');
 
-class _RecipeFilterWidgetState extends ConsumerState<RecipeFilterWidget> {
-  final List<String> buttonLabels = [
-    '濃厚な', 'スパイシー', 'ジューシー',  //クイック条件となる形容詞群
-    'さっぱりした', 'こってり', '淡泊な',
-    'クセになる', 'うま味', 'まろやか',
-    'コク深い', '香ばしい', '素朴な',
-  ];
-
-  List<int> buttonStates = List.filled(12, 0);
-  double budgetValue = 500;
-  double timeValue = 30;
-  double servingValue = 1;
-  String searchKeyword = '';
-
-  void _resetFilters() {
-    setState(() {
-      buttonStates = List.filled(12, 0);
-      budgetValue = 500;
-      timeValue = 30;
-      servingValue = 1;
-      searchKeyword = '';
-    });
-  }
-
-  void _startSearch() {
-    final Map<String, String> attributes = {};
-    for (int i = 0; i < buttonLabels.length; i++) {
-      if (buttonStates[i] == 1) {
-        attributes[buttonLabels[i]] = '強';
-      } else if (buttonStates[i] == -1) {
-        attributes[buttonLabels[i]] = '弱';
-      }
+    void resetFilters() {
+      buttonStates.value = List<int>.filled(12, 0);
+      budgetValue.value = 500;
+      timeValue.value = 30;
+      servingValue.value = 1;
+      searchKeyword.value = '';
     }
 
-    print('--- フィルター条件 ---');
-    print('検索キーワード: $searchKeyword');
-    print('予算: ${budgetValue.toInt()} 円');
-    print('調理時間: ${timeValue.toInt()} 分');
-    print('分量: ${servingValue.toInt()} 人前');
-    print('属性:');
-    attributes.forEach((key, value) {
-      print(' - $key : $value');  //現在の出力内容：print()で以下を出力
-    });
-  }
+    void startSearch() {
+      final Map<String, String> attributes = {};
+      for (int i = 0; i < buttonLabels.length; i++) {
+        if (buttonStates.value[i] == 1) {
+          attributes[buttonLabels[i]] = '強';
+        } else if (buttonStates.value[i] == -1) {
+          attributes[buttonLabels[i]] = '弱';
+        }
+      }
+      debugPrint('--- フィルター条件 ---');
+      debugPrint('検索キーワード: ${searchKeyword.value}');
+      debugPrint('予算: ${budgetValue.value.toInt()} 円');
+      debugPrint('調理時間: ${timeValue.value.toInt()} 分');
+      debugPrint('分量: ${servingValue.value.toInt()} 人前');
+      debugPrint('属性:');
+      attributes.forEach((key, value) {
+        debugPrint(' - $key : $value');
+      });
+    }
 
-  @override
-  Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(  //検索バー
-            onChanged: (value) => setState(() => searchKeyword = value),
+          TextField(
+            onChanged: (value) => searchKeyword.value = value,
             decoration: InputDecoration(
               hintText: 'レシピを検索',
               prefixIcon: const Icon(Icons.search),
@@ -72,7 +63,7 @@ class _RecipeFilterWidgetState extends ConsumerState<RecipeFilterWidget> {
             ),
           ),
           const SizedBox(height: 24),
-          GridView.count(  //形容詞ボタン群
+          GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 3,
@@ -80,19 +71,19 @@ class _RecipeFilterWidgetState extends ConsumerState<RecipeFilterWidget> {
             crossAxisSpacing: 16,
             childAspectRatio: 2.5,
             children: List.generate(buttonLabels.length, (index) {
-              final state = buttonStates[index];
+              final state = buttonStates.value[index];
               final color = state == 1
-                  ? Colors.red  //強化
+                  ? Colors.red
                   : state == -1
-                      ? Colors.blue  //抑制
-                      : Colors.grey.shade300;  //中立(初期状態)
+                      ? Colors.blue
+                      : Colors.grey.shade300;
               final textColor = state == 0 ? Colors.black : Colors.white;
 
               return ElevatedButton(
                 onPressed: () {
-                  setState(() {
-                    buttonStates[index] = (buttonStates[index] + 2) % 3 - 1; //内部属性：List<int> buttonStates で記録され、開始時に出力（強化/抑制の重みづけに活用可能）
-                  });
+                  final newStates = List<int>.from(buttonStates.value);
+                  newStates[index] = (newStates[index] + 2) % 3 - 1;
+                  buttonStates.value = newStates;
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color,
@@ -106,45 +97,45 @@ class _RecipeFilterWidgetState extends ConsumerState<RecipeFilterWidget> {
             }),
           ),
           const SizedBox(height: 32),
-          Text("予算: ${budgetValue.toInt()} 円"),
+          Text("予算: ${budgetValue.value.toInt()} 円"),
           Slider(
-            value: budgetValue,
+            value: budgetValue.value,
             min: 0,
             max: 1500,
             divisions: 100,
-            label: '${budgetValue.toInt()} 円',
+            label: '${budgetValue.value.toInt()} 円',
             activeColor: Colors.orange,
             inactiveColor: Colors.orange.shade100,
-            onChanged: (value) => setState(() => budgetValue = value),
+            onChanged: (value) => budgetValue.value = value,
           ),
-          Text("調理時間: ${timeValue.toInt()} 分"),
+          Text("調理時間: ${timeValue.value.toInt()} 分"),
           Slider(
-            value: timeValue,
+            value: timeValue.value,
             min: 0,
             max: 90,
             divisions: 10,
-            label: '${timeValue.toInt()} 分',
+            label: '${timeValue.value.toInt()} 分',
             activeColor: Colors.orange,
             inactiveColor: Colors.orange.shade100,
-            onChanged: (value) => setState(() => timeValue = value),
+            onChanged: (value) => timeValue.value = value,
           ),
-          Text("分量: ${servingValue.toInt()} 人前"),
+          Text("分量: ${servingValue.value.toInt()} 人前"),
           Slider(
-            value: servingValue,
+            value: servingValue.value,
             min: 1,
             max: 10,
             divisions: 5,
-            label: '${servingValue.toInt()} 人前',
+            label: '${servingValue.value.toInt()} 人前',
             activeColor: Colors.orange,
             inactiveColor: Colors.orange.shade100,
-            onChanged: (value) => setState(() => servingValue = value),
+            onChanged: (value) => servingValue.value = value,
           ),
           const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _resetFilters,
+                  onPressed: resetFilters,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
@@ -154,8 +145,8 @@ class _RecipeFilterWidgetState extends ConsumerState<RecipeFilterWidget> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ElevatedButton(  //役割：現在の選択条件を使って検索処理（未実装）を呼び出す(53行目)
-                  onPressed: _startSearch,
+                child: ElevatedButton(
+                  onPressed: startSearch,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
