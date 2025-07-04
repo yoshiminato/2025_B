@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 const String favoriteRecipeIdKey = 'favorite_recipe_ids';
 
@@ -6,7 +7,12 @@ enum KeyType {
   favoriteRecipeId('favorite_recipe_ids'),
   historyRecipeId('history_recipe_ids'),
   servings('servings'),
-  allergys('allergys');
+  allergys('allergys'),
+  tools('tools'),
+  stockitemnameId('stockitemname_ids'),
+  stockitemcountId('stockitemcount_ids'),
+  stockitemexpiryId('stockitemexpiry_ids')
+  ;
 
   final String value;
   const KeyType(this.value);
@@ -57,6 +63,8 @@ class KVService {
     final String key = keyType.value;
 
     final prefs = await SharedPreferences.getInstance();
+
+    debugPrint('Saving values for key: $key, values: $list');
 
     await prefs.setStringList(key, list);
   }
