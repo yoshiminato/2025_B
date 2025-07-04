@@ -1,5 +1,6 @@
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/models/comment_model.dart';
+import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/search_sort_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -127,6 +128,7 @@ class DatabaseService{
     return;
   }
 
+
   Future<List<Comment>> getCommentsByRecipeId(String recipeId) async {
     
     debugPrint("getComments");
@@ -161,27 +163,96 @@ class DatabaseService{
 
       return [];
     }
-    
-
+  
   }
 
-  // // データベースに登録されているすべてのレシピを削除
-  // Future<void> clearRecipes() async {
-  //   final collection = FirebaseFirestore.instance.collection(recipeCollectionPath);
-  //   final snapshots = await collection.get();
+  Future<void> addReview(String userId, String recipeId, Review review) async {
 
-  //   for (final doc in snapshots.docs) {
-  //     await doc.reference.delete();
-  //   }
-  // }
+    debugPrint("addReview");
 
-  // Future<void> addMockRecipes() async {
-  //   // モックレシピを追加する処理を実装
-  //   final recipes = sampleRecipesForTest;
-  //   for (final recipe in recipes) {
-  //     await addRecipe(recipe);
-  //   }
-  // }
+    try {
+      // レビューコレクションの入手
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+
+      // 既存レビューの有無を確認
+      final querySnapshot = await reviewsRef
+          .where('recipeId', isEqualTo: recipeId)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      // 既存レビューがあれば更新
+      if (querySnapshot.docs.isNotEmpty) {
+        
+        final docId = querySnapshot.docs.first.id;
+        await reviewsRef.doc(docId).update(review.toMap(userId, recipeId));
+     
+      } 
+      // なければ新規追加
+      else {
+        await reviewsRef.add(review.toMap(userId, recipeId));
+        debugPrint("新規レビューを追加しました");
+      }
+    } catch (e) {
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') ||
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      return;
+    }
+  }
+
+  Future<Review> getReviewByRecipeIdAndUserId(String userId, String recipeId) async {
+
+    debugPrint("getReviewByRecipeId");
+
+    try {
+      // レビューコレクションの取得
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+
+      // レシピID, ユーザーIDでレビューを取得
+      final querySnapshot = await reviewsRef
+          .where('recipeId', isEqualTo: recipeId)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      if(querySnapshot.docs.length > 1) {
+        debugPrint("１つのレシピに対して複数のレビューがなされています");
+        throw Exception("複数のレビューが存在します: ${querySnapshot.docs.length}");
+      }
+
+      if (querySnapshot.docs.isEmpty) {
+        return Review.empty; // デフォルト値を返す
+      }
+
+      final reveiwMap = querySnapshot.docs.first.data();
+      return Review.fromMap(reveiwMap);
+
+    } catch (e) {
+      // 認証エラーの場合の特別な処理
+      if (e.toString().contains('UNAUTHENTICATED') || 
+          e.toString().contains('INVALID_REFRESH_TOKEN')) {
+        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
+        // FirebaseAuthからログアウト
+        try {
+          await FirebaseAuth.instance.signOut();
+          debugPrint("自動ログアウトを実行しました");
+        } catch (signOutError) {
+          debugPrint("ログアウトエラー: $signOutError");
+        }
+        throw Exception('認証エラー: 再ログインしてください');
+      }
+      throw Exception("エラー発生:$e"); // エラー時もデフォルト値を返す
+    }
+  }
 
   // 引数で受け取ったユーザIDをもとにユーザのレシピを取得するメソッド
   Future<List<Recipe>> getUsersRecipes(String userId) async {
@@ -237,11 +308,27 @@ class DatabaseService{
       for (var keyword in keywordsList) {
         debugPrint("キーワード: $keyword");
       }
-      
 
       // 新しい構造のingredientNamesフィールドで検索
+      bool sort_tmp = false; // デフォルトは昇順
+      String sort_name = "createdAt"; // デフォルトのソートフィールド
+
+      //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
+      if(type == SortType.newest){
+        sort_tmp = true;
+        sort_name = "createdAt";
+
+      }else if(type == SortType.oldest){
+        sort_tmp = false;
+        sort_name = "createdAt";
+        
+      }else{
+        sort_tmp = false;
+        sort_name = "$type";
+      }
+
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
-      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy("createdAt", descending: true).get();
+      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy(sort_name, descending: sort_tmp).get();
 
       List<Recipe> recipes = query.docs.map((doc) {
         final data = doc.data();
@@ -251,6 +338,11 @@ class DatabaseService{
         
         return Recipe.fromMap(data);
       }).toList();
+
+      // レビューの平均値を計算
+      for(var doc in query.docs){
+        await calreviewaverage(doc.id);
+      }
 
       return recipes;
       
@@ -378,119 +470,54 @@ class DatabaseService{
       return [];
     }
   }
+  //レビューの値を計算する
+  Future<void> calreviewaverage(String recipeId) async {
+    double tasteweight = 0.4; // 味の重み
+    double usefulweight = 0.3; // 作りやすさの重み
+    double cospweight = 0.3; // コストパフォーマンスの重み
+    try {
+      // レビューコレクションの取得
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+
+      // レシピIDでレビューを取得
+      final querySnapshot = await reviewsRef.where('recipeId', isEqualTo: recipeId).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        debugPrint("レビューが見つかりません");
+        return;
+      }
+
+      // レビューの平均値を計算
+      double tasteSum = 0;
+      double usefulSum = 0;
+      double costperformanceSum = 0;
+
+      for (var doc in querySnapshot.docs) {
+        final reviewData = doc.data() as Map<String, dynamic>;
+        tasteSum += reviewData['taste'] ?? 0;
+        usefulSum += reviewData['useful'] ?? 0;
+        costperformanceSum += reviewData['costperformance'] ?? 0;
+      }
+
+      int count = querySnapshot.docs.length;
+
+      // 平均値を計算
+      double tasteAve = tasteSum / count;
+      double usefulAve = usefulSum / count;
+      double costperformanceAve = costperformanceSum / count;
+      double reccommend = (tasteAve*tasteweight + usefulAve*usefulweight + costperformanceAve*cospweight) / 3;
+
+      // レシピの更新
+      await FirebaseFirestore.instance.collection(recipeCollectionPath).doc(recipeId).update({
+        'taste_ave': tasteAve,
+        'useful_ave': usefulAve,
+        'costperformance_ave': costperformanceAve,
+        'reccommend': reccommend,
+      });
+
+    } catch (e) {
+      debugPrint("calreviewaverage エラー: ${e.toString()}");
+    }
+  }
 
 }
-
-
-  
-
-
-
-
-// テスト用のユーザデータ
-final testUsers = [
-  "User1",
-  "User2",
-  "User3",
-];
-
-// テスト用のレシピデータ
-final sampleRecipeForTest1 = Recipe(
-  title: "Sample Recipe 1",
-  description: "This is a sample recipe description.",
-  imageUrl: "https://example.com/sample.jpg",
-  ingredients: {"Ingredient 1": "1 cup", "Ingredient 2": "2 tbsp", "Ingredient 3": "3 tsp"},
-  steps: ["Step 1", "Step 2", "Step 3"],
-  time: "30分",
-  cost: "1000円",
-  createdAt: DateTime.now(),
-  userId: "User1",
-  id: "sampleRecipeId",
-  reviewCount: 0,
-  likeCount: 0,
-);
-
-final sampleRecipeForTest2 = Recipe(
-  title: "Sample Recipe 2",
-  description: "This is another sample recipe description.",
-  imageUrl: "https://example.com/sample2.jpg",
-  ingredients: {"Ingredient A": "2 cups", "Ingredient B": "1 tbsp"},
-  steps: ["Step A", "Step B"],
-  time: "45分",
-  cost: "1500円",
-  createdAt: DateTime.now(),
-  userId: "User2",
-  id: "sampleRecipeId2",
-  reviewCount: 0,
-  likeCount: 0,
-);
-
-final sampleRecipeForTest3 = Recipe(
-  title: "Sample Recipe 3",
-  description: "This is yet another sample recipe description.",
-  imageUrl: "https://example.com/sample3.jpg",
-  ingredients: {"Ingredient X": "1 cup", "Ingredient Y": "2 tsp"},
-  steps: ["Step X", "Step Y"],
-  time: "20分",
-  cost: "800円",
-  createdAt: DateTime.now(),
-  userId: "User3",
-  id: "sampleRecipeId3",
-  reviewCount: 0,
-  likeCount: 0,
-);
-
-final sampleRecipeForTest4 = Recipe(
-  title: "Sample Recipe 4",
-  description: "This is a sample recipe for testing.",
-  imageUrl: "https://example.com/sample4.jpg",
-  ingredients: {"Ingredient M": "1 cup", "Ingredient N": "3 tbsp"},
-  steps: ["Step M", "Step N"],
-  time: "15分",
-  cost: "500円",
-  createdAt: DateTime.now(),
-  userId: "User1",
-  id: "sampleRecipeId4",
-  reviewCount: 0,
-  likeCount: 0,
-);
-
-final sampleRecipeForTest5 = Recipe(
-  title: "Sample Recipe 5",
-  description: "This is a sample recipe for testing.",
-  imageUrl: "https://example.com/sample5.jpg",
-  ingredients: {"Ingredient P": "2 cups", "Ingredient Q": "1 tbsp"},
-  steps: ["Step P", "Step Q"],
-  time: "10分",
-  cost: "300円",
-  createdAt: DateTime.now(),
-  userId: "User2",
-  id: "sampleRecipeId5",
-  reviewCount: 0,
-  likeCount: 0,
-);
-
-final sampleRecipeForTest6 = Recipe(
-  title: "Sample Recipe 6",
-  description: "This is a sample recipe description.",
-  imageUrl: "https://example.com/sample.jpg",
-  ingredients: {"Ingredient 1": "1 cup", "Ingredient 2": "2 tbsp", "Ingredient 3": "3 tsp"},
-  steps: ["Step 1", "Step 2", "Step 3"],
-  time: "30分",
-  cost: "1000円",
-  createdAt: DateTime.now(),
-  userId: "User1",
-  id: "sampleRecipeId1",
-  reviewCount: 0,
-  likeCount: 0,
-);
-
-// テスト用のレシピリスト
-final sampleRecipesForTest = [
-  sampleRecipeForTest1,
-  sampleRecipeForTest2,
-  sampleRecipeForTest3,
-  sampleRecipeForTest4,
-  sampleRecipeForTest5,
-  sampleRecipeForTest6,
-];

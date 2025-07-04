@@ -16,6 +16,11 @@ class Recipe{
   String? userId;                  // 作成者のUID
   int reviewCount;                 // レビュー数（初期値は0）
   int likeCount;                   // いいね数（初期値は0）
+  int taste_ave;                   // 味の平均評価   
+  int useful_ave;                  // 作りやすさの平均評価
+  int costperformance_ave;         // コストパフォーマンスの平均評価
+  int reccommend;                  // おすすめ度 
+
   
   
   Recipe({
@@ -31,6 +36,10 @@ class Recipe{
     this.userId,
     this.reviewCount = 0,
     this.likeCount = 0,
+    this.taste_ave = 0,
+    this.useful_ave = 0,
+    this.costperformance_ave = 0,
+    this.reccommend = 0,
   });
 
   // レシピ生成時刻とユーザIDを新たに登録するメゾッド
@@ -58,6 +67,10 @@ class Recipe{
       'userId': userId,
       'reviewCount': reviewCount,
       'likeCount': likeCount,
+      'taste_ave': taste_ave,
+      'useful_ave': useful_ave,
+      'costperformance_ave': costperformance_ave,
+      'reccommend': reccommend,
     };
   }  // MapからRecipeオブジェクトを作成（Firestore読み込み用）
   factory Recipe.fromMap(Map<String, dynamic> map) {
@@ -91,6 +104,10 @@ class Recipe{
       userId: map['userId'] as String?,
       reviewCount: map['reviewCount'] as int? ?? 0,
       likeCount: map['likeCount'] as int? ?? 0,
+      taste_ave: map['taste_ave'] as int? ?? 0,
+      useful_ave: map['useful_ave'] as int? ?? 0,
+      costperformance_ave: map['costperformance_ave'] as int? ?? 0,
+      reccommend: map['reccommend'] as int? ?? 0,
     );
   }
   // RecipeオブジェクトをJSONに変換（API用）?? ユーザの評価履歴をもとにプロンプトするなら使うかも
@@ -113,6 +130,10 @@ class Recipe{
       'userId': userId,
       'reviewCount': reviewCount,
       'likeCount': likeCount,
+      'taste_ave': taste_ave,
+      'useful_ave': useful_ave,
+      'costperformance_ave': costperformance_ave,
+      'reccommend': reccommend,
     };
   }
   // JSONからRecipeオブジェクトを作成（API用）
@@ -147,6 +168,10 @@ class Recipe{
       userId: json['userId'] as String?,
       reviewCount: json['reviewCount'] as int? ?? 0,
       likeCount: json['likeCount'] as int? ?? 0,
+      taste_ave: json['taste_ave'] as int? ?? 0,
+      useful_ave: json['useful_ave'] as int? ?? 0,
+      costperformance_ave: json['costperformance_ave'] as int? ?? 0,
+      reccommend: json['reccommend'] as int? ?? 0,
     );
   }
 
@@ -165,6 +190,10 @@ final sampleRecipe1 = Recipe(
   id: "sampleRecipeId",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe2 = Recipe(
@@ -180,6 +209,10 @@ final sampleRecipe2 = Recipe(
   id: "sampleRecipeId2",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe3 = Recipe(
@@ -195,6 +228,10 @@ final sampleRecipe3 = Recipe(
   id: "sampleRecipeId3",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe4 = Recipe(
@@ -210,6 +247,10 @@ final sampleRecipe4 = Recipe(
   id: "sampleRecipeId4",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe5 = Recipe(
@@ -225,6 +266,10 @@ final sampleRecipe5 = Recipe(
   id: "sampleRecipeId5",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe6 = Recipe(
@@ -240,6 +285,10 @@ final sampleRecipe6 = Recipe(
   id: "sampleRecipeId6",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe7 = Recipe(
@@ -255,6 +304,10 @@ final sampleRecipe7 = Recipe(
   id: "sampleRecipeId7",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe8 = Recipe(
@@ -270,6 +323,10 @@ final sampleRecipe8 = Recipe(
   id: "sampleRecipeId8",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe9 = Recipe(
@@ -285,6 +342,10 @@ final sampleRecipe9 = Recipe(
   id: "sampleRecipeId9",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipe10 = Recipe(
@@ -300,6 +361,10 @@ final sampleRecipe10 = Recipe(
   id: "sampleRecipeId10",
   reviewCount: 0,
   likeCount: 0,
+  taste_ave: 0,
+  useful_ave: 0,
+  costperformance_ave: 0,
+  reccommend: 0,
 );
 
 final sampleRecipes = [

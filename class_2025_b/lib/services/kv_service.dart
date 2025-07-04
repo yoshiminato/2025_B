@@ -20,7 +20,7 @@ enum KeyType {
 
 class KVService {
 
-  Future<void> addValue(KeyType keyType, String value) async {
+  Future<void> addValueForKeyType(KeyType keyType, String value) async {
 
     final String key = keyType.value;
 
@@ -33,7 +33,7 @@ class KVService {
     await prefs.setStringList(key, list);
   }
 
-  Future<void> removeValue(KeyType keyType, String value) async {
+  Future<void> removeValueFromKeyType(KeyType keyType, String value) async {
 
     final String key = keyType.value;
 
@@ -44,6 +44,24 @@ class KVService {
     list.remove(value);
 
     await prefs.setStringList(key, list);
+  }
+
+  Future<void> removeValueFromKeyTypeByIndex(KeyType keyType, int index) async {
+
+    final String key = keyType.value;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final List<String> list = prefs.getStringList(key) ?? [];
+
+    if(index < 0 || index >= list.length) return; // インデックスが無効な場合は何もしない
+
+    // 要素の削除
+    list.removeAt(index);
+
+    // 削除の適用
+    await prefs.setStringList(key, list);
+    
   }
 
   

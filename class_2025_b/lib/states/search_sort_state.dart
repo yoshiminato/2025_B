@@ -4,7 +4,11 @@ enum SortType {
   newest, // 新しい順
   oldest, // 古い順
   cost, // 価格順
-  time
+  time,//調理時間
+  taste,//味
+  useful,//作りやすさ
+  costperformance,//コストパフォーマンス
+  reccommend//おすすめ
 }
 
 final sortStateProvider = StateProvider<SortType>((ref) {

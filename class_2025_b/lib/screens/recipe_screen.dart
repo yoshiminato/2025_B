@@ -4,6 +4,7 @@ import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/widgets/comment_widget.dart';
 import 'package:class_2025_b/widgets/favorite_button_widget.dart';
 import 'package:class_2025_b/widgets/recipe_widget.dart';
+import 'package:class_2025_b/widgets/review_widget.dart';
 
 class RecipeScreen extends ConsumerWidget {
   
@@ -27,6 +28,8 @@ class RecipeScreen extends ConsumerWidget {
           RecipeWidget(),
           const SizedBox(height: 20),
           FavoriteButtonWidget(),
+          const SizedBox(height: 20),
+          ReviewWidget(),
           const SizedBox(height: 20),
           CommentsWidget()
         ],
