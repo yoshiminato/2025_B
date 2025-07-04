@@ -2,11 +2,13 @@ class Review {
   final int tasteRating;
   final int easeRating;
   final int costRating;
+  final int uniquenessRating;
 
   Review({
     required this.tasteRating,
     required this.easeRating,
     required this.costRating,
+    required this.uniquenessRating
   });
 
   // Firestore保存用Map変換
@@ -17,6 +19,7 @@ class Review {
       'tasteRating': tasteRating,
       'easeRating': easeRating,
       'costRating': costRating,
+      'uniquenessRating': uniquenessRating, // 追加: ユニークさの評価
     };
   }
 
@@ -26,6 +29,7 @@ class Review {
       tasteRating: map['tasteRating'] ?? 0,
       easeRating: map['easeRating'] ?? 0,
       costRating: map['costRating'] ?? 0,
+      uniquenessRating: map['uniquenessRating'] ?? 0,
     );
   }
 
@@ -33,6 +37,7 @@ class Review {
     tasteRating: 0,
     easeRating: 0,
     costRating: 0,
+    uniquenessRating: 0,
   );
 
 }
