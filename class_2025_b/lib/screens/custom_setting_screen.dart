@@ -1,13 +1,85 @@
 import 'package:class_2025_b/routers/router.dart';
+import 'package:class_2025_b/screens/ingredients_screen.dart';
 import 'package:class_2025_b/services/kv_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:class_2025_b/states/custom_state.dart';
 
-class CustomSettingScreen extends StatelessWidget {
+
+// 主要8品目と主要調理器具
+const List<String> majorAllergys = [
+  '卵', '乳', '小麦', 'そば', '落花生', 'えび', 'かに', 'くるみ'
+];
+const List<String> majorTools = [
+  '電子レンジ', 'オーブン', 'トースター', 'フライパン', '鍋', '炊飯器', '包丁', 'まな板'
+];
+
+class CustomSettingScreen extends ConsumerWidget {
   const CustomSettingScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
+    final model = ref.watch(customizeNotifierProvider);
+    final notifier = ref.read(customizeNotifierProvider.notifier);
+
+    final body = model.when(
+      data: (data) {
+        return SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // 分量
+                const SizedBox(height: 24),
+                const Text("分量", style: TextStyle(fontWeight: FontWeight.bold)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DropdownButton<int>(
+                      value: data.servings,
+                      items: [
+                        for (var i = 1; i <= 10; i++)
+                          DropdownMenuItem(value: i, child: Text("$i"))
+                      ],
+                      onChanged: (value) {
+                        if (value != null) notifier.setServings(value);
+                      },
+                    ),
+                    const Text("人前"),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // アレルギー
+                SelectableButtonList(
+                  title: "主要アレルギー（8品目）", 
+                  items: majorAllergys,
+                  selectedItems: data.allergys,
+                  onTap: notifier.toggleAllergy,
+                ),
+                const SizedBox(height: 24),
+                // 調理器具
+                SelectableButtonList(
+                  title: "使用可能な調理器具", 
+                  items: majorTools,
+                  selectedItems: data.availableTools,
+                  onTap: notifier.toggleTool,
+                ), 
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () => notifier.saveSettings(),
+                  child: const Text("設定を保存"),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text("エラーが発生しました: $error")),
+    );
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -16,177 +88,38 @@ class CustomSettingScreen extends StatelessWidget {
         ),
         title: const Text("カスタマイズ設定"),
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const NumInputWidget(),
-              const SizedBox(height: 20),
-              const AllergyWidget(),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => AppRouter.goToHome(context),
-                child: const Text("ホームに戻る")
-              ),
-            ],
-          ),
-        ),
-      )
+      body: body
     );
   }
 }
 
-const numLimit = 10;
+class SelectableButtonList extends ConsumerWidget {
 
-class NumInputWidget extends HookWidget {
-  const NumInputWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final kvService = KVService();
-    final selectedServings = useState(1);
-
-    // 初回表示時にKVから値を読み込み
-    useEffect(() {
-      Future.microtask(() async {
-        final servings = await kvService.getValueFromKeyType(KeyType.servings);
-        selectedServings.value = int.parse(servings);
-      });
-      return null;
-    }, []);
-
-    return Row(
-      children: [
-        const Text("分量   :    "),
-        DropdownButton<int>(
-          value: selectedServings.value,
-          items: [
-            for (var i = 1; i <= numLimit; i++)
-              DropdownMenuItem(value: i, child: Text("$i"))
-          ],
-          onChanged: (value) async {
-            if (value != null) {
-              selectedServings.value = value;
-              await kvService.saveValueForKeyType(KeyType.servings, value.toString());
-            }
-          },
-        ),
-        const Text("人前")
-      ],
-    );
-  }
-}
-
-
-class AllergyWidget extends HookWidget {
-  const AllergyWidget({super.key});
+  final String title;
+  final List<String> items;
+  final List<String> selectedItems;
+  final void Function(String) onTap;
+  const SelectableButtonList({super.key, required this.title, required this.items, required this.selectedItems, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    final kvService = KVService();
-    final controllers = useState<List<TextEditingController>>([
-      TextEditingController()
-    ]);
+  Widget build(BuildContext context, WidgetRef ref) {
 
-    // 初回表示時にKVからアレルギーリストを読み込み
-    useEffect(() {
-      Future.microtask(() async {
-        final allergys = await kvService.getValuesFromKeyType(KeyType.allergys);
-        if (allergys.isNotEmpty) {
-          // 古いコントローラを削除
-          for (var c in controllers.value) {
-            c.dispose();
-          }
-          // 新しいコントローラを作成
-          controllers.value = allergys.map((allergy) => 
-              TextEditingController(text: allergy)).toList();
-        }
-      });
-      return () {
-        for (var c in controllers.value) {
-          c.dispose();
-        }
-      };
-    }, []);
-
-    void addTextField() {
-      controllers.value = [
-        ...controllers.value,
-        TextEditingController()
-      ];
-    }
-
-    void removeTextField(int index) {
-      if (controllers.value.length > 1) {
-        final newList = List<TextEditingController>.from(controllers.value);
-        newList[index].dispose();
-        newList.removeAt(index);
-        controllers.value = newList;
-        // 削除後にKVを更新
-        Future.microtask(() async {
-          final allergys = controllers.value.map((c) => c.text.trim())
-              .where((text) => text.isNotEmpty).toList();
-          await kvService.saveValuesForKeyType(KeyType.allergys, allergys);
-        });
-      }
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 16.0, right: 16.0),
-          child: Text("アレルギー："),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              ...controllers.value.asMap().entries.map((entry) {
-                int index = entry.key;
-                TextEditingController controller = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: controller,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            hintText: "アレルギー${index + 1}",
-                            suffixIcon: controllers.value.length > 1
-                                ? IconButton(
-                                    icon: const Icon(Icons.remove_circle),
-                                    onPressed: () => removeTextField(index),
-                                  )
-                                : null,
-                          ),
-                          onChanged: (value) {
-                            // アレルギーリストをKVに保存
-                            Future.microtask(() async {
-                              final allergys = controllers.value.map((c) => c.text.trim())
-                                  .where((text) => text.isNotEmpty).toList();
-                              await KVService().saveValuesForKeyType(KeyType.allergys, allergys);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  onPressed: addTextField,
-                  icon: const Icon(Icons.add),
-                  label: const Text("追加"),
-                ),
-              ),
-            ],
-          ),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: items.map((item) {
+            return FilterChip(
+              label: Text(item),
+              selected: selectedItems.contains(item), // 選択状態は外部で管理
+              onSelected: (selected) => onTap(item), // 選択状態の変更処理を外部で実装
+              selectedColor: Colors.red.shade200,
+            );
+          }).toList(),
         ),
       ],
     );
