@@ -46,12 +46,15 @@ class GenerateScreen extends HookConsumerWidget {
     final budgetValue = useState(500.0);
     final timeValue = useState(30.0);
     final searchKeyword = useState('');
+    final servingsState = useState(1.0);
 
-    final servingsState = asyncCustomize.when(
-      data: (data) => useState(data.servings.toDouble()), 
-      error: (error, stack) => useState(1.0),
-      loading: () => useState(1.0)
-    );
+    useEffect((){
+      if (asyncCustomize is AsyncData && asyncCustomize.value != null) {
+        servingsState.value = asyncCustomize.value!.servings.toDouble();
+      }
+      // 依存配列にasyncCustomizeを入れることで、値が変わったときだけ反映
+      return null;
+    }, [asyncCustomize]);
 
     void resetFilters() {
       buttonStates.value = List<bool>.filled(12, false);
@@ -122,7 +125,6 @@ class GenerateScreen extends HookConsumerWidget {
               return ElevatedButton(
                 onPressed: () {
                   final newStates = List<bool>.from(buttonStates.value);
-                  // newStates[index] = (newStates[index] + 2) % 3 - 1;
                   newStates[index] = !newStates[index];
                   buttonStates.value = newStates;
                 },
