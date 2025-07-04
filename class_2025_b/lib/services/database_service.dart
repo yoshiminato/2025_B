@@ -339,6 +339,11 @@ class DatabaseService{
         return Recipe.fromMap(data);
       }).toList();
 
+      // レビューの平均値を計算
+      for(var doc in query.docs){
+        await calreviewaverage(doc.id);
+      }
+
       return recipes;
       
     } 
@@ -463,6 +468,55 @@ class DatabaseService{
         throw Exception('認証エラー: 再ログインしてください');
       }
       return [];
+    }
+  }
+  //レビューの値を計算する
+  Future<void> calreviewaverage(String recipeId) async {
+    double tasteweight = 0.4; // 味の重み
+    double usefulweight = 0.3; // 作りやすさの重み
+    double cospweight = 0.3; // コストパフォーマンスの重み
+    try {
+      // レビューコレクションの取得
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+
+      // レシピIDでレビューを取得
+      final querySnapshot = await reviewsRef.where('recipeId', isEqualTo: recipeId).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        debugPrint("レビューが見つかりません");
+        return;
+      }
+
+      // レビューの平均値を計算
+      double tasteSum = 0;
+      double usefulSum = 0;
+      double costperformanceSum = 0;
+
+      for (var doc in querySnapshot.docs) {
+        final reviewData = doc.data() as Map<String, dynamic>;
+        tasteSum += reviewData['taste'] ?? 0;
+        usefulSum += reviewData['useful'] ?? 0;
+        costperformanceSum += reviewData['costperformance'] ?? 0;
+      }
+
+      int count = querySnapshot.docs.length;
+
+      // 平均値を計算
+      double tasteAve = tasteSum / count;
+      double usefulAve = usefulSum / count;
+      double costperformanceAve = costperformanceSum / count;
+      double reccommend = (tasteAve*tasteweight + usefulAve*usefulweight + costperformanceAve*cospweight) / 3;
+
+      // レシピの更新
+      await FirebaseFirestore.instance.collection(recipeCollectionPath).doc(recipeId).update({
+        'taste_ave': tasteAve,
+        'useful_ave': usefulAve,
+        'costperformance_ave': costperformanceAve,
+        'reccommend': reccommend,
+      });
+
+    } catch (e) {
+      debugPrint("calreviewaverage エラー: ${e.toString()}");
     }
   }
 

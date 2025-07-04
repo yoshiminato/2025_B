@@ -147,6 +147,50 @@ class SearchScreen extends HookConsumerWidget {
                                 }
                               },
                             ),
+                            RadioListTile<SortType>(
+                              title: const Text('味'),
+                              value: SortType.taste,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('作りやすさ'),
+                              value: SortType.useful,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('コスパ'),
+                              value: SortType.costperformance,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                            RadioListTile<SortType>(
+                              title: const Text('おすすめ'),
+                              value: SortType.reccommend,
+                              groupValue: sortType,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  ref.read(sortStateProvider.notifier).state = value;
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ),
