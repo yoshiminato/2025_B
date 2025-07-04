@@ -16,41 +16,30 @@ class ReviewFormWidget extends HookConsumerWidget {
     final tasteRating = useState(review.tasteRating);
     final easeRating  = useState(review.easeRating);
     final costRating  = useState(review.costRating);
+    final uniquenessRating = useState(review.uniquenessRating);
 
     useEffect(() {
       tasteRating.value = review.tasteRating;
       easeRating.value  = review.easeRating;
       costRating.value  = review.costRating;
+      uniquenessRating.value = review.uniquenessRating;
       return null;
     }, [review]);
 
     final user = ref.watch(userProvider);
 
-    final bool isValid = tasteRating.value > 0 && easeRating.value > 0 && costRating.value > 0 && user != null;
-
-    final header = Container(
-      // padding: const EdgeInsets.all(16.0),
-      child: Text(
-        'レビュー',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
+    final bool isValid = tasteRating.value > 0 && easeRating.value > 0 && costRating.value > 0 && uniquenessRating.value > 0 && user != null;
 
     return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      // Center(child: 
-      header,
-      // ),
-      SizedBox(height: 16),
       ReviewRatingRow(label: '味', notifier: tasteRating),
       SizedBox(height: 16),
       ReviewRatingRow(label: '作りやすさ', notifier: easeRating),
       SizedBox(height: 16),
       ReviewRatingRow(label: 'コスパ', notifier: costRating),
+      SizedBox(height: 16),
+      ReviewRatingRow(label: '奇抜さ', notifier: uniquenessRating),
       SizedBox(height: 16),
       isValid ? SizedBox.shrink() :
       Padding(
@@ -67,6 +56,7 @@ class ReviewFormWidget extends HookConsumerWidget {
               tasteRating.value,
               easeRating.value,
               costRating.value,
+              uniquenessRating.value,
               ref
             );
           } : null,
@@ -85,12 +75,31 @@ class ReviewWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    final header = SizedBox(
+      child: Text(
+        'レビュー',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
     final asyncReview = ref.watch(reviewProvider);
 
-    return asyncReview.when(
+    final body = asyncReview.when(
       data: (review) => ReviewFormWidget(review: review),
-      loading: () => ReviewFormWidget(review: Review.empty),
+      loading: () => CircularProgressIndicator(),
       error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        header,
+        SizedBox(height: 16),
+        body,
+      ],
     );
   }
 }

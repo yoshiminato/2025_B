@@ -44,7 +44,7 @@ final reviewProvider = FutureProvider<Review>((ref) async {
   return review;
 });
 
-Future<void> addReview(int tasteRating, int easeRating, int costRating, WidgetRef ref) async {
+Future<void> addReview(int tRating, int eRating, int cRating, int uRating, WidgetRef ref) async {
 
   final user = ref.read(userProvider);
 
@@ -66,9 +66,10 @@ Future<void> addReview(int tasteRating, int easeRating, int costRating, WidgetRe
 
   // reviewインスタンスの作成
   final review = Review(
-    tasteRating: tasteRating,
-    easeRating: easeRating,
-    costRating: costRating,
+    tasteRating: tRating,
+    easeRating: eRating,
+    costRating: cRating,
+    uniquenessRating: uRating,
   );
 
   // レビューをデータベースに追加
