@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
+import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/stock_item_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -37,7 +38,7 @@ class FunctionService {
     debugPrint("FunctionService: basePath = $basePath");
   }
 
-  Future<Recipe?> generateRecipe(Filter filter) async {
+  Future<Recipe?> generateRecipe(Filter filter,List<Review> reviews,List<Recipe> recipes) async {
 
     debugPrint("関数呼び出し: generateRecipe");
 
@@ -107,9 +108,19 @@ class FunctionService {
         '''
         - 使用する食材: ${filter.ingredients.join(', ')}; 
         ''';
+    
+    // 過去レシピ情報を文字列化
+    final recipesInfo = recipes.map((r) =>
+      '- レシピID: ${r.id}\n  材料: ${r.ingredients.keys.join(", ")}\n  説明: ${r.description}'
+    ).join('\n');
+
+    // 過去レビュー情報を文字列化
+    final reviewsInfo = reviews.map((rev) =>
+      '- レシピID: ${rev.recipeId}, 味: ${rev.tasteRating}, 作りやすさ: ${rev.easeRating}, コスパ: ${rev.cospRating}, ユニークさ: ${rev.uniquenessRating}'
+    ).join('\n');
 
     final prompt = '''
-      後で示すレシピの条件に基づいて、斬新なレシピを以下のJSON形式で出力してください
+      後で示すレシピの条件とユーザーの過去のレシピとレビューに基づいて、斬新なレシピを以下のJSON形式で出力してください
       
       レスポンステキストの形式(JSON形式):
       {
@@ -135,6 +146,12 @@ class FunctionService {
       - 何人分: ${filter.servings}
       - アレルギー: ${filter.allergy.join(', ')}
       - 使用可能な調理器具: ${filter.availableTools.join(', ')}
+
+      【ユーザーの過去のレシピ】
+      $recipesInfo
+
+      【ユーザーの過去のレビュー】
+      $reviewsInfo
 
       最後に注意事項をまとめます
       - レシピは日本語で記述してください

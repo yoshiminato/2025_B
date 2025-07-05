@@ -3,12 +3,16 @@ class Review {
   final int easeRating;
   final int cospRating;
   final int uniquenessRating;
+  final String recipeId; // レビュー対象のレシピID
+  final String userId; // レビューを投稿したユーザーID
 
   Review({
     required this.tasteRating,
     required this.easeRating,
     required this.cospRating,
-    required this.uniquenessRating
+    required this.uniquenessRating,
+    this.recipeId = '', // レビュー対象のレシピID
+    this.userId = '', // レビューを投稿したユーザーID
   });
 
   // Firestore保存用Map変換
@@ -30,6 +34,8 @@ class Review {
       easeRating: map['easeRating'] ?? 0,
       cospRating: map['cospRating'] ?? 0,
       uniquenessRating: map['uniquenessRating'] ?? 0,
+      recipeId: map['recipeId'] ?? '', // レビュー対象のレシピID
+      userId: map['userId'] ?? '', // レビューを投稿したユーザーID
     );
   }
 
