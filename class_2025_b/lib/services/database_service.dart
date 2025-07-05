@@ -544,5 +544,29 @@ class DatabaseService{
       throw Exception("レビューの平均値計算に失敗しました: $e");
     }
   }
+  // ユーザーIDをもとにレビューを3件取得するメソッド
+  Future<List<Review>> getReviewsByUserId(String userId) async {
+    try {
+      final reviewsRef = FirebaseFirestore.instance.collection('Review');
+      //直近から3件のレビューを取得
+      final querySnapshot = await reviewsRef.where('userId', isEqualTo: userId).orderBy('createdAt',descending:true).limit(3).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        debugPrint("ユーザーのレビューが見つかりません");
+        return [];
+      }
+
+      List<Review> reviews = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id; // ドキュメントIDを明示的に設定
+        return Review.fromMap(data);
+      }).toList();
+
+      return reviews;
+    } catch (e) {
+      debugPrint("getReviewsByUserId エラー: ${e.toString()}");
+      throw Exception("レビューの取得に失敗しました: $e");
+    }
+  }
 
 }

@@ -12,6 +12,7 @@ import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/widgets/recipe_filter_widget.dart';
 import 'package:class_2025_b/services/kv_service.dart';
+import 'package:class_2025_b/models/review_model.dart';
 
 
 const regenerationLimit = 3;
@@ -230,6 +231,7 @@ class GenerateScreen extends HookConsumerWidget {
 
                     // 生成されたレシピを格納する変数
                     Recipe? recipe;
+                    final dbService = DatabaseService();
 
                     // レシピ生成を試みる
                     try {
@@ -237,10 +239,25 @@ class GenerateScreen extends HookConsumerWidget {
 
                       debugPrint("レシピ生成開始");
 
+                      // レビュー情報を取得
+                      List<Review> reviews = await dbService.getReviewsByUserId(user?.uid ?? "");
+
+                      //レビューに対するレシピIDを取得
+                      List<String> reviews_recipesId = reviews.map((review) => review.recipeId).toList();
+
+                      //レビューに対するレシピ情報を取得
+                      List<Recipe> reviews_recipes = [];
+                      for(String recipeId in reviews_recipesId){
+                        final recipe = await dbService.getRecipeById(recipeId);
+                        if(recipe != null) {
+                          reviews_recipes.add(recipe);
+                        }
+                      }
+
                       while (regenerateCount < regenerationLimit && (recipe == null)) {
                         // レシピ生成関数を呼び出す
                         debugPrint("レシピ生成中: 再生成カウント: ${regenerateCount+1}");
-                        recipe = await functionService.generateRecipe(filter);
+                        recipe = await functionService.generateRecipe(filter,reviews, reviews_recipes);
                         regenerateCount++;
                       }
 
@@ -304,7 +321,7 @@ class GenerateScreen extends HookConsumerWidget {
                     }
 
                     // レシピのDB登録を試みる
-                    final dbService = DatabaseService();
+                
                     try {
                       final String? recipeId = await dbService.addRecipe(recipe);
                       if (recipeId == null) {
