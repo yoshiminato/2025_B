@@ -110,6 +110,8 @@ class SearchScreen extends HookConsumerWidget {
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -121,6 +123,8 @@ class SearchScreen extends HookConsumerWidget {
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -132,6 +136,8 @@ class SearchScreen extends HookConsumerWidget {
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -143,6 +149,8 @@ class SearchScreen extends HookConsumerWidget {
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -154,28 +162,34 @@ class SearchScreen extends HookConsumerWidget {
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
                             ),
                             RadioListTile<SortType>(
                               title: const Text('作りやすさ'),
-                              value: SortType.useful,
+                              value: SortType.ease,
                               groupValue: sortType,
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
                             ),
                             RadioListTile<SortType>(
                               title: const Text('コスパ'),
-                              value: SortType.costperformance,
+                              value: SortType.cosp,
                               groupValue: sortType,
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -187,6 +201,8 @@ class SearchScreen extends HookConsumerWidget {
                               onChanged: (value) {
                                 if (value != null) {
                                   ref.read(sortStateProvider.notifier).state = value;
+                                  final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+                                  searchResultNotifier.updateSearchResult();
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -390,8 +406,8 @@ class SearchResultWidget extends ConsumerWidget {
       onPressed: () {
         // 検索結果をクリア
         ref.read(searchResultNotifierProvider.notifier).clearSearchResult();
-        // 検索テキストをクリア
-        ref.read(searchTextProvider.notifier).state = "";
+        // // 検索テキストをクリア
+        // ref.read(searchTextProvider.notifier).state = "";
         // 検索結果がない状態に戻す
         ref.read(hasSearchResultProvider.notifier).state = false;
       },

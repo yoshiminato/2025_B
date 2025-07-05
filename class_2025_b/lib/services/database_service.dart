@@ -64,9 +64,7 @@ class DatabaseService{
 
     try {
       // テーブルの取得
-
       CollectionReference recipesRef = FirebaseFirestore.instance.collection(recipeCollectionPath);
-
 
       // IDでレシピを取得
       DocumentSnapshot docSnapshot = await recipesRef.doc(recipeId).get();
@@ -138,7 +136,7 @@ class DatabaseService{
 
       //queryをComment型に変形
       List<Comment> comment = query.docs.map((doc){
-        final data = doc.data() as Map<String,dynamic>;
+        final data = doc.data();
         return Comment.fromMap(data);
       }).toList();
 
@@ -314,31 +312,22 @@ class DatabaseService{
       bool isDescending = false; // デフォルトは昇順
       String sortName = "createdAt"; // デフォルトのソートフィールド
 
-      // //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
-      // if(type == SortType.newest){
-      //   isDescending = true;
-      //   sortName = "createdAt";
+      //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
+      if(type == SortType.newest){
+        isDescending = true;
+        sortName = "createdAt";
 
-      // }else if(type == SortType.oldest){
-      //   isDescending = false;
-      //   sortName = "createdAt";
-        
-      // }else{
-      //   isDescending = false;
-      //   sortName = "$type";
-      // }
-      switch (type) {
-        case SortType.newest:
-          isDescending = true;
-          sortName = "createdAt";
-          break;
-        case SortType.oldest:
-          isDescending = false;
-          sortName = "createdAt";
-          break;
-        default:
-          isDescending = false; // デフォルトは昇順
-          sortName = type.toString().split('.').last; // SortTypeの名前を文字列に変換
+      }else if(type == SortType.oldest){
+        isDescending = false;
+        sortName = "createdAt";        
+      }
+      else if(type == SortType.time){
+        isDescending = false;
+        sortName = "time";
+      }
+      else if(type == SortType.cost){
+        isDescending = false;
+        sortName = "cost";
       }
 
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
@@ -350,6 +339,8 @@ class DatabaseService{
 
       final recipes = <Recipe>[];
 
+      debugPrint("取得したレシピ数: ${query.docs.length}");
+
       for(final doc in query.docs) {
         final data = doc.data();
         data['id'] = doc.id;
@@ -359,10 +350,16 @@ class DatabaseService{
         recipe.reviewAverage = await calreviewaverage(doc.id);
         
         recipes.add(recipe);
+      }
 
-        debugPrint("taste: ${recipe.reviewAverage.tasteAve}, "
-                   "ease: ${recipe.reviewAverage.easeAve}, "
-                   "reccommend: ${recipe.reviewAverage.reccommend}");
+      if(type == SortType.taste) {
+        recipes.sort((a, b) => b.reviewAverage.tasteAve.compareTo(a.reviewAverage.tasteAve));
+      } else if(type == SortType.ease) {
+        recipes.sort((a, b) => b.reviewAverage.easeAve.compareTo(a.reviewAverage.easeAve));
+      } else if(type == SortType.cosp) {
+        recipes.sort((a, b) => b.reviewAverage.cospAve.compareTo(a.reviewAverage.cospAve));
+      } else if(type == SortType.reccommend) {
+        recipes.sort((a, b) => b.reviewAverage.reccommend.compareTo(a.reviewAverage.reccommend));
       }
 
       return recipes;

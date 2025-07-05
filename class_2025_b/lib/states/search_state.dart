@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/search_sort_state.dart';
+import 'package:flutter/foundation.dart';
 part 'search_state.g.dart';
 
 // 検索文字列を保持するプロバイダ

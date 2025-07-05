@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/states/review_state.dart';
 import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/user_state.dart';
+import 'package:class_2025_b/states/search_state.dart';
 
 class ReviewFormWidget extends HookConsumerWidget {
   final Review review;
@@ -59,6 +60,11 @@ class ReviewFormWidget extends HookConsumerWidget {
               uniquenessRating.value,
               ref
             );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("レビューを投稿しました")),
+            );
+            final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
+            searchResultNotifier.updateSearchResult();
           } : null,
           child: const Text('レビューを投稿する'),
         )

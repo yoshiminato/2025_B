@@ -6,8 +6,8 @@ enum SortType {
   cost, // 価格順
   time,//調理時間
   taste,//味
-  useful,//作りやすさ
-  costperformance,//コストパフォーマンス
+  ease,//作りやすさ
+  cosp,//コストパフォーマンス
   reccommend//おすすめ
 }
 
