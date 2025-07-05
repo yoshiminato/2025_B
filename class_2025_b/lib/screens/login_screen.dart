@@ -73,9 +73,9 @@ class LoginScreen extends HookConsumerWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
-        fixedSize: const Size(120, 30),
+        fixedSize: const Size(140, 30),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        textStyle: const TextStyle(fontSize: 16),
+        textStyle: const TextStyle(fontSize: 13),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: Text("ログイン"),
@@ -89,12 +89,12 @@ class LoginScreen extends HookConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.orange,
         side: BorderSide(color: Colors.orange, width: 1),
-        fixedSize: const Size(120, 30),
+        fixedSize: const Size(140, 30),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        textStyle: const TextStyle(fontSize: 16),
+        textStyle: const TextStyle(fontSize: 13),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      child: Text("新規登録"),
+      child: Text("新規登録画面へ"),
     );
 
     final guestLoginButton = ElevatedButton(
