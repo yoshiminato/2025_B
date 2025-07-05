@@ -15,13 +15,13 @@ class ReviewFormWidget extends HookConsumerWidget {
 
     final tasteRating = useState(review.tasteRating);
     final easeRating  = useState(review.easeRating);
-    final costRating  = useState(review.costRating);
+    final costRating  = useState(review.cospRating);
     final uniquenessRating = useState(review.uniquenessRating);
 
     useEffect(() {
       tasteRating.value = review.tasteRating;
       easeRating.value  = review.easeRating;
-      costRating.value  = review.costRating;
+      costRating.value  = review.cospRating;
       uniquenessRating.value = review.uniquenessRating;
       return null;
     }, [review]);
