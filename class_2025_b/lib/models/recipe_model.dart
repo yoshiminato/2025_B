@@ -14,10 +14,10 @@ class Recipe{
   List<String> steps;              // 調理手順のリスト {手順: 所要時間}
   String time;                     // 総所要時間
   String cost;                     // 予算（コスト）
+  int servings;                    // 何人前か（例: 2人前）
   DateTime createdAt;              // 作成日時
   String? userId;                  // 作成者のUID
   int reviewCount;                 // レビュー数（初期値は0）
-  int likeCount;                   // いいね数（初期値は0）
   ReviewAverage reviewAverage; // レビューの平均値
 
   Recipe({
@@ -29,10 +29,10 @@ class Recipe{
     required this.steps,
     required this.time,
     required this.cost,
+    this.servings = 1, // デフォルトは1人前
     required this.createdAt,
     this.userId,
     this.reviewCount = 0,
-    this.likeCount = 0,
     ReviewAverage? reviewAverage,
   }) : reviewAverage = reviewAverage ?? ReviewAverage.empty;
 
@@ -53,10 +53,10 @@ class Recipe{
       'steps': steps,
       'time': time,
       'cost': cost,
+      'servings': servings,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'userId': userId,
       'reviewCount': reviewCount,
-      'likeCount': likeCount,
     };
   }  // MapからRecipeオブジェクトを作成（Firestore読み込み用）
   factory Recipe.fromMap(Map<String, dynamic> map) {
@@ -86,10 +86,10 @@ class Recipe{
       steps: List<String>.from(map['steps'] as List),
       time: map['time'] as String,
       cost: map['cost'] as String,
+      servings: map['servings'] as int? ?? 1, // デフォルトは1人前
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
       userId: map['userId'] as String?,
       reviewCount: map['reviewCount'] as int? ?? 0,
-      likeCount: map['likeCount'] as int? ?? 0,
     );
   }
   // RecipeオブジェクトをJSONに変換（API用）?? ユーザの評価履歴をもとにプロンプトするなら使うかも
@@ -108,10 +108,10 @@ class Recipe{
       'steps': steps,
       'time': time,
       'cost': cost,
+      'servings': servings,
       'createdAt': createdAt.toIso8601String(),
       'userId': userId,
       'reviewCount': reviewCount,
-      'likeCount': likeCount,
     };
   }
   // JSONからRecipeオブジェクトを作成（API用）
@@ -142,10 +142,10 @@ class Recipe{
       steps: List<String>.from(json['steps'] as List),
       time: json['time'] as String,
       cost: json['cost'] as String,
+      servings: json['servings'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
       userId: json['userId'] as String?,
       reviewCount: json['reviewCount'] as int? ?? 0,
-      likeCount: json['likeCount'] as int? ?? 0,
     );
   }
 

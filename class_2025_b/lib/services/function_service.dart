@@ -145,54 +145,56 @@ class FunctionService {
 
     debugPrint(prompt);
     
-    // /* 実際にcloud functionを呼び出す場合 */
-    // try{
-    //   // cloud functionに登録した関数の呼び出し
-    //   final requestBody = json.encode({
-    //     "prompt": prompt
-    //   });
+    /* 実際にcloud functionを呼び出す場合 */
+    try{
+      // cloud functionに登録した関数の呼び出し
+      final requestBody = json.encode({
+        "prompt": prompt
+      });
       
-    //   final res = await http.post(
-    //     Uri.parse("$basePath/generateRecipe"),
-    //     headers: {"Content-Type": "application/json"},
-    //     body: requestBody
-    //   );
+      final res = await http.post(
+        Uri.parse("$basePath/generateRecipe"),
+        headers: {"Content-Type": "application/json"},
+        body: requestBody
+      );
       
-    //   if (res.statusCode != 200) {
-    //     debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
-    //     return null;
-    //   }
+      if (res.statusCode != 200) {
+        debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
+        return null;
+      }
       
-    //   if (res.body.isEmpty) {
-    //     debugPrint("Empty response body");
-    //     return null;
-    //   }
+      if (res.body.isEmpty) {
+        debugPrint("Empty response body");
+        return null;
+      }
         
-    //   try {
-    //     final responseJson = json.decode(res.body);
+      try {
+        final responseJson = json.decode(res.body);
         
-    //     // レスポンスの構造をデバッグ出力（画像データを除く）
-    //     final debugResponse = Map<String, dynamic>.from(responseJson);
+        // レスポンスの構造をデバッグ出力（画像データを除く）
+        final debugResponse = Map<String, dynamic>.from(responseJson);
       
-    //     debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
+        debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
         
-    //     // テキストデータ（レシピ情報）の処理
-    //     final Recipe recipe = Recipe.fromJson(responseJson);
+        // テキストデータ（レシピ情報）の処理
+        final Recipe recipe = Recipe.fromJson(responseJson);
 
-    //     debugPrint("正常にデータを返します");
+        debugPrint("正常にデータを返します");
+
+        recipe.servings = filter.servings; // レシピの人数分を設定
         
-    //     return recipe;
-    //   }
-    //   catch (e) {
-    //     debugPrint("Recipe parsing error: $e");
-    //     debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
-    //     return null;
-    //   }
-    // } 
-    // catch (e) {
-    //   debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
-    //   return null;
-    // }
+        return recipe;
+      }
+      catch (e) {
+        debugPrint("Recipe parsing error: $e");
+        debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
+        return null;
+      }
+    } 
+    catch (e) {
+      debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
+      return null;
+    }
   }
 
   Future<String?> generateBase64Image(Recipe recipe) async {

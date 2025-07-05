@@ -5,6 +5,7 @@ import 'package:class_2025_b/widgets/comment_widget.dart';
 import 'package:class_2025_b/widgets/favorite_button_widget.dart';
 import 'package:class_2025_b/widgets/recipe_widget.dart';
 import 'package:class_2025_b/widgets/review_widget.dart';
+import 'package:class_2025_b/widgets/recipe_result_widget.dart';
 
 class RecipeScreen extends ConsumerWidget {
   
@@ -25,7 +26,8 @@ class RecipeScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(30.0),
       child: Column(
         children: [
-          RecipeWidget(),
+          // RecipeWidget(),
+          RecipeResultWidget(),
           const SizedBox(height: 20),
           FavoriteButtonWidget(),
           const SizedBox(height: 20),
