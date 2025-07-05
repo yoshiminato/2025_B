@@ -6,8 +6,8 @@ import 'package:class_2025_b/states/recipe_id_state.dart';
 class RecipeInfo {
   final String title; //レシピタイトル
   final int number; //何人前
-  final String time; //調理時間(分)
-  final String cost; //想定予算
+  final int time; //調理時間(分)
+  final int cost; //想定予算
   RecipeInfo(this.title, this.number, this.time, this.cost);
 }
 
@@ -39,8 +39,8 @@ class RecipeResultWidget extends ConsumerWidget {
         final RecipeInfo rInfo = RecipeInfo(
           recipe.title, 
           recipe.servings, 
-          recipe.time, 
-          recipe.cost
+          int.parse(recipe.time.replaceAll(RegExp(r'[^0-9]'), '')),
+          int.parse(recipe.cost.replaceAll(RegExp(r'[^0-9]'), ''))
         );
 
         final List<RecipeIngredients> rIngredients = recipe.ingredients
@@ -82,7 +82,7 @@ class RecipeResultWidget extends ConsumerWidget {
               ),
             const SizedBox(height: 8),
             Text(
-              '想定予算：${rInfo.cost}\n所要時間：${rInfo.time}',
+              '想定予算：${rInfo.cost}円\n所要時間：${rInfo.time}分',
               style: TextStyle(fontSize: 15),
               textAlign: TextAlign.center,
             ),
