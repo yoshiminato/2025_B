@@ -26,7 +26,6 @@ class RecipeScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(30.0),
       child: Column(
         children: [
-          // RecipeWidget(),
           RecipeResultWidget(),
           const SizedBox(height: 20),
           FavoriteButtonWidget(),

@@ -143,7 +143,7 @@ class FunctionService {
       - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
     ''';    
 
-    debugPrint(prompt);
+    // debugPrint(prompt);
     
     /* 実際にcloud functionを呼び出す場合 */
     try{

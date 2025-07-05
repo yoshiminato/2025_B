@@ -64,8 +64,8 @@ class Recipe{
     
     // 新しい形式（ingredientNames + ingredientAmounts）がある場合
     if (map.containsKey('ingredientNames') && map.containsKey('ingredientAmounts')) {
-      List<String> names = List<String>.from(map['ingredientNames'] as List);
-      List<String> amounts = List<String>.from(map['ingredientAmounts'] as List);
+      List<String> names = List<String>.from((map['ingredientNames'] as List?) ?? []);
+      List<String> amounts = List<String>.from((map['ingredientAmounts'] as List?) ?? []);
       
       // 2つの配列を組み合わせてMapを作成
       for (int i = 0; i < names.length && i < amounts.length; i++) {
@@ -74,22 +74,24 @@ class Recipe{
     } 
     // 従来の形式（ingredients Map）がある場合（後方互換性）
     else if (map.containsKey('ingredients')) {
-      ingredients = Map<String, String>.from(map['ingredients'] as Map);
+      ingredients = Map<String, String>.from((map['ingredients'] as Map?) ?? {});
     }
     
     return Recipe(
       id: map['id'] as String?,
-      title: map['title'] as String,
-      description: map['description'] as String,
+      title: (map['title'] as String?) ?? '',
+      description: (map['description'] as String?) ?? '',
       imageUrl: map['imageUrl'] as String?,
       ingredients: ingredients,
-      steps: List<String>.from(map['steps'] as List),
-      time: map['time'] as String,
-      cost: map['cost'] as String,
-      servings: map['servings'] as int? ?? 1, // デフォルトは1人前
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int),
+      steps: List<String>.from((map['steps'] as List?) ?? []),
+      time: (map['time'] as String?) ?? '',
+      cost: (map['cost'] as String?) ?? '',
+      servings: (map['servings'] as int?) ?? 1, // デフォルトは1人前
+      createdAt: map['createdAt'] != null 
+        ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
+        : DateTime.now(),
       userId: map['userId'] as String?,
-      reviewCount: map['reviewCount'] as int? ?? 0,
+      reviewCount: (map['reviewCount'] as int?) ?? 0,
     );
   }
   // RecipeオブジェクトをJSONに変換（API用）?? ユーザの評価履歴をもとにプロンプトするなら使うかも
@@ -142,7 +144,6 @@ class Recipe{
       steps: List<String>.from(json['steps'] as List),
       time: json['time'] as String,
       cost: json['cost'] as String,
-      servings: json['servings'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
       userId: json['userId'] as String?,
       reviewCount: json['reviewCount'] as int? ?? 0,
