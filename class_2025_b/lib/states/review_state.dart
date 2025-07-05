@@ -68,7 +68,7 @@ Future<void> addReview(int tRating, int eRating, int cRating, int uRating, Widge
   final review = Review(
     tasteRating: tRating,
     easeRating: eRating,
-    costRating: cRating,
+    cospRating: cRating,
     uniquenessRating: uRating,
   );
 

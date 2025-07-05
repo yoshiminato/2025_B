@@ -326,11 +326,11 @@ class CarouselCard extends ConsumerWidget {
       width: imageSize,
       height: imageSize,
       child: recipe.imageUrl != null
-          ? Image.network(recipe.imageUrl!, fit: BoxFit.cover)
-          : Image.asset(
-              "assets/images/noImage.png",
-              fit: BoxFit.cover,
-            ),
+        ? Image.network(recipe.imageUrl!, fit: BoxFit.cover)
+        : Image.asset(
+            "assets/images/noImage.png",
+            fit: BoxFit.cover,
+          ),
     );
 
     final column = Column(
@@ -368,27 +368,6 @@ class CarouselCard extends ConsumerWidget {
         ),
       );
 
-    // return Card(
-      
-    //   child: InkWell(
-    //     onTap: () {
-    //       // レシピの詳細画面に遷移する処理を追加
-    //       final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-    //       recipeIdNotifier.state = recipe.id;
-
-    //       // レシピの詳細画面に遷移
-    //       final contentNotifier = ref.read(currentContentTypeProvider.notifier);
-    //       contentNotifier.state = ContentType.recipe;
-
-    //     },
-    //     child: Padding(
-    //       padding: EdgeInsets.all(5.0),
-    //       child: column,
-        
-    //     ),
-    //   ),
-      
-    // );
   }
 }
 
@@ -445,9 +424,10 @@ class SearchResultWidget extends ConsumerWidget {
                 itemCount: recipes.length,
                 itemBuilder: (context, index) {
                   final recipe = recipes[index];
+                  final double rating = (recipe.reviewAverage.reccommend ?? 0).toDouble();
                   final tile = SizedBox(
                     width: double.infinity,
-                    height: tileImageSize,
+                    height: tileImageSize + 18, // 星表示分高さを少し増やす
                     child: ListTile(
                       leading: recipe.imageUrl != null
                         ? Image.network(recipe.imageUrl!, width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
@@ -458,15 +438,41 @@ class SearchResultWidget extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis, // テキストが長い場合は省略
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
                       ),
-                      subtitle: Text(
-                        recipe.ingredients.keys.join(", "),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 8)
-
-                      ), // 材料をカンマ区切りで表示
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            recipe.ingredients.keys.join(", "),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 8)
+                          ),
+                          const SizedBox(height: 2),
+                          recipe.reviewAverage.reccommend != 0 ?
+                          Row(
+                            children: [
+                              // 星アイコン（小数対応）
+                              for (int i = 1; i <= 5; i++)
+                                rating >= i
+                                  ? const Icon(Icons.star, color: Colors.amber, size: 14)
+                                  : (rating >= i - 0.5
+                                      ? const Icon(Icons.star_half, color: Colors.amber, size: 14)
+                                      : const Icon(Icons.star_border, color: Colors.amber, size: 14)),
+                              const SizedBox(width: 4),
+                              Text(
+                                rating.toStringAsFixed(1),
+                                style: const TextStyle(fontSize: 10, color: Colors.black54),
+                              ),
+                            ],
+                          )
+                          :
+                          const Text(
+                            "レビューなし",
+                            style: TextStyle(fontSize: 10, color: Colors.black54),
+                          ),
+                        ],
+                      ),
                       onTap: () {
-                      
                         // レシピの詳細画面に遷移する処理を追加
                         // レシピIDを状態管理に保存
                         final recipeIdNotifier = ref.read(recipeIdProvider.notifier);

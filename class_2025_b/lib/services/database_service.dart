@@ -308,40 +308,61 @@ class DatabaseService{
       for (var keyword in keywordsList) {
         debugPrint("キーワード: $keyword");
       }
+      
 
       // 新しい構造のingredientNamesフィールドで検索
-      bool sort_tmp = false; // デフォルトは昇順
-      String sort_name = "createdAt"; // デフォルトのソートフィールド
+      bool isDescending = false; // デフォルトは昇順
+      String sortName = "createdAt"; // デフォルトのソートフィールド
 
-      //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
-      if(type == SortType.newest){
-        sort_tmp = true;
-        sort_name = "createdAt";
+      // //typeがnewestの場合はcreatedAtで降順、oldestの場合はcreatedAtで昇順、それ以外はtypeの値をそのまま使用して昇順
+      // if(type == SortType.newest){
+      //   isDescending = true;
+      //   sortName = "createdAt";
 
-      }else if(type == SortType.oldest){
-        sort_tmp = false;
-        sort_name = "createdAt";
+      // }else if(type == SortType.oldest){
+      //   isDescending = false;
+      //   sortName = "createdAt";
         
-      }else{
-        sort_tmp = false;
-        sort_name = "$type";
+      // }else{
+      //   isDescending = false;
+      //   sortName = "$type";
+      // }
+      switch (type) {
+        case SortType.newest:
+          isDescending = true;
+          sortName = "createdAt";
+          break;
+        case SortType.oldest:
+          isDescending = false;
+          sortName = "createdAt";
+          break;
+        default:
+          isDescending = false; // デフォルトは昇順
+          sortName = type.toString().split('.').last; // SortTypeの名前を文字列に変換
       }
 
       final recipesRef = FirebaseFirestore.instance.collection('recipes');
-      final query = await recipesRef.where('ingredientNames', arrayContainsAny: keywordsList).orderBy(sort_name, descending: sort_tmp).get();
 
-      List<Recipe> recipes = query.docs.map((doc) {
+      final query = await recipesRef
+        .where('ingredientNames', arrayContainsAny: keywordsList)
+        .orderBy(sortName, descending: isDescending)
+        .get();
+
+      final recipes = <Recipe>[];
+
+      for(final doc in query.docs) {
         final data = doc.data();
-        
-        // FirestoreのドキュメントIDを明示的に設定
         data['id'] = doc.id;
-        
-        return Recipe.fromMap(data);
-      }).toList();
+        final Recipe recipe = Recipe.fromMap(data);
 
-      // レビューの平均値を計算
-      for(var doc in query.docs){
-        await calreviewaverage(doc.id);
+        // レビューの平均値を計算してセット
+        recipe.reviewAverage = await calreviewaverage(doc.id);
+        
+        recipes.add(recipe);
+
+        debugPrint("taste: ${recipe.reviewAverage.tasteAve}, "
+                   "ease: ${recipe.reviewAverage.easeAve}, "
+                   "reccommend: ${recipe.reviewAverage.reccommend}");
       }
 
       return recipes;
@@ -471,9 +492,9 @@ class DatabaseService{
     }
   }
   //レビューの値を計算する
-  Future<void> calreviewaverage(String recipeId) async {
+  Future<ReviewAverage> calreviewaverage(String recipeId) async {
     double tasteweight = 0.4; // 味の重み
-    double usefulweight = 0.3; // 作りやすさの重み
+    double easeweight = 0.3; // 作りやすさの重み
     double cospweight = 0.3; // コストパフォーマンスの重み
     try {
       // レビューコレクションの取得
@@ -484,39 +505,46 @@ class DatabaseService{
 
       if (querySnapshot.docs.isEmpty) {
         debugPrint("レビューが見つかりません");
-        return;
+        return ReviewAverage.empty;
       }
 
       // レビューの平均値を計算
       double tasteSum = 0;
-      double usefulSum = 0;
-      double costperformanceSum = 0;
+      double easeSum = 0;
+      double cospSum = 0;
+      double uniquenessSum = 0; 
 
       for (var doc in querySnapshot.docs) {
-        final reviewData = doc.data() as Map<String, dynamic>;
-        tasteSum += reviewData['taste'] ?? 0;
-        usefulSum += reviewData['useful'] ?? 0;
-        costperformanceSum += reviewData['costperformance'] ?? 0;
+
+        final reviewData = doc.data();
+        tasteSum += reviewData['tasteRating'] ?? 0;
+        easeSum += reviewData['easeRating'] ?? 0;
+        cospSum += reviewData['cospRating'] ?? 0;
+        uniquenessSum += reviewData['uniquenessRating'] ?? 0; // ユニークさの合計を追加
       }
 
       int count = querySnapshot.docs.length;
 
       // 平均値を計算
       double tasteAve = tasteSum / count;
-      double usefulAve = usefulSum / count;
-      double costperformanceAve = costperformanceSum / count;
-      double reccommend = (tasteAve*tasteweight + usefulAve*usefulweight + costperformanceAve*cospweight) / 3;
+      double easeAve = easeSum / count;
+      double cospAve = cospSum / count;
+      double uniquenessAve = uniquenessSum / count; // ユニークさの平均を追加
+      double reccommend = (tasteAve*tasteweight + easeAve*easeweight + cospAve*cospweight);
 
-      // レシピの更新
-      await FirebaseFirestore.instance.collection(recipeCollectionPath).doc(recipeId).update({
-        'taste_ave': tasteAve,
-        'useful_ave': usefulAve,
-        'costperformance_ave': costperformanceAve,
-        'reccommend': reccommend,
-      });
+      final result = ReviewAverage(
+        tasteAve: tasteAve,
+        easeAve: easeAve,
+        cospAve: cospAve,
+        uniquenessAve: uniquenessAve, // ユニークさの平均を追加
+        reccommend: reccommend,
+      );
+
+      return result;
 
     } catch (e) {
       debugPrint("calreviewaverage エラー: ${e.toString()}");
+      throw Exception("レビューの平均値計算に失敗しました: $e");
     }
   }
 
