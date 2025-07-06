@@ -243,22 +243,32 @@ class GenerateScreen extends HookConsumerWidget {
                       List<Review> reviews = await dbService.getReviewsByUserId(user?.uid ?? "");
 
                       //レビューに対するレシピIDを取得
-                      List<String> reviews_recipesId = reviews.map((review) => review.recipeId).toList();
+                      List<String> reviewsRecipesId = reviews.map((review) => review.recipeId).toList();
 
                       //レビューに対するレシピ情報を取得
-                      List<Recipe> reviews_recipes = [];
-                      for(String recipeId in reviews_recipesId){
+                      List<Recipe> reviewsRecipes = [];
+                      for(String recipeId in reviewsRecipesId){
                         final recipe = await dbService.getRecipeById(recipeId);
                         if(recipe != null) {
-                          reviews_recipes.add(recipe);
+                          reviewsRecipes.add(recipe);
                         }
                       }
 
                       while (regenerateCount < regenerationLimit && (recipe == null)) {
                         // レシピ生成関数を呼び出す
+                        try{
+
                         debugPrint("レシピ生成中: 再生成カウント: ${regenerateCount+1}");
-                        recipe = await functionService.generateRecipe(filter,reviews, reviews_recipes);
+                        recipe = await functionService.generateRecipe(filter, reviews, reviewsRecipes);
                         regenerateCount++;
+                        }
+                        catch (e) {
+                          debugPrint("レシピ生成に失敗: $e");
+                          regenerateCount++;
+                          if (regenerateCount >= regenerationLimit) {
+                            throw Exception("レシピ生成に失敗しました: $e");
+                          }
+                        }
                       }
 
                       debugPrint("レシピ生成完了: ${recipe.toString()}");

@@ -546,6 +546,8 @@ class DatabaseService{
   }
   // ユーザーIDをもとにレビューを3件取得するメソッド
   Future<List<Review>> getReviewsByUserId(String userId) async {
+
+    debugPrint("getReviewsByUserId: ユーザーID: $userId");
     try {
       final reviewsRef = FirebaseFirestore.instance.collection('Review');
       //直近から3件のレビューを取得

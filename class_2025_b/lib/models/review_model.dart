@@ -24,6 +24,7 @@ class Review {
       'easeRating': easeRating,
       'cospRating': cospRating,
       'uniquenessRating': uniquenessRating, // 追加: ユニークさの評価
+      'createdAt': DateTime.now().millisecondsSinceEpoch, // 作成日時を追加
     };
   }
 

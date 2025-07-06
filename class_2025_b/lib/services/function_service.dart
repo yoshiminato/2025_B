@@ -95,13 +95,23 @@ class FunctionService {
     getBaseURL();
 
     final items = await getStockItems();
+    
+    // 食糧庫データのデバッグ出力
+    debugPrint("Stock items count: ${items.length}");
+    for (int i = 0; i < items.length; i++) {
+      debugPrint("Item $i: name=${items[i].name}, count=${items[i].count}, expiry=${items[i].expiry}");
+    }
 
     final ingredientsConditionString = filter.usePantryOnly
         ? 
         '''
         - 使用してよい食材情報(ここに記述する食材以外を使用するレシピは生成しないでください): 
         ${items.map((item) {
-          return '${item.name}（${item.count}個、賞味期限: ${item.expiry}）';
+          // null安全で特殊文字もエスケープした文字列生成
+          final name = (item.name ?? '不明な食材').replaceAll('"', '\\"').replaceAll('\n', ' ').replaceAll('\r', ' ');
+          final count = item.count ?? "不明"; // countがnullの場合のデフォルト値
+          final expiry = (item.expiry ?? '不明').replaceAll('"', '\\"').replaceAll('\n', ' ').replaceAll('\r', ' ');
+          return '$name（$count個、賞味期限: $expiry）';
         }).join(', ')}; 
         ''' // 食糧庫の食材を取得
         : 
@@ -109,15 +119,29 @@ class FunctionService {
         - 使用する食材: ${filter.ingredients.join(', ')}; 
         ''';
     
-    // 過去レシピ情報を文字列化
-    final recipesInfo = recipes.map((r) =>
-      '- レシピID: ${r.id}\n  材料: ${r.ingredients.keys.join(", ")}\n  説明: ${r.description}'
-    ).join('\n');
+    debugPrint("Ingredients condition string: $ingredientsConditionString");
 
-    // 過去レビュー情報を文字列化
-    final reviewsInfo = reviews.map((rev) =>
-      '- レシピID: ${rev.recipeId}, 味: ${rev.tasteRating}, 作りやすさ: ${rev.easeRating}, コスパ: ${rev.cospRating}, ユニークさ: ${rev.uniquenessRating}'
-    ).join('\n');
+    final reviewHistoryInfo = reviews.isNotEmpty
+        ? '''
+        - 過去のレビュー履歴: 
+        ${reviews.asMap().entries.map((entry) {
+          final index = entry.key;
+          final rev = entry.value;
+          final rec = recipes[index];
+          final title = "$indexつ目のレビュー\n";
+          final recipeString = 
+          '''
+          レシピタイトル: ${rec.title}, 説明: ${rec.description}, 材料: ${rec.ingredients.keys.join(", ")}, 手順: ${rec.steps.join(", ")}\n          
+          ''';
+          final reviewString = 
+          '''
+          味: ${rev.tasteRating}, 作りやすさ: ${rev.easeRating}, コスパ: ${rev.cospRating}, ユニークさ: ${rev.uniquenessRating}
+          ''';
+          return title + recipeString + reviewString;
+        }).join('\n')}
+        '''
+        : '';
+
 
     final prompt = '''
       後で示すレシピの条件とユーザーの過去のレシピとレビューに基づいて、斬新なレシピを以下のJSON形式で出力してください
@@ -147,11 +171,7 @@ class FunctionService {
       - アレルギー: ${filter.allergy.join(', ')}
       - 使用可能な調理器具: ${filter.availableTools.join(', ')}
 
-      【ユーザーの過去のレシピ】
-      $recipesInfo
-
-      【ユーザーの過去のレビュー】
-      $reviewsInfo
+      $reviewHistoryInfo
 
       最後に注意事項をまとめます
       - レシピは日本語で記述してください
@@ -161,7 +181,9 @@ class FunctionService {
       - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
     ''';    
 
-    // debugPrint(prompt);
+    debugPrint("=== Generated Prompt ===");
+    debugPrint(prompt);
+    debugPrint("=== End Prompt ===");
     
     /* 実際にcloud functionを呼び出す場合 */
     try{
@@ -170,11 +192,23 @@ class FunctionService {
         "prompt": prompt
       });
       
+      debugPrint("=== Request Body ===");
+      debugPrint("Request body length: ${requestBody.length}");
+      debugPrint("Request body (first 500 chars): ${requestBody.substring(0, requestBody.length > 500 ? 500 : requestBody.length)}");
+      debugPrint("=== End Request Body ===");
+      
       final res = await http.post(
         Uri.parse("$basePath/generateRecipe"),
         headers: {"Content-Type": "application/json"},
         body: requestBody
       );
+      
+      debugPrint("=== HTTP Response ===");
+      debugPrint("Status Code: ${res.statusCode}");
+      debugPrint("Response Headers: ${res.headers}");
+      debugPrint("Response Body Length: ${res.body.length}");
+      debugPrint("Response Body (first 1000 chars): ${res.body.substring(0, res.body.length > 1000 ? 1000 : res.body.length)}");
+      debugPrint("=== End HTTP Response ===");
       
       if (res.statusCode != 200) {
         debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
@@ -187,30 +221,53 @@ class FunctionService {
       }
         
       try {
+        debugPrint("Attempting to decode JSON response...");
         final responseJson = json.decode(res.body);
         
         // レスポンスの構造をデバッグ出力（画像データを除く）
         final debugResponse = Map<String, dynamic>.from(responseJson);
-      
+        
+        debugPrint("JSON decode successful");
+        debugPrint("Response type: ${responseJson.runtimeType}");
+        debugPrint("Response keys: ${responseJson is Map ? responseJson.keys.toList() : 'Not a Map'}");
         debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
         
         // テキストデータ（レシピ情報）の処理
+        debugPrint("Attempting to create Recipe from JSON...");
         final Recipe recipe = Recipe.fromJson(responseJson);
 
+        debugPrint("Recipe creation successful");
         debugPrint("正常にデータを返します");
 
         recipe.servings = filter.servings; // レシピの人数分を設定
         
         return recipe;
       }
-      catch (e) {
+      catch (e, stackTrace) {
+        debugPrint("=== Recipe Parsing Error ===");
+        debugPrint("Error Type: ${e.runtimeType}");
         debugPrint("Recipe parsing error: $e");
-        debugPrint("Response body was: ${res.body.substring(0, res.body.length > 300 ? 300 : res.body.length)}");
+        debugPrint("Stack trace: $stackTrace");
+        debugPrint("Response body (full): ${res.body}");
+        debugPrint("Response body length: ${res.body.length}");
+        // レスポンスが有効なJSONかどうかチェック
+        try {
+          final testJson = json.decode(res.body);
+          debugPrint("Response is valid JSON. Type: ${testJson.runtimeType}");
+          debugPrint("JSON content: $testJson");
+        } catch (jsonError) {
+          debugPrint("Response is NOT valid JSON: $jsonError");
+        }
+        debugPrint("=== End Recipe Parsing Error ===");
         return null;
       }
     } 
-    catch (e) {
-      debugPrint("Response body was: ${e.toString().substring(0, e.toString().length > 300 ? 300 : e.toString().length)}");
+    catch (e, stackTrace) {
+      debugPrint("=== HTTP Request Error ===");
+      debugPrint("Error Type: ${e.runtimeType}");
+      debugPrint("HTTP request error: $e");
+      debugPrint("Stack trace: $stackTrace");
+      debugPrint("=== End HTTP Request Error ===");
       return null;
     }
   }
