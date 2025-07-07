@@ -149,7 +149,7 @@ export const generateRecipe = onRequest(async (request, response) => {
     // Flutter側のRecipeモデルで必要なフィールドを追加
     recipeJson.createdAt = new Date().toISOString();
     recipeJson.reviwewCount = 0;
-    recipeJson.likeCount = 0;
+    recipeJson.servings = recipeJson.servings || 1; // 分量を追加（デフォルト値は1）
 
     response.status(200).json(recipeJson);
     
