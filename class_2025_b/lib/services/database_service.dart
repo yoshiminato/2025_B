@@ -90,7 +90,7 @@ class DatabaseService{
     debugPrint("getComments");
 
     try{
-      final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).get();
+      final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).orderBy('timestamp', descending: true).get();
 
       //queryをComment型に変形
       List<Comment> comment = query.docs.map((doc){
