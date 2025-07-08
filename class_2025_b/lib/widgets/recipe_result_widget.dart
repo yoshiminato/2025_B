@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:class_2025_b/global.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 
@@ -75,7 +76,7 @@ class RecipeResultWidget extends ConsumerWidget {
                   fit: BoxFit.cover, 
                   width: double.infinity):
                 Image.network(
-                  recipe.imageUrl!,
+                  fixEmulatorUrlForWeb(recipe.imageUrl!),
                   fit: BoxFit.cover,
                   width: double.infinity, // 横幅いっぱいに広げる
                 )

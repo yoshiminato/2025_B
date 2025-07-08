@@ -7,11 +7,12 @@ class FavoriteRecipeIdNotifier extends _$FavoriteRecipeIdNotifier {
   @override
   Future<List<String>> build() async {
     final kvService = KVService();
+    // キータイプからお気に入りレシピIDのリストを取得
     return kvService.getValuesFromKeyType(KeyType.favoriteRecipeId);
   }
 
   // レシピIDを設定するメソッド
-  Future<void> addValueForKeyType(String recipeId) async {
+  Future<void> addRecipeId(String recipeId) async {
     final kvService = KVService();
     await kvService.addValueForKeyType(KeyType.favoriteRecipeId, recipeId);
     final List<String> favoriteRecipeIds = await kvService.getValuesFromKeyType(KeyType.favoriteRecipeId);
@@ -19,7 +20,7 @@ class FavoriteRecipeIdNotifier extends _$FavoriteRecipeIdNotifier {
   }
 
   // レシピIDを消去するメソッド
-  Future<void> removeValueFromKeyType(String recipeId) async {
+  Future<void> removeRecipeId(String recipeId) async {
     final kvService = KVService();
     await kvService.removeValueFromKeyType(KeyType.favoriteRecipeId, recipeId);
     final List<String> favoriteRecipeIds = await kvService.getValuesFromKeyType(KeyType.favoriteRecipeId);

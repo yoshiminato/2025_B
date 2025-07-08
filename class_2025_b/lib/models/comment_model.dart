@@ -1,7 +1,7 @@
 class Comment{
   final String? id;
   final String recipeId;
-  final String userId;
+  final String? userId;
   final String content;
   final DateTime timestamp;
   final String? imageUrl;

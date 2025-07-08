@@ -7,7 +7,7 @@ part of 'favorite_recipe_id_state.dart';
 // **************************************************************************
 
 String _$favoriteRecipeIdNotifierHash() =>
-    r'54789425d6e6f8b2275582a564c6cf29d89167e1';
+    r'545ff4d10a7c43030abdb0298f2345102b7686ed';
 
 /// See also [FavoriteRecipeIdNotifier].
 @ProviderFor(FavoriteRecipeIdNotifier)

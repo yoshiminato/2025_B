@@ -8,7 +8,7 @@ import 'package:class_2025_b/models/recipe_model.dart';
 
 final favoriteRecipesProvider = FutureProvider<List<Recipe>>((ref)  async{
 
-  final contentType = ref.watch(currentContentTypeProvider);
+  final contentType = ref.watch(homeContentTypeProvider);
 
   // 検索画面以外ではﾚｼﾋﾟの取得は行わない
   if (contentType != ContentType.search) {

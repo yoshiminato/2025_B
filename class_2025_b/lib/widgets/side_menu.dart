@@ -36,18 +36,14 @@ class SideMenuWidget extends ConsumerWidget {
           try{
             debugPrint("ログアウト処理を開始");
             await authService.signOut();
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("ログアウトしました"))
-            );
+            if(!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログアウトしました")));
           }catch(e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("ログアウトに失敗しました: $e"))
-            );
+            if(!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログアウトに失敗しました: $e")));
           }
         } :
-        () => ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("ログインしていません"))
-              ),  
+        () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログインしていません"))),  
     );
 
     final customizeTile = ListTile(

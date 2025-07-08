@@ -22,7 +22,7 @@ class FavoriteButtonWidget extends ConsumerWidget {
 
     // 取得した状態からこのレシピがいいねされいるかを取得 true/false
     final isFavorite = favoriteRecipeIds.when(
-      data: (ids) => ids?.contains(recipeId) ?? false,
+      data: (ids) => ids.contains(recipeId),
       loading: () => false,
       error: (error, stack) {
         debugPrint("FavoriteButtonWidget: いいね状態の取得に失敗: $error");
@@ -30,6 +30,7 @@ class FavoriteButtonWidget extends ConsumerWidget {
       },
     );
 
+    // ヘッダー定義
     final header = SizedBox(
       child: const Text(
         'お気に入り',
@@ -40,6 +41,7 @@ class FavoriteButtonWidget extends ConsumerWidget {
       ),
     );
 
+    // いいねボタンのウィジェットを定義
     final favoriteButton = IconButton(
       icon: Icon(
         Icons.favorite,
@@ -47,11 +49,7 @@ class FavoriteButtonWidget extends ConsumerWidget {
       ),
       onPressed: () {
         final notifier = ref.read(favoriteRecipeIdNotifierProvider.notifier);
-        if (isFavorite) {
-          notifier.removeValueFromKeyType(recipeId);
-        } else {
-          notifier.addValueForKeyType(recipeId);
-        }
+        isFavorite ? notifier.removeRecipeId(recipeId) : notifier.addRecipeId(recipeId);
       },
     );
 

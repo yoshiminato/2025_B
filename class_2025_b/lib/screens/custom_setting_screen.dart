@@ -1,6 +1,4 @@
 import 'package:class_2025_b/routers/router.dart';
-import 'package:class_2025_b/screens/ingredients_screen.dart';
-import 'package:class_2025_b/services/kv_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/states/custom_state.dart';
@@ -20,59 +18,49 @@ class CustomSettingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    // カスタマイズ設定の状態とNotifierを取得
     final model = ref.watch(customizeNotifierProvider);
     final notifier = ref.read(customizeNotifierProvider.notifier);
 
     final body = model.when(
       data: (data) {
         return SingleChildScrollView(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // 分量
-                const SizedBox(height: 24),
-                const Text("分量", style: TextStyle(fontWeight: FontWeight.bold)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    DropdownButton<int>(
-                      value: data.servings,
-                      items: [
-                        for (var i = 1; i <= 10; i++)
-                          DropdownMenuItem(value: i, child: Text("$i"))
-                      ],
-                      onChanged: (value) {
-                        if (value != null) notifier.setServings(value);
-                      },
-                    ),
-                    const Text("人前"),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // アレルギー
-                SelectableButtonList(
-                  title: "主要アレルギー（8品目）", 
-                  items: majorAllergys,
-                  selectedItems: data.allergys,
-                  onTap: notifier.toggleAllergy,
-                ),
-                const SizedBox(height: 24),
-                // 調理器具
-                SelectableButtonList(
-                  title: "使用可能な調理器具", 
-                  items: majorTools,
-                  selectedItems: data.availableTools,
-                  onTap: notifier.toggleTool,
-                ), 
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: () => notifier.saveSettings(),
-                  child: const Text("設定を保存"),
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 分量
+              const SizedBox(height: 24),
+              IntDropDownWidget(
+                title: "分量",
+                value: data.servings,
+                rangeMin: 1,
+                rangeMax: 10,
+                measurementUnit: "人前",
+                onChanged: notifier.setServings,
+              ),
+              const SizedBox(height: 24),
+              // アレルギー
+              SelectableButtonList(
+                title: "主要アレルギー（8品目）", 
+                items: majorAllergys,
+                selectedItems: data.allergys,
+                onTap: notifier.toggleAllergy,
+              ),
+              const SizedBox(height: 24),
+              // 調理器具
+              SelectableButtonList(
+                title: "使用可能な調理器具", 
+                items: majorTools,
+                selectedItems: data.availableTools,
+                onTap: notifier.toggleTool,
+              ), 
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () => notifier.saveSettings(),
+                child: const Text("設定を保存"),
+              ),
+            ],
           ),
         );
       },
@@ -93,6 +81,55 @@ class CustomSettingScreen extends ConsumerWidget {
   }
 }
 
+// int数値のドロップダウンウィジェット
+class IntDropDownWidget extends ConsumerWidget {
+
+  final String title;
+  final int value;
+  final int rangeMin;
+  final int rangeMax;
+  final String measurementUnit; // 単位
+  final void Function(int) onChanged;
+
+  const IntDropDownWidget({
+    super.key, 
+    required this.title, 
+    required this.value,
+    this.rangeMin = 1, // デフォルトは1
+    this.rangeMax = 10, // デフォルトは10
+    this.measurementUnit = "", // デフォルトは空文字
+    required this.onChanged
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text("分量", style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            DropdownButton<int>(
+              value: value,
+              items: [
+                for (var i = rangeMin; i <= rangeMax; i++)
+                  DropdownMenuItem(value: i, child: Text("$i"))
+              ],
+              onChanged: (value) {
+                if (value != null) onChanged(value);
+              },
+            ),
+            Text(measurementUnit.toString()),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+
+// 選択可能なボタンリストウィジェット
 class SelectableButtonList extends ConsumerWidget {
 
   final String title;

@@ -14,8 +14,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     
-    final content = ref.watch(currentContentTypeProvider);
-    final contentNotifier = ref.read(currentContentTypeProvider.notifier);
+    final content = ref.watch(homeContentTypeProvider);
+    final contentNotifier = ref.read(homeContentTypeProvider.notifier);
 
     final drawer = Drawer(
       backgroundColor: Colors.grey[200] ,
@@ -29,6 +29,7 @@ class HomeScreen extends ConsumerWidget {
       IngredientsScreen()
     ];
 
+    // BottomNavigationBarのアイテムを定義(アイコンとラベル)
     final generateItem = BottomNavigationBarItem(
       icon: const Icon(Icons.add, color: Colors.grey),
       label: "generate",
@@ -64,6 +65,7 @@ class HomeScreen extends ConsumerWidget {
           recipeItem,
           ingredientsItem
         ],
+        // ButtonNavigationBarのスタイル
         selectedItemColor: Colors.grey[500],
         unselectedItemColor: Colors.grey[100],
         selectedLabelStyle: TextStyle(color: Colors.grey[500]), // ラベルのスタイル

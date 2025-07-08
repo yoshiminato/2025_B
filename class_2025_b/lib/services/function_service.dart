@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'dart:convert';
+import 'package:class_2025_b/global.dart';
 import 'package:class_2025_b/models/filter_model.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
@@ -18,22 +19,9 @@ class FunctionService {
 
     debugPrint("FunctionService: getBaseURL()");
 
-    if (kIsWeb) {
+    basePath = "http://10.0.2.2:5001/recipe-ai-175b2/us-central1";
 
-      // Web(開発環境)の場合: localhost
-      basePath = "http://localhost:5001/recipe-ai-175b2/us-central1";
-
-      // Web(本番環境)の場合: 以下をコメントアウト解除
-      // basePath = "https://us-central1-recipe-ai-175b2.cloudfunctions.net";
-    } 
-    else if( Platform.isAndroid ){
-      // Android エミュレータの場合: 10.0.2.2 を使用
-      basePath = "http://10.0.2.2:5001/recipe-ai-175b2/us-central1";
-    }
-    else {
-      // iOS シミュレータやその他の場合: localhost
-      basePath = "http://localhost:5001/recipe-ai-175b2/us-central1";
-    }
+    basePath = fixEmulatorUrlForWeb(basePath);
 
     debugPrint("FunctionService: basePath = $basePath");
   }
@@ -94,14 +82,10 @@ class FunctionService {
 
     getBaseURL();
 
+    // 食糧庫の食材を取得
     final items = await getStockItems();
     
-    // 食糧庫データのデバッグ出力
-    debugPrint("Stock items count: ${items.length}");
-    for (int i = 0; i < items.length; i++) {
-      debugPrint("Item $i: name=${items[i].name}, count=${items[i].count}, expiry=${items[i].expiry}");
-    }
-
+    // 食材の条件に関するプロンプト部分
     final ingredientsConditionString = filter.usePantryOnly
         ? 
         '''
@@ -118,9 +102,8 @@ class FunctionService {
         '''
         - 使用する食材: ${filter.ingredients.join(', ')}; 
         ''';
-    
-    debugPrint("Ingredients condition string: $ingredientsConditionString");
 
+    // レビュー履歴に関するプロンプト部分
     final reviewHistoryInfo = reviews.isNotEmpty
         ? '''
         - 過去のレビュー履歴: 
@@ -142,10 +125,9 @@ class FunctionService {
         '''
         : '';
 
-
+    // レシピ生成のプロンプトを作成
     final prompt = '''
       後で示すレシピの条件とユーザーの過去のレシピとレビューに基づいて、斬新なレシピを以下のJSON形式で出力してください
-      
       レスポンステキストの形式(JSON形式):
       {
         "title": "レシピのタイトル",
@@ -161,7 +143,6 @@ class FunctionService {
         "time": "調理時間（分）",
         "cost": "予算（円）"
       }
-
       条件:
       $ingredientsConditionString
       - 属性: ${filter.attributes.join(', ')}
@@ -170,9 +151,7 @@ class FunctionService {
       - 何人分: ${filter.servings}
       - アレルギー: ${filter.allergy.join(', ')}
       - 使用可能な調理器具: ${filter.availableTools.join(', ')}
-
       $reviewHistoryInfo
-
       最後に注意事項をまとめます
       - レシピは日本語で記述してください
       - レシピは必ず上に示した通りのJSON形式で出力してください
@@ -180,85 +159,53 @@ class FunctionService {
       - 調理手順の文字列に手順番号は含めないでください
       - 調理時間や予算には単位も含めて出力してください, ただし予算の単位は円としてください
     ''';    
-
-    debugPrint("=== Generated Prompt ===");
-    debugPrint(prompt);
-    debugPrint("=== End Prompt ===");
     
     /* 実際にcloud functionを呼び出す場合 */
     try{
-      // cloud functionに登録した関数の呼び出し
+      // cloud functionに渡すjsonの作成
       final requestBody = json.encode({
         "prompt": prompt
       });
-      
-      debugPrint("=== Request Body ===");
-      debugPrint("Request body length: ${requestBody.length}");
-      debugPrint("Request body (first 500 chars): ${requestBody.substring(0, requestBody.length > 500 ? 500 : requestBody.length)}");
-      debugPrint("=== End Request Body ===");
-      
+      // リクエスト送信
       final res = await http.post(
         Uri.parse("$basePath/generateRecipe"),
         headers: {"Content-Type": "application/json"},
         body: requestBody
       );
-      
-      debugPrint("=== HTTP Response ===");
-      debugPrint("Status Code: ${res.statusCode}");
-      debugPrint("Response Headers: ${res.headers}");
-      debugPrint("Response Body Length: ${res.body.length}");
-      debugPrint("Response Body (first 1000 chars): ${res.body.substring(0, res.body.length > 1000 ? 1000 : res.body.length)}");
-      debugPrint("=== End HTTP Response ===");
-      
+      // 通信エラー
       if (res.statusCode != 200) {
         debugPrint("HTTP Error ${res.statusCode}: ${res.body}");
         return null;
       }
-      
+      // レスポンスが空の場合
       if (res.body.isEmpty) {
         debugPrint("Empty response body");
         return null;
       }
         
       try {
-        debugPrint("Attempting to decode JSON response...");
         final responseJson = json.decode(res.body);
         
         // レスポンスの構造をデバッグ出力（画像データを除く）
         final debugResponse = Map<String, dynamic>.from(responseJson);
         
-        debugPrint("JSON decode successful");
-        debugPrint("Response type: ${responseJson.runtimeType}");
-        debugPrint("Response keys: ${responseJson is Map ? responseJson.keys.toList() : 'Not a Map'}");
         debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
         
         // テキストデータ（レシピ情報）の処理
-        debugPrint("Attempting to create Recipe from JSON...");
         final Recipe recipe = Recipe.fromJson(responseJson);
-
-        debugPrint("Recipe creation successful");
-        debugPrint("正常にデータを返します");
 
         recipe.servings = filter.servings; // レシピの人数分を設定
         
         return recipe;
       }
-      catch (e, stackTrace) {
-        debugPrint("=== Recipe Parsing Error ===");
-        debugPrint("Error Type: ${e.runtimeType}");
-        debugPrint("Recipe parsing error: $e");
-        debugPrint("Stack trace: $stackTrace");
-        debugPrint("Response body (full): ${res.body}");
-        debugPrint("Response body length: ${res.body.length}");
+      catch (e) {
         // レスポンスが有効なJSONかどうかチェック
         try {
           final testJson = json.decode(res.body);
-          debugPrint("Response is valid JSON. Type: ${testJson.runtimeType}");
           debugPrint("JSON content: $testJson");
         } catch (jsonError) {
           debugPrint("Response is NOT valid JSON: $jsonError");
         }
-        debugPrint("=== End Recipe Parsing Error ===");
         return null;
       }
     } 
@@ -313,19 +260,9 @@ class FunctionService {
     }
 
     try {
-      debugPrint("getBase64Image: Response body: ${res.body.substring(0, res.body.length > 200 ? 200 : res.body.length)}");
-
       final responseJson = json.decode(res.body);
-
-      debugPrint("getBase64Image: Cloud Functionsからのレスポンス: ${responseJson.toString().substring(0, 100)}");
-      
       debugPrint("imageDataの中身： ${responseJson['imageData'].toString().substring(0, 20)}..."); // 先頭20文字だけ表示
       return responseJson['imageData'] as String;
-      // if (responseJson.containsKey('imageData')){
-        
-      //   return responseJson['imageData'] as String;
-      // }
-      return null;
     } 
     catch (e) {
       debugPrint("getBase64Image parsing error: $e");

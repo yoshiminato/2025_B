@@ -1,5 +1,4 @@
 import 'package:class_2025_b/states/user_state.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/models/review_model.dart';
@@ -20,7 +19,6 @@ final reviewProvider = FutureProvider<Review>((ref) async {
   final dbService = DatabaseService();
 
   if(recipeId == null || recipeId.isEmpty) {
-    debugPrint('Recipe ID is null or empty, returning empty review');
     return Review.empty; // レシピIDが無い場合は空のレビューを返す
   }
 
@@ -31,32 +29,24 @@ final reviewProvider = FutureProvider<Review>((ref) async {
 
   final userId = user.uid;
 
-
-  if (recipeId == null || recipeId.isEmpty) {
-    throw Exception('Recipe ID is null or empty');
-  }
-
   // レビューをデータベースから取得
   final Review review = await dbService.getReviewByRecipeIdAndUserId(userId, recipeId);
-
-  debugPrint('Fetched review: $review for user $userId and recipe $recipeId');
 
   return review;
 });
 
+// レビューを追加する関数
 Future<void> addReview(int tRating, int eRating, int cRating, int uRating, WidgetRef ref) async {
 
+  // ログインしているユーザIDの取得
   final user = ref.read(userProvider);
-
-  // ユーザーがログインしているか確認
   if (user == null) {
     throw Exception('ログインしていません');
   }
-
   final userId = user.uid;
 
+  // レシピIDの取得
   final recipeId = ref.read(recipeIdProvider);
-
   if (recipeId == null || recipeId.isEmpty) {
     throw Exception('レシピIDが取得できていません');
   }

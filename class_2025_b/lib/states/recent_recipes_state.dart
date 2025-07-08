@@ -9,7 +9,7 @@ import 'package:class_2025_b/states/home_state.dart';
 final recentRecipesProvider = FutureProvider<List<Recipe>>((ref) {
 
   // ホーム画面のコンテンツの切り代わりに応じてプロバイダの状態を再読み込み
-  final contentType = ref.watch(currentContentTypeProvider);
+  final contentType = ref.watch(homeContentTypeProvider);
 
   // 検索画面以外ではﾚｼﾋﾟの取得は行わない
   if (contentType != ContentType.search) {
