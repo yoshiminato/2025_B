@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -59,15 +58,12 @@ class RegisterScreen extends HookConsumerWidget {
       onPressed: () async {
         try {
           await authService.signUp(emailText.value, passwordText.value);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("ログイン成功")));
+          if(!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログイン成功")));
           AppRouter.goToHome(context);
         } catch (e) {
           debugPrint("ログインに失敗: ${e.toString()}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("ログインに失敗しました: ${e.toString()}")),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログインに失敗しました: ${e.toString()}")));
         }
       },
       style: ElevatedButton.styleFrom(
@@ -104,15 +100,10 @@ class RegisterScreen extends HookConsumerWidget {
       child: Text("ログイン画面へ",),
     );
 
-    final guestLoginButton = ElevatedButton(
-      onPressed: () {
-        AppRouter.goToHome(context);
-      },
-      child: Text("ログインせずに使用する"),
-    );
 
     final guestLoginLink = GestureDetector(
       onTap: () {
+        authService.signOut();
         AppRouter.goToHome(context);
       },
       child: Text(

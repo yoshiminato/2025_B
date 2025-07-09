@@ -59,6 +59,7 @@ class LoginScreen extends HookConsumerWidget {
       onPressed: () async {
         try {
           await authService.signIn(emailText.value, passwordText.value);
+          if(!context.mounted) return;
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text("ログイン成功")));
@@ -97,15 +98,9 @@ class LoginScreen extends HookConsumerWidget {
       child: Text("新規登録画面へ"),
     );
 
-    final guestLoginButton = ElevatedButton(
-      onPressed: () {
-        AppRouter.goToHome(context);
-      },
-      child: Text("ログインせずに使用する"),
-    );
-
     final guestLoginLink = GestureDetector(
       onTap: () {
+        authService.signOut();
         AppRouter.goToHome(context);
       },
       child: Text(

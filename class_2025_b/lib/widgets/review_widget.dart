@@ -6,7 +6,9 @@ import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/states/search_state.dart';
 
+// レビューの入力・投稿部分のウィジェット
 class ReviewFormWidget extends HookConsumerWidget {
+
   final Review review;
 
   const ReviewFormWidget({super.key, required this.review});
@@ -14,21 +16,15 @@ class ReviewFormWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    // レビューの状態をデータベースでの登録値で初期化
     final tasteRating = useState(review.tasteRating);
     final easeRating  = useState(review.easeRating);
     final costRating  = useState(review.cospRating);
     final uniquenessRating = useState(review.uniquenessRating);
 
-    useEffect(() {
-      tasteRating.value = review.tasteRating;
-      easeRating.value  = review.easeRating;
-      costRating.value  = review.cospRating;
-      uniquenessRating.value = review.uniquenessRating;
-      return null;
-    }, [review]);
-
     final user = ref.watch(userProvider);
 
+    // レビューのを投稿可能かどうかをチェック(全項目入力＆ログイン)
     final bool isValid = tasteRating.value > 0 && easeRating.value > 0 && costRating.value > 0 && uniquenessRating.value > 0 && user != null;
 
     return Column(
@@ -43,13 +39,14 @@ class ReviewFormWidget extends HookConsumerWidget {
       ReviewRatingRow(label: '奇抜さ', notifier: uniquenessRating),
       SizedBox(height: 16),
       isValid ? SizedBox.shrink() :
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      Center(
         child: Text(
           'レビューを投稿するには、ログインした状態すべての評価を設定してください',
           style: TextStyle(color: Colors.red),
         ),
       ),
+      SizedBox(height: 16),
+      // レビュー投稿ボタン
       Center(
         child: ElevatedButton(
           onPressed: isValid ? () async {
@@ -60,9 +57,8 @@ class ReviewFormWidget extends HookConsumerWidget {
               uniquenessRating.value,
               ref
             );
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("レビューを投稿しました")),
-            );
+            if(!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("レビューを投稿しました")));
             final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
             searchResultNotifier.updateSearchResult();
           } : null,
@@ -74,6 +70,7 @@ class ReviewFormWidget extends HookConsumerWidget {
   }
 }
 
+// レビューウィジェット全体を表示するウィジェット
 class ReviewWidget extends HookConsumerWidget {
 
   const ReviewWidget({super.key});
@@ -93,6 +90,7 @@ class ReviewWidget extends HookConsumerWidget {
 
     final asyncReview = ref.watch(reviewProvider);
 
+    // レビュー取得状態に応じて表示を変化
     final body = asyncReview.when(
       data: (review) => ReviewFormWidget(review: review),
       loading: () => CircularProgressIndicator(),
@@ -110,7 +108,7 @@ class ReviewWidget extends HookConsumerWidget {
   }
 }
 
-
+// レビューの評価を行う行を表示するウィジェット
 class ReviewRatingRow extends HookConsumerWidget {
 
   final String label;
@@ -119,8 +117,6 @@ class ReviewRatingRow extends HookConsumerWidget {
   const ReviewRatingRow({super.key, required this.label, required this.notifier});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
-    debugPrint(notifier.value.toString());
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

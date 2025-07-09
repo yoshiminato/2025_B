@@ -8,6 +8,6 @@ enum ContentType{
 }
 
 // ホーム画面のコンテンツの状態を管理するプロバイダ
-final currentContentTypeProvider = StateProvider<ContentType>((ref) {
+final homeContentTypeProvider = StateProvider<ContentType>((ref) {
   return ContentType.generate; // 初期画面は生成画面
 });

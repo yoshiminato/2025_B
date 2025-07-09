@@ -33,6 +33,7 @@ class IconButtons extends StatelessWidget {
               await kvservice.modifyValueFromKeyTypeByIndex(KeyType.stockitemcountId, index, result['count']);
               await kvservice.modifyValueFromKeyTypeByIndex(KeyType.stockitemexpiryId, index, result['expiry']);
 
+              if(!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('食材を更新しました')),
               );
@@ -50,6 +51,8 @@ class IconButtons extends StatelessWidget {
             await kvservice.removeValueFromKeyTypeByIndex(KeyType.stockitemnameId, index);
             await kvservice.removeValueFromKeyTypeByIndex(KeyType.stockitemcountId, index);
             await kvservice.removeValueFromKeyTypeByIndex(KeyType.stockitemexpiryId, index);
+            
+            if(!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('食材を削除しました')),
             );

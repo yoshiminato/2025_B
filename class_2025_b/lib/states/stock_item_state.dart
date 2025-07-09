@@ -10,27 +10,17 @@ Future<List<StockItem>> getStockItems() async {
   final itemCounts = await kvService.getValuesFromKeyType(KeyType.stockitemcountId);
   final itemExpiries = await kvService.getValuesFromKeyType(KeyType.stockitemexpiryId);
 
-  // デバッグ出力
-  debugPrint('Stock item names: $itemNames');
-  debugPrint('Stock item counts: $itemCounts');
-  debugPrint('Stock item expiries: $itemExpiries');
-
-  // 各リストの長さが一致していることを確認
-  if (itemNames.length != itemCounts.length || itemNames.length != itemExpiries.length) {
-    debugPrint('ERROR: Stock item data is inconsistent - names: ${itemNames.length}, counts: ${itemCounts.length}, expiries: ${itemExpiries.length}');
-    throw Exception('Stock item data is inconsistent');
-  }
-
   // StockItemのリストを作成
   final items = List.generate(itemNames.length, (index) {
     // 安全にint.parseを実行
     int? count;
     try {
       count = int.parse(itemCounts[index]);
-    } catch (e) {
+    } 
+    catch (e) {
       count = null;
     }
-    
+    // 食糧情報を返す
     return StockItem(
       name: itemNames[index],
       count: count,    
@@ -38,7 +28,6 @@ Future<List<StockItem>> getStockItems() async {
     );
   });
 
-  
-  // StockItemのリストに変換
+  // 食糧庫の情報を返却
   return items;
 }

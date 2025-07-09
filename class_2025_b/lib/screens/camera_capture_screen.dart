@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/routers/router.dart';
-
-
-// 撮影した画像を共有するためのProvider
-final selectedImageProvider = StateProvider<File?>((ref) => null);
+import 'package:class_2025_b/states/selected_image_state.dart';
 
 // 撮影専用画面
 class CameraCaptureScreen extends HookConsumerWidget {

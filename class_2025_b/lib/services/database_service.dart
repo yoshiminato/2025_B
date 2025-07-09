@@ -3,7 +3,7 @@ import 'package:class_2025_b/models/comment_model.dart';
 import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/search_sort_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:class_2025_b/error_handle.dart';
 import 'package:flutter/foundation.dart';
 
 
@@ -38,23 +38,7 @@ class DatabaseService{
 
     }
     catch (e) {
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
-      
-      // その他のエラーの場合
-      debugPrint("データベースエラー: ${e.toString()}");
-      debugPrint("エラータイプ: ${e.runtimeType}");
+      handleError(e);
       return null;
     }
   }
@@ -77,26 +61,12 @@ class DatabaseService{
         data['id'] = docSnapshot.id;
         
         return Recipe.fromMap(data);
-      } else {
+      } 
+      else {
         return null; // レシピが存在しない場合はnullを返す
       }
     } catch (e) {
-
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
-
-      // エラーが発生した場合はnullを返す
+      handleError(e);
       return null;
     }
   }
@@ -109,19 +79,7 @@ class DatabaseService{
       await FirebaseFirestore.instance.collection('Comment').add(comment.toMap());
     }
     catch (e) {
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
+      handleError(e);
     }
     return;
   }
@@ -132,7 +90,7 @@ class DatabaseService{
     debugPrint("getComments");
 
     try{
-      final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).get();
+      final query = await FirebaseFirestore.instance.collection('Comment').where('recipeId',isEqualTo: recipeId).orderBy('timestamp', descending: true).get();
 
       //queryをComment型に変形
       List<Comment> comment = query.docs.map((doc){
@@ -145,20 +103,7 @@ class DatabaseService{
       return comment;
     }
     catch (e) {
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
-
+      handleError(e);
       return [];
     }
   
@@ -191,19 +136,7 @@ class DatabaseService{
         debugPrint("新規レビューを追加しました");
       }
     } catch (e) {
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') ||
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
+      handleError(e);
       return;
     }
   }
@@ -235,20 +168,8 @@ class DatabaseService{
       return Review.fromMap(reveiwMap);
 
     } catch (e) {
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
-      throw Exception("エラー発生:$e"); // エラー時もデフォルト値を返す
+      handleError(e);
+      throw Exception("レビューの取得に失敗しました: $e");
     }
   }
 
@@ -273,19 +194,7 @@ class DatabaseService{
       return recipes;
     }
     catch(e){
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
+      handleError(e);
       return [];
     }
     
@@ -366,21 +275,8 @@ class DatabaseService{
       
     } 
     catch (e) {
-
-      if (e.toString().contains('UNAUTHENTICATED') || 
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        debugPrint("認証エラーが発生しました。再ログインが必要です: ${e.toString()}");
-        // FirebaseAuthからログアウト
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
-
-      return [];
+      handleError(e);
+      throw Exception("キーワード検索に失敗しました: $e");
     }
   }
 
@@ -442,18 +338,7 @@ class DatabaseService{
       }
       debugPrint("deleteInvalidData: 完了");
     } catch (e) {
-      debugPrint("deleteInvalidData エラー: ${e.toString()}");
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') ||
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
+      handleError(e);
     }
   }
 
@@ -464,28 +349,14 @@ class DatabaseService{
 
       List<Recipe> recipes = querySnapshot.docs.map((doc) {
         final data = doc.data();
-        
-        // FirestoreのドキュメントIDを明示的に設定
         data['id'] = doc.id;
-        
         return Recipe.fromMap(data);
       }).toList();
-
       return recipes;
+
     } catch (e) {
-      debugPrint("getAllRecipes エラー: ${e.toString()}");
-      // 認証エラーの場合の特別な処理
-      if (e.toString().contains('UNAUTHENTICATED') ||
-          e.toString().contains('INVALID_REFRESH_TOKEN')) {
-        try {
-          await FirebaseAuth.instance.signOut();
-          debugPrint("自動ログアウトを実行しました");
-        } catch (signOutError) {
-          debugPrint("ログアウトエラー: $signOutError");
-        }
-        throw Exception('認証エラー: 再ログインしてください');
-      }
-      return [];
+      handleError(e);
+      throw Exception("最近のレシピの取得に失敗しました: $e");
     }
   }
   //レビューの値を計算する
@@ -540,7 +411,7 @@ class DatabaseService{
       return result;
 
     } catch (e) {
-      debugPrint("calreviewaverage エラー: ${e.toString()}");
+      handleError(e);
       throw Exception("レビューの平均値計算に失敗しました: $e");
     }
   }
@@ -565,8 +436,9 @@ class DatabaseService{
       }).toList();
 
       return reviews;
-    } catch (e) {
-      debugPrint("getReviewsByUserId エラー: ${e.toString()}");
+    } 
+    catch (e) {
+      handleError(e);
       throw Exception("レビューの取得に失敗しました: $e");
     }
   }

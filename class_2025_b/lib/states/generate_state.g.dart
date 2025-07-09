@@ -1,29 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'custom_state.dart';
+part of 'generate_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$customizeNotifierHash() => r'dd822c87206b5713205f1b2742f816c0f44f5da0';
+String _$generateStateNotifierHash() =>
+    r'e474863ab3d03ff59a85defa09c3eeb274afaddb';
 
-/// See also [CustomizeNotifier].
-@ProviderFor(CustomizeNotifier)
-final customizeNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<
-      CustomizeNotifier,
-      CustomizeModel
-    >.internal(
-      CustomizeNotifier.new,
-      name: r'customizeNotifierProvider',
+/// See also [GenerateStateNotifier].
+@ProviderFor(GenerateStateNotifier)
+final generateStateNotifierProvider =
+    AutoDisposeNotifierProvider<GenerateStateNotifier, GenerateState>.internal(
+      GenerateStateNotifier.new,
+      name: r'generateStateNotifierProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$customizeNotifierHash,
+          : _$generateStateNotifierHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$CustomizeNotifier = AutoDisposeAsyncNotifier<CustomizeModel>;
+typedef _$GenerateStateNotifier = AutoDisposeNotifier<GenerateState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

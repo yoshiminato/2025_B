@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/widgets/comment_widget.dart';
 import 'package:class_2025_b/widgets/favorite_button_widget.dart';
-import 'package:class_2025_b/widgets/recipe_widget.dart';
 import 'package:class_2025_b/widgets/review_widget.dart';
 import 'package:class_2025_b/widgets/recipe_result_widget.dart';
 
@@ -26,12 +25,16 @@ class RecipeScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(30.0),
       child: Column(
         children: [
+          // レシピ情報表示
           RecipeResultWidget(),
           const SizedBox(height: 20),
+          // お気に入りボタン
           FavoriteButtonWidget(),
           const SizedBox(height: 20),
+          // レビューセクション
           ReviewWidget(),
           const SizedBox(height: 20),
+          // コメントセクション
           CommentsWidget()
         ],
       )    

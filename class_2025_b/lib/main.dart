@@ -1,3 +1,5 @@
+
+import 'package:class_2025_b/global.dart';
 import 'package:flutter/material.dart';
 import 'package:class_2025_b/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,13 +9,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:cloud_functions/cloud_functions.dart";
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 
 
 void main() async {
-
-  // final ip = "localhost";
-  final ip = "10.0.2.2";
-
+  String ip;
+  if (kIsWeb) {
+    ip = hostingIP;
+  } else if (Platform.isAndroid) {
+    ip = hostingIPForAndroidEmulator;
+  } else {
+    ip = hostingIP;
+  }
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
