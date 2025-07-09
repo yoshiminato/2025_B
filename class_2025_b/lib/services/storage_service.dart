@@ -49,4 +49,19 @@ class StorageService{
       throw Exception('画像の保存に失敗しました: ${e.toString()}');
     }
   }
+
+  // Uint8List型の画像データをFirebase Storageに保存し、ダウンロードURLを返す
+  Future<String> storeUint8ListImageAndGetUrl(Uint8List imageBytes, String folder) async {
+    final uuid = const Uuid().v4();
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child(folder).child('$uuid.png');
+      await storageRef.putData(imageBytes, SettableMetadata(contentType: "image/png"));
+      final url = await storageRef.getDownloadURL();
+      debugPrint("Uint8List画像アップロード成功: $url");
+      return url;
+    } catch (e) {
+      handleError(e);
+      throw Exception('Uint8List画像の保存に失敗しました: ${e.toString()}');
+    }
+  }
 }

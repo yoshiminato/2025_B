@@ -43,12 +43,21 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
       throw Exception("レシピIDが設定されていません");
     }
 
-    final File? selectedImage = ref.watch(selectedImageProvider);
+    final selectedImageType = ref.watch(selectedImageTypeProvider);
+    final capturedImage = ref.watch(capturedImageProvider);
+    final uploadedImage = ref.watch(uploadedImageProvider);
 
-    // 画像が選択されている場合はストレージに保存し、URLを取得
-    final imageUrl = selectedImage != null
-        ? await strageService.storeImageAndGetUrl(selectedImage, "comments")
-        : null;
+    late final String? imageUrl;
+
+    if(selectedImageType == SelectedImageType.captured && capturedImage != null) {
+      imageUrl = await strageService.storeImageAndGetUrl(capturedImage, "comments");
+    }
+    else if(selectedImageType == SelectedImageType.uploaded && uploadedImage != null) {
+      imageUrl = await strageService.storeUint8ListImageAndGetUrl(uploadedImage, "comments");
+    }
+    else {
+      imageUrl = null; // 画像がない場合は空文字
+    }
 
     // ユーザー情報を取得
     final user = ref.read(userProvider);
@@ -73,7 +82,9 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
 
     // コメント送信後の処理
     controller.clear(); // コメント入力欄をクリア
-    ref.read(selectedImageProvider.notifier).state = null; // 選択された画像をクリア
+    ref.read(selectedImageTypeProvider.notifier).state = null; // 選択された画像タイプをクリア  
+    ref.read(capturedImageProvider.notifier).state = null; // キャプチャされた画像をクリア
+    ref.read(uploadedImageProvider.notifier).state = null; // アップロードされた
     _clearComment(); // コメントの状態をクリア
   }
 

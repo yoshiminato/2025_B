@@ -124,7 +124,9 @@ class CameraCaptureScreen extends HookConsumerWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        ref.read(selectedImageProvider.notifier).state = capturedImage.value;
+                        ref.read(capturedImageProvider.notifier).state = capturedImage.value;
+                        ref.read(selectedImageTypeProvider.notifier).state = SelectedImageType.captured;
+                        // 画像を選択した状態でホーム画面に戻る
                         AppRouter.goToHome(context);
                       },
                       child: const Text('この画像を使用'),
