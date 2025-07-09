@@ -14,14 +14,7 @@ import 'dart:io' show Platform;
 
 
 void main() async {
-  String ip;
-  if (kIsWeb) {
-    ip = hostingIP;
-  } else if (Platform.isAndroid) {
-    ip = hostingIPForAndroidEmulator;
-  } else {
-    ip = hostingIP;
-  }
+  String host = hostingHost;
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,10 +23,10 @@ void main() async {
   );
   try {
     // エミュレータの設定
-    FirebaseFirestore.instance.useFirestoreEmulator(ip, 8080);
-    FirebaseFunctions.instance.useFunctionsEmulator(ip, 5001);
-    FirebaseStorage.instance.useStorageEmulator(ip, 9199);
-    await FirebaseAuth.instance.useAuthEmulator(ip, 9099); 
+    FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+    FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
+    FirebaseStorage.instance.useStorageEmulator(host, 9199);
+    await FirebaseAuth.instance.useAuthEmulator(host, 9099); 
    } 
    catch (e) {
     debugPrint(e.toString());
