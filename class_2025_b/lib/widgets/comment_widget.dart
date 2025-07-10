@@ -1,3 +1,4 @@
+
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/models/comment_model.dart';
 import 'package:class_2025_b/states/comment_state.dart';
 import 'package:class_2025_b/states/selected_image_state.dart';
-
 
 class CommentsWidget extends HookConsumerWidget {
 
@@ -31,6 +31,7 @@ class CommentsWidget extends HookConsumerWidget {
 
     // 選択された画像の状態を取得
     final selectedImage = ref.watch(selectedImageProvider);
+
 
     // コメント一覧の取得
     final commentsPanel = ref.watch(commentsNotifierProvider).when(
@@ -89,8 +90,8 @@ class CommentsWidget extends HookConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.file(
-                  selectedImage!,
-                  fit: BoxFit.cover,
+                            selectedImage!,
+                            fit: BoxFit.cover,
                 ),
               ),
             ),

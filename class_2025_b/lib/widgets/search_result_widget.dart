@@ -89,7 +89,7 @@ class ListItem extends ConsumerWidget {
 
     final item = ListTile(
       leading: recipe.imageUrl != null
-        ? Image.network(fixEmulatorUrlForWeb(recipe.imageUrl!), width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
+        ? Image.network(replaceHostInUrl(recipe.imageUrl!, storageHost), width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
         : Image.asset("assets/images/noImage.png", width: tileImageSize, height: tileImageSize, fit: BoxFit.cover),
       title: Text(
         recipe.title,

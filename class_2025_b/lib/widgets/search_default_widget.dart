@@ -180,7 +180,7 @@ class CarouselCard extends ConsumerWidget {
       width: imageSize,
       height: imageSize,
       child: recipe.imageUrl != null
-        ? Image.network(fixEmulatorUrlForWeb(recipe.imageUrl!), fit: BoxFit.cover)
+        ? Image.network(replaceHostInUrl(recipe.imageUrl!, storageHost), fit: BoxFit.cover)
         : Image.asset(
             "assets/images/noImage.png",
             fit: BoxFit.cover,

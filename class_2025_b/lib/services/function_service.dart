@@ -15,13 +15,9 @@ class FunctionService {
 
   void getBaseURL() {
 
-    // basePath = "https://us-central1-recipe-ai-175b2.cloudfunctions.net";
-
     debugPrint("FunctionService: getBaseURL()");
 
-    basePath = "http://10.0.2.2:5001/recipe-ai-175b2/us-central1";
-
-    basePath = fixEmulatorUrlForWeb(basePath);
+    basePath = "http://$functionsHost:5001/recipe-ai-175b2/us-central1";
 
     debugPrint("FunctionService: basePath = $basePath");
   }
@@ -189,7 +185,7 @@ class FunctionService {
         // レスポンスの構造をデバッグ出力（画像データを除く）
         final debugResponse = Map<String, dynamic>.from(responseJson);
         
-        debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
+        debugPrint("Cloud Functionsからのレスポンス: ${debugResponse.toString().substring(0, 20)}..."); // 最初の100文字だけ出力
         
         // テキストデータ（レシピ情報）の処理
         final Recipe recipe = Recipe.fromJson(responseJson);

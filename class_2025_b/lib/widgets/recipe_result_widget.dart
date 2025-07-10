@@ -76,7 +76,7 @@ class RecipeResultWidget extends ConsumerWidget {
                   fit: BoxFit.cover, 
                   width: double.infinity):
                 Image.network(
-                  fixEmulatorUrlForWeb(recipe.imageUrl!),
+                  replaceHostInUrl(recipe.imageUrl!, storageHost),
                   fit: BoxFit.cover,
                   width: double.infinity, // 横幅いっぱいに広げる
                 )
