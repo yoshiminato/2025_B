@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:class_2025_b/global.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
@@ -11,10 +10,9 @@ import 'package:class_2025_b/states/user_recipe_state.dart';
 import 'package:class_2025_b/states/history_recipe_id_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/search_state.dart';
-import 'package:class_2025_b/states/selected_image_state.dart'; 
 
 
-class SearchDefaultWidget extends HookConsumerWidget {
+class SearchDefaultWidget extends ConsumerWidget {
   const SearchDefaultWidget({super.key});
 
   @override
@@ -24,17 +22,6 @@ class SearchDefaultWidget extends HookConsumerWidget {
     final asyncFavoriteRecipes = ref.watch(favoriteRecipesProvider);
     final asyncUsersRecipes = ref.watch(usersRecipesProvider);
     final asyncHistryRecipes = ref.watch(historyRecipesProvider);
-    final contentType = ref.watch(homeContentTypeProvider);
-
-    useEffect(() {
-      if (contentType == ContentType.search) {
-       WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(selectedImageProvider.notifier).state = null;
-        });
-      }
-      return null;
-    }, [contentType]);
-
 
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.start,

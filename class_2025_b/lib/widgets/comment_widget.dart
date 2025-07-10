@@ -53,7 +53,7 @@ class CommentsWidget extends HookConsumerWidget {
         onPressed: () {
           ref.read(uploadedImageProvider.notifier).state = null;
           ref.read(capturedImageProvider.notifier).state = null;
-          ref.read(selectedImageTypeProvider.notifier).state = null;
+          ref.read(selectedImageTypeProvider.notifier).state = SelectedImageType.none;
         },
         icon: Container(
           decoration: const BoxDecoration(
@@ -77,7 +77,7 @@ class CommentsWidget extends HookConsumerWidget {
     final selectedImageType = ref.watch(selectedImageTypeProvider);
 
     // 画像パネル - 画像が選択されていない場合は空のウィジェットを表示
-    final imagePanel = selectedImageType == null 
+    final imagePanel = selectedImageType == SelectedImageType.none 
       ?
       SizedBox.shrink()
       :

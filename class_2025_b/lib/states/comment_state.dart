@@ -82,7 +82,7 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
 
     // コメント送信後の処理
     controller.clear(); // コメント入力欄をクリア
-    ref.read(selectedImageTypeProvider.notifier).state = null; // 選択された画像タイプをクリア  
+    ref.read(selectedImageTypeProvider.notifier).state = SelectedImageType.none; // 選択された画像タイプをクリア  
     ref.read(capturedImageProvider.notifier).state = null; // キャプチャされた画像をクリア
     ref.read(uploadedImageProvider.notifier).state = null; // アップロードされた
     _clearComment(); // コメントの状態をクリア
