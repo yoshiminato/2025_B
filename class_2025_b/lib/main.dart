@@ -14,7 +14,7 @@ import 'dart:io' show Platform;
 
 
 void main() async {
-  String host = hostingHost;
+  String host = hostForAndroidEmulator;
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();

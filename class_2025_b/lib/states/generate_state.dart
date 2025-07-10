@@ -138,6 +138,11 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピ生成に失敗しました: $e");
     }
 
+    if (recipe == null) {
+      updateState(GenerateState.error); // エラー状態に更新
+      throw Exception("レシピ生成に失敗しました");
+    }
+
     return recipe!;
   }
 
@@ -167,6 +172,12 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
         genCount++;
       }
     }
+
+    if (base64Image == null) {
+      updateState(GenerateState.error); // エラー状態に更新
+      throw Exception("画像生成に失敗しました");
+    }
+
     return base64Image!;
   }
 

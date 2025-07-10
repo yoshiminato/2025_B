@@ -185,7 +185,7 @@ class FunctionService {
         // レスポンスの構造をデバッグ出力（画像データを除く）
         final debugResponse = Map<String, dynamic>.from(responseJson);
         
-        debugPrint("Cloud Functionsからのレスポンス: $debugResponse");
+        debugPrint("Cloud Functionsからのレスポンス: ${debugResponse.toString().substring(0, 20)}..."); // 最初の100文字だけ出力
         
         // テキストデータ（レシピ情報）の処理
         final Recipe recipe = Recipe.fromJson(responseJson);

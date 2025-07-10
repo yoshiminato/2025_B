@@ -65,19 +65,19 @@ const hostForAndroidEmulator = "10.0.2.2";
 // const storageHost   = "entirely-food-ks-nursing.trycloudflare.com";
 // const authHost      = "titanium-expects-locked-webmaster.trycloudflare.com";
 
-// // Androidエミュレータで実行する場合
-// const hostingHost   = hostForAndroidEmulator;
-// const functionsHost = hostForAndroidEmulator;
-// const firestoreHost = hostForAndroidEmulator;
-// const storageHost   = hostForAndroidEmulator;
-// const authHost      = hostForAndroidEmulator;
+// Androidエミュレータで実行する場合
+const hostingHost   = hostForAndroidEmulator;
+const functionsHost = hostForAndroidEmulator;
+const firestoreHost = hostForAndroidEmulator;
+const storageHost   = hostForAndroidEmulator;
+const authHost      = hostForAndroidEmulator;
 
-// エミュレータと同じ端末で実行する場合
-const hostingHost   = hostForLocal;
-const functionsHost = hostForLocal;
-const firestoreHost = hostForLocal;
-const storageHost   = hostForLocal;
-const authHost      = hostForLocal;
+// // エミュレータと同じ端末で実行する場合
+// const hostingHost   = hostForLocal;
+// const functionsHost = hostForLocal;
+// const firestoreHost = hostForLocal;
+// const storageHost   = hostForLocal;
+// const authHost      = hostForLocal;
 
 // 画面上にログを表示するためのグローバル変数
 List<String> debugMessages = [];
