@@ -33,7 +33,7 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
 
     final text = state;
 
-    final recipeId = ref.watch(recipeIdProvider);
+    final recipeId = ref.read(recipeIdProvider);
 
     if (text.isEmpty) {
       throw Exception("コメントが空です");
@@ -43,9 +43,9 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
       throw Exception("レシピIDが設定されていません");
     }
 
-    final selectedImageType = ref.watch(selectedImageTypeProvider);
-    final capturedImage = ref.watch(capturedImageProvider);
-    final uploadedImage = ref.watch(uploadedImageProvider);
+    final selectedImageType = ref.read(selectedImageTypeProvider);
+    final capturedImage = ref.read(capturedImageProvider);
+    final uploadedImage = ref.read(uploadedImageProvider);
 
     late final String? imageUrl;
 
@@ -86,6 +86,8 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
     ref.read(capturedImageProvider.notifier).state = null; // キャプチャされた画像をクリア
     ref.read(uploadedImageProvider.notifier).state = null; // アップロードされた
     _clearComment(); // コメントの状態をクリア
+
+    ref.read(commentsRefreshTrigger.notifier).state++; // コメント送信後にリフレッシュ
   }
 
   // コメントをクリアするメソッド

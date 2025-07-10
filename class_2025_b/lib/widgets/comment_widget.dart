@@ -217,9 +217,9 @@ class CommentsWidget extends HookConsumerWidget {
       onPressed: !notifier.isEmpty ? () async {
         try{
           await notifier.addComment(textController);
-          ref.read(commentsRefreshTrigger.notifier).state++; // コメント送信後にリフレッシュ
         }
         catch (e) {
+          debugPrint("コメント送信エラー: $e");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("コメントの送信中にエラーが発生しました: $e")),
           );
