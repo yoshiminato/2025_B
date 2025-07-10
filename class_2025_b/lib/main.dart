@@ -14,7 +14,30 @@ import 'dart:io' show Platform;
 
 
 void main() async {
-  String host = hostingHost;
+
+  if(kIsWeb){
+    hostingHost   = hostForLocal;
+    functionsHost = hostForLocal;
+    firestoreHost = hostForLocal;
+    storageHost   = hostForLocal;
+    authHost      = hostForLocal;
+  }
+  else if(Platform.isAndroid) {
+    // Androidエミュレータの場合
+    hostingHost   = hostForAndroidEmulator;
+    functionsHost = hostForAndroidEmulator;
+    firestoreHost = hostForAndroidEmulator;
+    storageHost   = hostForAndroidEmulator;
+    authHost      = hostForAndroidEmulator;
+  }
+  else {
+    // その他のプラットフォーム（iOSやデスクトップなど）
+    hostingHost   = hostForLocal;
+    functionsHost = hostForLocal;
+    firestoreHost = hostForLocal;
+    storageHost   = hostForLocal;
+    authHost      = hostForLocal;
+  }
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +46,10 @@ void main() async {
   );
   try {
     // エミュレータの設定
-    FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
-    FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
-    FirebaseStorage.instance.useStorageEmulator(host, 9199);
-    await FirebaseAuth.instance.useAuthEmulator(host, 9099); 
+    FirebaseFirestore.instance.useFirestoreEmulator(firestoreHost, 8080);
+    FirebaseFunctions.instance.useFunctionsEmulator(functionsHost, 5001);
+    FirebaseStorage.instance.useStorageEmulator(storageHost, 9199);
+    await FirebaseAuth.instance.useAuthEmulator(authHost, 9099); 
    } 
    catch (e) {
     debugPrint(e.toString());

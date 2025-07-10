@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/material.dart';
 
 void debugLog(String message) {
   if (kDebugMode) {
@@ -73,11 +74,15 @@ const hostForAndroidEmulator = "10.0.2.2";
 // const authHost      = hostForAndroidEmulator;
 
 // エミュレータと同じ端末で実行する場合
-const hostingHost   = hostForLocal;
-const functionsHost = hostForLocal;
-const firestoreHost = hostForLocal;
-const storageHost   = hostForLocal;
-const authHost      = hostForLocal;
+late final String hostingHost  ;
+late final String functionsHost;
+late final String firestoreHost;
+late final String storageHost  ;
+late final String authHost     ;
+
+
+
+
 
 // 画面上にログを表示するためのグローバル変数
 List<String> debugMessages = [];
