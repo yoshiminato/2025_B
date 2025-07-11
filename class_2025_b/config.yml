@@ -1,0 +1,27 @@
+tunnel: 7507990b-c789-4a4e-8634-cfab7dc75d2e
+credentials-file: C:\Users\yoshi\.cloudflared\7507990b-c789-4a4e-8634-cfab7dc75d2e.json
+
+ingress:
+  # Port 8080 - FireStore サーバー (最初に配置)
+  - hostname: firestore.2025classb.com
+    service: http://localhost:8080
+  
+  # Port 5001 - CloudFunction サーバー
+  - hostname: functions.2025classb.com
+    service: http://localhost:5001
+  
+  # Port 9099 - Firebase Authentication サーバー 
+  - hostname: auth.2025classb.com
+    service: http://localhost:9099
+  
+  # Port 9199 - FirebaseStorage サーバー
+  - hostname: storage.2025classb.com
+    service: http://localhost:9199
+  
+  # Port 5000 - FlutterAppサーバー (最後に配置)
+  - hostname: host.2025classb.com
+    service: http://localhost:5000
+  
+  # キャッチオール（必須）
+  - service: http_status:404
+

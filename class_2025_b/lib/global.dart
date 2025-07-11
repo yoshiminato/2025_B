@@ -19,6 +19,17 @@ String replaceHostInUrl(String url, String newHost) {
   });
 }
 
+// ポート番号を置換する関数
+String replacePortInUrl(String url, int newPort) {
+  // http(s)://host(:oldPort)?/path → http(s)://host:newPort/path
+  final reg = RegExp(r'^(https?://[^/:]+)(:\d+)?(\/.*)?');
+  return url.replaceFirstMapped(reg, (m) {
+    final schemeHost = m.group(1) ?? '';
+    final path = m.group(3) ?? '';
+    return '$schemeHost:$newPort$path';
+  });
+}
+
 // // Web/Android用: 10.0.2.2→hostingIP 変換
 // String fixEmulatorUrlForWeb(String url) {
 //   if (kIsWeb) {
@@ -43,46 +54,32 @@ const hostForLocal = "localhost"; // ローカルホスト
 // Androidエミュレータ用のホスティングIP(Androidエミュレータから見たfirebaseEmulatorが起動している端末ののIP)
 const hostForAndroidEmulator = "10.0.2.2";
 
-// 以下のIPはローカルでのテスト用
-// const hostingIP = "localhost";
-// const functionsIP = hostingIP;
-// const firestoreIP = hostingIP;
-// const storageIP   = hostingIP; 
-// const authIP      = hostingIP;
+// ローカルエミュレータのポート
+const int localFirestorePort = 8080;
+const int localFunctionsPort = 5001;
+const int localStoragePort = 9199;
+const int localAuthPort = 9099;
 
-// 以下のIPはローカルトンネルを使う場合のテスト用
-// url発行ごとに書き換える必要あり
-// const hostingHost   = "hosting.loca.lt";
-// const functionsHost = "functions.loca.lt";
-// const firestoreHost = "firestore.loca.lt";
-// const storageHost   = "storage.loca.lt";
-// const authHost      = "auth.loca.lt";
-
-// 以下のIPはCloudflare Tunnelを使う場合のテスト用
-// url発行ごとに書き換える必要あり
-// const hostingHost   = "posts-advantage-collective-cookies.trycloudflare.com";
-// const functionsHost = "tube-ev-payments-scenes.trycloudflare.com";
-// const firestoreHost = "throws-toll-minimize-nasa.trycloudflare.com";
-// const storageHost   = "entirely-food-ks-nursing.trycloudflare.com";
-// const authHost      = "titanium-expects-locked-webmaster.trycloudflare.com";
-
-// // Androidエミュレータで実行する場合
-// const hostingHost   = hostForAndroidEmulator;
-// const functionsHost = hostForAndroidEmulator;
-// const firestoreHost = hostForAndroidEmulator;
-// const storageHost   = hostForAndroidEmulator;
-// const authHost      = hostForAndroidEmulator;
-
-// エミュレータと同じ端末で実行する場合
-late final String hostingHost  ;
-late final String functionsHost;
-late final String firestoreHost;
-late final String storageHost  ;
-late final String authHost     ;
+class CloudFlare{
+  static const String hostingHost   = "host.2025classb.com";
+  static const String functionsHost = "functions.2025classb.com";
+  static const String firestoreHost = "firestore.2025classb.com";
+  static const String storageHost   = "storage.2025classb.com";
+  static const String authHost      = "auth.2025classb.com";
+  static const int port = 443;
+}
 
 
-
-
+// グローバル変数（初期化）
+String hostingHost   = CloudFlare.hostingHost;
+String functionsHost = CloudFlare.functionsHost;
+String firestoreHost = CloudFlare.firestoreHost;
+String storageHost   = CloudFlare.storageHost;
+String authHost      = CloudFlare.authHost;
+int functionsPort    = CloudFlare.port;
+int firestorePort    = CloudFlare.port;
+int storagePort      = CloudFlare.port;
+int authPort         = CloudFlare.port;
 
 // 画面上にログを表示するためのグローバル変数
 List<String> debugMessages = [];

@@ -24,9 +24,7 @@ class RecipeManual {
   const RecipeManual(this.number, this.manual);
 }
 
-
 class RecipeResultWidget extends ConsumerWidget {
-
   const RecipeResultWidget({super.key});
 
   @override
@@ -36,6 +34,17 @@ class RecipeResultWidget extends ConsumerWidget {
 
     return asyncRecipe.when(
       data: (recipe) {
+
+        late String url;
+
+        // ホストとポートの(画像生成時の環境による違いの)整合性をとる
+        if(recipe.imageUrl != null){
+          url = replaceHostInUrl(recipe.imageUrl!, storageHost);
+          url = replacePortInUrl(url, storagePort);
+        }
+
+        print("=== RecipeResultWidget ===");
+        print("imageUrl: $url");
 
         final RecipeInfo rInfo = RecipeInfo(
           recipe.title, 
@@ -71,15 +80,8 @@ class RecipeResultWidget extends ConsumerWidget {
               SizedBox(
                 child: 
                 recipe.imageUrl == null ?
-                Image.asset(
-                  "assets/images/no_image.png", 
-                  fit: BoxFit.cover, 
-                  width: double.infinity):
-                Image.network(
-                  replaceHostInUrl(recipe.imageUrl!, storageHost),
-                  fit: BoxFit.cover,
-                  width: double.infinity, // 横幅いっぱいに広げる
-                )
+                Image.asset("assets/images/no_image.png", fit: BoxFit.cover, width: double.infinity):
+                Image.network(url, fit: BoxFit.cover, width: double.infinity)
               ),
             const SizedBox(height: 8),
             Text(

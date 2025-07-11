@@ -87,9 +87,17 @@ class ListItem extends ConsumerWidget {
 
     final double rating = (recipe.reviewAverage.reccommend).toDouble();
 
+    late String url;
+
+    // ホストとポートの(画像生成時の環境による違いの)整合性をとる
+    if(recipe.imageUrl != null){
+      url = replaceHostInUrl(recipe.imageUrl!, storageHost);
+      url = replacePortInUrl(url, storagePort);
+    }
+
     final item = ListTile(
       leading: recipe.imageUrl != null
-        ? Image.network(replaceHostInUrl(recipe.imageUrl!, storageHost), width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
+        ? Image.network(url, width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
         : Image.asset("assets/images/noImage.png", width: tileImageSize, height: tileImageSize, fit: BoxFit.cover),
       title: Text(
         recipe.title,

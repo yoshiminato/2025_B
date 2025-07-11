@@ -19,6 +19,9 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
+  
+  <!-- Mixed Content対応: HTTPSページからHTTP接続を許可 -->
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -29,8 +32,25 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>class_2025_b</title>
+  <title>class_2025_b v20250711_2019</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Firebase Web SDK用の設定 -->
+  <script>
+    // Firebase Web SDKがHTTPSでエミュレータに接続するための設定
+    window.firebaseEmulatorConfig = {
+      useHttps: true,
+      hosts: {
+        firestore: 'firestore.2025classb.com',
+        functions: 'functions.2025classb.com',
+        storage: 'storage.2025classb.com',
+        auth: 'auth.2025classb.com'
+      }
+    };
+    
+    // デバッグ用ログ
+    console.log('Firebase Emulator Config:', window.firebaseEmulatorConfig);
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

@@ -17,7 +17,8 @@ class FunctionService {
 
     debugPrint("FunctionService: getBaseURL()");
 
-    basePath = "http://$functionsHost:5001/recipe-ai-175b2/us-central1";
+    // Cloudflare Tunnel使用時はHTTPSでポート番号なし
+    basePath = "https://$functionsHost:$functionsPort/recipe-ai-175b2/us-central1";
 
     debugPrint("FunctionService: basePath = $basePath");
   }

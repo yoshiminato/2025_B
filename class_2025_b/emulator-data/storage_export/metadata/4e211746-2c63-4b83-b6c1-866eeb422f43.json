@@ -1,0 +1,19 @@
+{
+  "name": "comments/a6230216-b386-4f17-81c7-559a6fe77c06",
+  "bucket": "recipe-ai-175b2.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1752154196345,
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "c9b5dc8b-d0bb-4f61-b2fe-9735b4c771c2"
+  ],
+  "etag": "OVNQr3pIf47ZT37enT0S9aAed4o",
+  "customMetadata": {},
+  "timeCreated": "2025-07-10T13:29:56.345Z",
+  "updated": "2025-07-10T13:29:56.345Z",
+  "size": 5305,
+  "md5Hash": "7EXnEnnx20w7eoKRxWK4mQ==",
+  "crc32c": "1764644792"
+}
