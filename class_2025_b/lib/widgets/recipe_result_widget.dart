@@ -35,12 +35,15 @@ class RecipeResultWidget extends ConsumerWidget {
     return asyncRecipe.when(
       data: (recipe) {
 
-        late String url;
+        String? url;
+
+        String? path = recipe.imagePath;
 
         // ホストとポートの(画像生成時の環境による違いの)整合性をとる
-        if(recipe.imageUrl != null){
-          url = replaceHostInUrl(recipe.imageUrl!, storageHost);
-          url = replacePortInUrl(url, storagePort);
+        if(path != null){
+          url = getHttpsUrl(storageHost, storagePort, path);
+          // url = replaceHostInUrl(recipe.imageUrl!, storageHost);
+          // url = replacePortInUrl(url, storagePort);
         }
 
         print("=== RecipeResultWidget ===");
@@ -73,13 +76,13 @@ class RecipeResultWidget extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            recipe.imageUrl == null
+            recipe.imagePath == null
               ? 
               const Center(child: Text("画像がありません"))
               :
               SizedBox(
                 child: 
-                recipe.imageUrl == null ?
+                url == null ?
                 Image.asset("assets/images/no_image.png", fit: BoxFit.cover, width: double.infinity):
                 Image.network(url, fit: BoxFit.cover, width: double.infinity)
               ),

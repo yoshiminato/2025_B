@@ -47,16 +47,16 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
     final capturedImage = ref.read(capturedImageProvider);
     final uploadedImage = ref.read(uploadedImageProvider);
 
-    late final String? imageUrl;
+    late final String? imagePath;
 
     if(selectedImageType == SelectedImageType.captured && capturedImage != null) {
-      imageUrl = await strageService.storeImageAndGetUrl(capturedImage, "comments");
+      imagePath = await strageService.storeImageAndGetUrl(capturedImage, "comments");
     }
     else if(selectedImageType == SelectedImageType.uploaded && uploadedImage != null) {
-      imageUrl = await strageService.storeUint8ListImageAndGetUrl(uploadedImage, "comments");
+      imagePath = await strageService.storeUint8ListImageAndGetUrl(uploadedImage, "comments");
     }
     else {
-      imageUrl = null; // 画像がない場合は空文字
+      imagePath = null; // 画像がない場合は空文字
     }
 
     // ユーザー情報を取得
@@ -68,7 +68,7 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
       recipeId: recipeId,
       userId: (user == null) ? null : user.uid, // ユーザーIDがnullの場合は匿名とする
       content: text,
-      imageUrl: imageUrl,
+      imagePath: imagePath,
       timestamp: DateTime.now()
     );
 

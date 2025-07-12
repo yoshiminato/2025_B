@@ -4,7 +4,7 @@ class Comment{
   final String? userId;
   final String content;
   final DateTime timestamp;
-  final String? imageUrl;
+  final String? imagePath; // 画像のパス（ストレージ上のURL）
 
   Comment({
     required this.id,
@@ -12,7 +12,7 @@ class Comment{
     required this.userId,
     required this.content,
     required this.timestamp,
-    required this.imageUrl,
+    required this.imagePath,
   });
   // Map形式に変換するメソッド
   Map<String, dynamic> toMap() {
@@ -22,7 +22,7 @@ class Comment{
       'userId': userId,
       'content': content,
       'timestamp': timestamp.toIso8601String(),
-      'imageUrl': imageUrl,
+      'imagePath': imagePath,
     };
   }
 
@@ -34,7 +34,7 @@ class Comment{
       userId: map['userId'] ?? '',
       content: map['content'] ?? '',
       timestamp: DateTime.parse(map['timestamp']),
-      imageUrl: map['imageUrl'] as String?,
+      imagePath: map['imagePath'] as String?,
     );
   }
 }

@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:class_2025_b/error_handle.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:class_2025_b/global.dart';
+
 
 class DatabaseService{
 
@@ -324,6 +326,31 @@ class DatabaseService{
   //     return [];
   //   }
   // }
+
+  Future<void> urlToPath() async{
+    debugPrint("urlToPath: imageUrlをimagePathに変換します");
+    try {
+      final recipeCollection = FirebaseFirestore.instance.collection(recipeCollectionPath);
+      final querySnapshot = await recipeCollection.get();
+
+      for (final doc in querySnapshot.docs) {
+        final url = doc.data()['imageUrl'] as String?;
+        final path = url != null ? extractPathFromUrl(url) : null;
+        await doc.reference.update({'imagePath': path});
+      }
+
+      final commentCollection = FirebaseFirestore.instance.collection('Comment');
+      final commentQuerySnapshot = await commentCollection.get();
+      for (final doc in commentQuerySnapshot.docs) {
+        final url = doc.data()['imageUrl'] as String?;
+        final path = url != null ? Uri.parse(url).path : null;
+        await doc.reference.update({'imagePath': path});
+      }
+    } catch (e) {
+      debugPrint("urlToPathのエラー: $e");
+      handleError(e);
+    }
+  }
 
   /// imageUrlがnullのレシピをすべて削除する
   Future<void> deleteInvalidData() async {

@@ -1,4 +1,5 @@
 import 'package:class_2025_b/global.dart';
+import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:class_2025_b/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,6 +94,9 @@ void main() async {
     print("Functions Host: $functionsHost");
     print("Storage Host: $storageHost");
     print("Auth Host: $authHost");
+
+    final dbService = DatabaseService();
+    dbService.urlToPath();
     
     // 接続テストを実行
     await testFirestoreConnection();

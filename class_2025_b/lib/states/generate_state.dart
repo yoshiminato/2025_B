@@ -177,11 +177,11 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
 
     final storageService = StorageService();
     try {
-      final String? imageUrl = await storageService.storeBase64ImageAndGetUrl(base64Image, "recipe");
-      if (imageUrl == null) {
+      final String? imagePath = await storageService.storeBase64ImageAndGetUrl(base64Image, "recipe");
+      if (imagePath == null) {
         throw Exception("画像の保存に失敗しました");
       }
-      return imageUrl;
+      return imagePath;
     } 
     catch (e) {
       debugPrint("画像保存エラー: $e");
@@ -232,9 +232,9 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
 
     String base64Image = await _genImage(recipe);
 
-    String imageUrl = await _storeImage(base64Image);
+    String imagePath = await _storeImage(base64Image);
 
-    recipe.imageUrl = imageUrl; // 生成された画像URLをレシピに設定
+    recipe.imagePath = imagePath; // 生成された画像URLをレシピに設定
 
     String recipeId = await _registerRecipeToDB(recipe);
 

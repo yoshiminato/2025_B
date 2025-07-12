@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:class_2025_b/error_handle.dart';
+import 'package:class_2025_b/global.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:flutter/foundation.dart';
@@ -279,15 +281,28 @@ class CommentCard extends StatelessWidget {
   final Comment comment;
 
   @override
+
+
   Widget build(BuildContext context) {
 
+    String? url;
+
+    final path = comment.imagePath;
+
+    if (path != null) {
+      url = getHttpsUrl(storageHost, storagePort, path);
+      // url = replaceHostInUrl(comment.imageUrl!, storageHost);
+      // url = replacePortInUrl(url, storagePort);
+    }
+
+
+
+
     // コメントで表示する画像
-    final image = comment.imageUrl != null 
+    final image = url != null 
       // 画像が存在する場合は表示
-      ? Image.network(
-          comment.imageUrl!,
-          fit: BoxFit.cover,
-        ) 
+      ? Image.network(url, fit: BoxFit.cover)
+
       // 画像が存在しない場合は画像アイコンを表示
       : Container(
           color: Colors.grey[300],

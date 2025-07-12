@@ -19,6 +19,20 @@ String replaceHostInUrl(String url, String newHost) {
   });
 }
 
+String getHttpUrl(String host, int port, String path) {
+  // http://host:port/path
+  // パスが既に/で始まっている場合は重複を避ける
+  final cleanPath = path.startsWith('/') ? path : '/$path';
+  return 'http://$host:$port$cleanPath';
+}
+
+String getHttpsUrl(String host, int port, String path) {
+  // https://host:port/path
+  // パスが既に/で始まっている場合は重複を避ける
+  final cleanPath = path.startsWith('/') ? path : '/$path';
+  return 'https://$host:$port$cleanPath';
+}
+
 // ポート番号を置換する関数
 String replacePortInUrl(String url, int newPort) {
   // http(s)://host(:oldPort)?/path → http(s)://host:newPort/path
@@ -30,23 +44,36 @@ String replacePortInUrl(String url, int newPort) {
   });
 }
 
-// // Web/Android用: 10.0.2.2→hostingIP 変換
-// String fixEmulatorUrlForWeb(String url) {
-//   if (kIsWeb) {
-//     // Webの場合はhostingIPに変換
-//     return replaceHostInUrl(url, hostingIP);
-//   } else {
-//     try {
-//       if (Platform.isAndroid) {
-//         // Android実機の場合もhostingIPに変換
-//         return replaceHostInUrl(url, hostingIPForAndroidEmulator);
-//       }
-//     } catch (_) {
-//       // WebではPlatformは使えないので例外を握りつぶす
-//     }
-//   }
-//   return url;
-// }
+// URLからプロトコルを抽出する関数
+String extractProtocolFromUrl(String url) {
+  final reg = RegExp(r'^(https?):\/\/');
+  final match = reg.firstMatch(url);
+  return match?.group(1) ?? '';
+}
+
+// URLからポート番号を抽出する関数（ポートが指定されていない場合はnullを返す）
+int? extractPortFromUrl(String url) {
+  final reg = RegExp(r'^https?:\/\/[^:\/]+:(\d+)');
+  final match = reg.firstMatch(url);
+  if (match != null) {
+    return int.tryParse(match.group(1) ?? '');
+  }
+  return null;
+}
+
+// URLからパス部分のみを抽出する関数
+String extractPathFromUrl(String url) {
+  final reg = RegExp(r'^https?:\/\/[^\/]+(\/.*)?');
+  final match = reg.firstMatch(url);
+  return match?.group(1) ?? '/';
+}
+
+// URLからホスト名を抽出する関数
+String extractHostFromUrl(String url) {
+  final reg = RegExp(r'^https?:\/\/([^:\/]+)');
+  final match = reg.firstMatch(url);
+  return match?.group(1) ?? '';
+}
 
 // エミュレータと同じ端末で実行する場合のホスティングIP
 const hostForLocal = "localhost"; // ローカルホスト

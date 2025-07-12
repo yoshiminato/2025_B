@@ -176,18 +176,23 @@ class CarouselCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    late String url;
+    String? url;
+
+    final path = recipe.imagePath;
 
     // ホストとポートの(画像生成時の環境による違いの)整合性をとる
-    if(recipe.imageUrl != null){
-      url = replaceHostInUrl(recipe.imageUrl!, storageHost);
-      url = replacePortInUrl(url, storagePort);
+    if(path != null){
+      url = getHttpsUrl(storageHost, storagePort, path);
+      // url = replaceHostInUrl(recipe.imageUrl!, storageHost);
+      // url = replacePortInUrl(url, storagePort);
     }
+
+    debugPrint("url: $url");
 
     final imageContainer = SizedBox(
       width: imageSize,
       height: imageSize,
-      child: recipe.imageUrl != null
+      child: url != null
         ? Image.network(url, fit: BoxFit.cover)
         : Image.asset("assets/images/noImage.png", fit: BoxFit.cover,),
     );
