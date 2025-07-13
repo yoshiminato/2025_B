@@ -82,7 +82,7 @@ class RecipeResultWidget extends ConsumerWidget {
                 child: 
                 url == null ?
                 Image.asset("assets/images/no_image.png", fit: BoxFit.cover, width: double.infinity):
-                Image.network(url, fit: BoxFit.cover, width: double.infinity)
+                Image.network(ensureAltMediaParameter(url), fit: BoxFit.cover, width: double.infinity)
               ),
             const SizedBox(height: 8),
             Text(

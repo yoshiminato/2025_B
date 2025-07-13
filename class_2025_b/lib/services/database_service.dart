@@ -331,11 +331,14 @@ class DatabaseService{
     debugPrint("urlToPath: imageUrlをimagePathに変換します");
     try {
       final recipeCollection = FirebaseFirestore.instance.collection(recipeCollectionPath);
-      final querySnapshot = await recipeCollection.get();
+      final recipeQuerySnapshot = await recipeCollection.get();
 
-      for (final doc in querySnapshot.docs) {
+      for (final doc in recipeQuerySnapshot.docs) {
         final url = doc.data()['imageUrl'] as String?;
-        final path = url != null ? extractPathFromUrl(url) : null;
+        String? path;
+        if (url != null) {
+          path = extractPathFromUrl(url);
+        }
         await doc.reference.update({'imagePath': path});
       }
 
@@ -343,7 +346,10 @@ class DatabaseService{
       final commentQuerySnapshot = await commentCollection.get();
       for (final doc in commentQuerySnapshot.docs) {
         final url = doc.data()['imageUrl'] as String?;
-        final path = url != null ? Uri.parse(url).path : null;
+        String? path;
+        if (url != null) {
+          path = extractPathFromUrl(url);
+        }
         await doc.reference.update({'imagePath': path});
       }
     } catch (e) {

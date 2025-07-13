@@ -190,7 +190,7 @@ class CarouselCard extends ConsumerWidget {
       width: imageSize,
       height: imageSize,
       child: url != null
-        ? Image.network(url, fit: BoxFit.cover)
+        ? Image.network(ensureAltMediaParameter(url), fit: BoxFit.cover)
         : Image.asset("assets/images/noImage.png", fit: BoxFit.cover,),
     );
 

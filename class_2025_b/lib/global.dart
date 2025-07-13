@@ -63,7 +63,7 @@ int? extractPortFromUrl(String url) {
 
 // URLからパス部分のみを抽出する関数
 String extractPathFromUrl(String url) {
-  final reg = RegExp(r'^https?:\/\/[^\/]+(\/.*)?');
+  final reg = RegExp(r'^https?:\/\/[^\/]+(.*)');
   final match = reg.firstMatch(url);
   return match?.group(1) ?? '/';
 }
@@ -125,4 +125,25 @@ void showDebugMessage(String message) {
     print('[SHOW] $message');
     debugPrint('[SHOW] $message');
   }
+}
+
+// URLに?alt=mediaパラメータを追加する関数
+String ensureAltMediaParameter(String url) {
+  // 既に?alt=mediaが含まれている場合はそのまま返す
+  if (url.contains('?alt=media')) {
+    return url;
+  }
+  
+  // URLが空の場合は?alt=mediaのみを返す
+  if (url.isEmpty) {
+    return '?alt=media';
+  }
+  
+  // 既にクエリパラメータがある場合は&alt=mediaを追加
+  if (url.contains('?')) {
+    return '$url&alt=media';
+  }
+  
+  // クエリパラメータがない場合は?alt=mediaを追加
+  return '$url?alt=media';
 }

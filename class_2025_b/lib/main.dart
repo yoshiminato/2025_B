@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:class_2025_b/global.dart';
-import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:class_2025_b/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:cloud_functions/cloud_functions.dart";
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:class_2025_b/services/database_service.dart';
+
 
 
 
@@ -31,7 +32,7 @@ void main() async {
   print("=== After Init Check ===");
   print("firestorePort: $firestorePort");
 
-  // プラットフォーム別のデフォルト設定（ローカル用）
+  // // プラットフォーム別のデフォルト設定（ローカル用）
   if(kIsWeb){
     hostingHost   = hostForLocal; 
     functionsHost = hostForLocal;
@@ -73,7 +74,7 @@ void main() async {
   try {
     // Cloudflare Tunnelを使用する場合（HTTPSスキームを明示的に指定）
     
-    // Firebase SDKのデバッグログを有効にする
+    // // Firebase SDKのデバッグログを有効にする
     // FirebaseFirestore.instance.settings = const FirestoreSettings(
     //   persistenceEnabled: false,
     // );
@@ -90,12 +91,6 @@ void main() async {
     FirebaseStorage.instance.useStorageEmulator(storageHost, storagePort);
     await FirebaseAuth.instance.useAuthEmulator(authHost, authPort);
 
-    // // ローカルエミュレータを使用する場合
-    // FirebaseFirestore.instance.useFirestoreEmulator(firestoreHost, localFirestorePort);
-    // FirebaseFunctions.instance.useFunctionsEmulator(functionsHost, localFunctionsPort);  
-    // FirebaseStorage.instance.useStorageEmulator(storageHost, localStoragePort);
-    // await FirebaseAuth.instance.useAuthEmulator(authHost, localAuthPort);
-
     print("Firebaseのエミュレータに接続しました。");
     print("Firestore Host: $firestoreHost");
     print("Functions Host: $functionsHost");
@@ -104,6 +99,7 @@ void main() async {
 
     // final dbService = DatabaseService();
     // dbService.urlToPath();
+
     
     // 接続テストを実行
     await testFirestoreConnection();

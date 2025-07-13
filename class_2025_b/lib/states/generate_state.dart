@@ -207,6 +207,12 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
 
     updateState(GenerateState.registeringRecipe); // レシピ登録状態に更新
 
+    // imagePath のデバッグ出力
+    debugPrint("=== _registerRecipeToDB Debug ===");
+    debugPrint("recipe.imagePath: ${recipe.imagePath}");
+    debugPrint("recipe.id: ${recipe.id}");
+    debugPrint("recipe.title: ${recipe.title}");
+
     final dbService = DatabaseService();
 
     final String? recipeId = await dbService.addRecipe(recipe);
@@ -216,6 +222,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピIDがnullです");
     }
 
+    debugPrint("レシピ登録完了: recipeId = $recipeId");
     return recipeId;
   }
 
@@ -247,7 +254,13 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
 
     String imagePath = await _storeImage(base64Image);
 
+    debugPrint("=== genAndStoreRecipe Debug ===");
+    debugPrint("Generated imagePath: $imagePath");
+    debugPrint("Before setting - recipe.imagePath: ${recipe.imagePath}");
+
     recipe.imagePath = imagePath; // 生成された画像URLをレシピに設定
+
+    debugPrint("After setting - recipe.imagePath: ${recipe.imagePath}");
 
     String recipeId = await _registerRecipeToDB(recipe);
 

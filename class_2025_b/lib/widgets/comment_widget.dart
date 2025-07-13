@@ -301,7 +301,7 @@ class CommentCard extends StatelessWidget {
     // コメントで表示する画像
     final image = url != null 
       // 画像が存在する場合は表示
-      ? Image.network(url, fit: BoxFit.cover)
+      ? Image.network(ensureAltMediaParameter(url), fit: BoxFit.cover)
 
       // 画像が存在しない場合は画像アイコンを表示
       : Container(
