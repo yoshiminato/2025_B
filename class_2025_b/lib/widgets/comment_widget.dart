@@ -290,7 +290,7 @@ class CommentCard extends StatelessWidget {
     final path = comment.imagePath;
 
     if (path != null) {
-      url = getHttpsUrl(storageHost, storagePort, path);
+      url = getUrl(storageHost, storagePort, path);
       // url = replaceHostInUrl(comment.imageUrl!, storageHost);
       // url = replacePortInUrl(url, storagePort);
     }

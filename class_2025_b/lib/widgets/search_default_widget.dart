@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:class_2025_b/global.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
@@ -80,7 +81,7 @@ Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Co
           itemBuilder: (context, index) {
             return Container(
               width: 100,
-              margin: EdgeInsets.symmetric(horizontal: 8),
+              margin: EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(12),
@@ -137,7 +138,7 @@ class SortSelecterWidget extends ConsumerWidget {
           ],
         ),
       ),
-    );;
+    );
   }
 }
 
@@ -182,12 +183,8 @@ class CarouselCard extends ConsumerWidget {
 
     // ホストとポートの(画像生成時の環境による違いの)整合性をとる
     if(path != null){
-      url = getHttpsUrl(storageHost, storagePort, path);
-      // url = replaceHostInUrl(recipe.imageUrl!, storageHost);
-      // url = replacePortInUrl(url, storagePort);
+      url = getUrl(storageHost, storagePort, path);
     }
-
-    debugPrint("url: $url");
 
     final imageContainer = SizedBox(
       width: imageSize,
@@ -225,7 +222,7 @@ class CarouselCard extends ConsumerWidget {
           contentNotifier.state = ContentType.recipe;
         },
         child: Padding(
-          padding: EdgeInsets.all(5.0),
+          padding: EdgeInsets.all(2.0),
           child: column,
         ),
       );

@@ -79,7 +79,7 @@ class SideMenuWidget extends ConsumerWidget {
       color: Color.fromARGB(255, 248, 240, 238),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
-        children: [header, loginTile, logoutTile, customizeTile],
+        children: [loginTile, logoutTile, customizeTile],
       ),
     );
   }

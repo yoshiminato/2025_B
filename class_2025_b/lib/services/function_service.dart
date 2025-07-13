@@ -9,18 +9,14 @@ import 'package:class_2025_b/states/stock_item_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+
+const String basePath = "/recipe-ai-175b2/us-central1";
+
 class FunctionService {
 
-  late String basePath;
-
-  void getBaseURL() {
-
+  String getFunctionsURL() {
     debugPrint("FunctionService: getBaseURL()");
-
-    // Cloudflare Tunnel使用時はHTTPSでポート番号なし
-    basePath = "https://$functionsHost:$functionsPort/recipe-ai-175b2/us-central1";
-
-    debugPrint("FunctionService: basePath = $basePath");
+    return getUrl(functionsHost, functionsPort, basePath);
   }
 
   Future<Recipe?> generateRecipe(Filter filter,List<Review> reviews,List<Recipe> recipes) async {
@@ -77,7 +73,7 @@ class FunctionService {
     // return Future.delayed(const Duration(seconds: 2), () => recipe);
 
 
-    getBaseURL();
+    final functionsUrl = getFunctionsURL();
 
     // 食糧庫の食材を取得
     final items = await getStockItems();
@@ -165,7 +161,7 @@ class FunctionService {
       });
       // リクエスト送信
       final res = await http.post(
-        Uri.parse("$basePath/generateRecipe"),
+        Uri.parse("$functionsUrl/generateRecipe"),
         headers: {"Content-Type": "application/json"},
         body: requestBody
       );
@@ -224,7 +220,7 @@ class FunctionService {
     // const base64Image = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC";
     // return Future.delayed(const Duration(seconds: 2), () => base64Image);
 
-    getBaseURL();
+    final functionsUrl = getFunctionsURL();
 
     final prompt = '''
       以下のレシピの完成品を俯瞰で見たときのリアルな画像を生成し、base64エンコードした画像データを返してください。
@@ -241,7 +237,7 @@ class FunctionService {
     });
 
     final res = await http.post(
-      Uri.parse("$basePath/generateBase64Image"),
+      Uri.parse("$functionsUrl/generateBase64Image"),
       headers: {"Content-Type": "application/json"},
       body: requestBody
     );

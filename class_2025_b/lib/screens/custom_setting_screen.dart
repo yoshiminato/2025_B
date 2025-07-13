@@ -76,7 +76,10 @@ class CustomSettingScreen extends ConsumerWidget {
         ),
         title: const Text("カスタマイズ設定"),
       ),
-      body: body
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: body
+      )
     );
   }
 }

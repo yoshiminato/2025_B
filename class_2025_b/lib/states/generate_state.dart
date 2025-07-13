@@ -138,7 +138,13 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピ生成に失敗しました: $e");
     }
 
-    return recipe!;
+    // recipe がnullの場合のチェック
+    if (recipe == null) {
+      updateState(GenerateState.error);
+      throw Exception("レシピ生成の最大試行回数に達しました");
+    }
+
+    return recipe;
   }
 
   // 画像生成を行うメソッド
@@ -167,6 +173,13 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
         genCount++;
       }
     }
+
+     // recipe がnullの場合のチェック
+    if (base64Image == null) {
+      updateState(GenerateState.error);
+      throw Exception("レシピ画像生成の最大試行回数に達しました");
+    }
+
     return base64Image!;
   }
 

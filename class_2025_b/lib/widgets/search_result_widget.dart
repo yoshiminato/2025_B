@@ -93,7 +93,7 @@ class ListItem extends ConsumerWidget {
 
     // ホストとポートの(画像生成時の環境による違いの)整合性をとる
     if(path != null){
-      url = getHttpsUrl(storageHost, storagePort, path);
+      url = getUrl(storageHost, storagePort, path);
     }
 
     final item = ListTile(

@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:class_2025_b/global.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -11,50 +13,55 @@ import "package:cloud_functions/cloud_functions.dart";
 import 'package:firebase_storage/firebase_storage.dart';
 
 
+
 void main() async {
 
-  // Cloudflare Tunnelを使う場合の設定(使用しない場合はコメントアウト)
-  hostingHost   = CloudFlare.hostingHost;
-  functionsHost = CloudFlare.functionsHost;
-  firestoreHost = CloudFlare.firestoreHost;
-  storageHost   = CloudFlare.storageHost;
-  authHost      = CloudFlare.authHost;
-  functionsPort = CloudFlare.port;
-  firestorePort = CloudFlare.port;
-  storagePort   = CloudFlare.port;
-  authPort      = CloudFlare.port;
+  // // Cloudflare Tunnelを使う場合の設定(使用しない場合はコメントアウト)
+  // hostingHost   = CloudFlare.hostingHost;
+  // functionsHost = CloudFlare.functionsHost;
+  // firestoreHost = CloudFlare.firestoreHost;
+  // storageHost   = CloudFlare.storageHost;
+  // authHost      = CloudFlare.authHost;
+  // functionsPort = CloudFlare.port;
+  // firestorePort = CloudFlare.port;
+  // storagePort   = CloudFlare.port;
+  // authPort      = CloudFlare.port;
+  // getUrl = (String host, int port, String path) => getHttpsUrl(host, port, path);
   
   print("=== After Init Check ===");
   print("firestorePort: $firestorePort");
 
-  // // プラットフォーム別のデフォルト設定（ローカル用）
-  // if(kIsWeb){
-  //   hostingHost   = hostForLocal; 
-  //   functionsHost = hostForLocal;
-  //   firestoreHost = hostForLocal;
-  //   storageHost   = hostForLocal;
-  //   authHost      = hostForLocal;
-  // }
-  // else if(Platform.isAndroid) {
-  //   // Androidエミュレータの場合
-  //   hostingHost   = hostForAndroidEmulator;
-  //   functionsHost = hostForAndroidEmulator;
-  //   firestoreHost = hostForAndroidEmulator;
-  //   storageHost   = hostForAndroidEmulator;
-  //   authHost      = hostForAndroidEmulator;
-  // }
-  // else {
-  //   // その他のプラットフォーム（iOSやデスクトップなど）
-  //   hostingHost   = hostForLocal;
-  //   functionsHost = hostForLocal;
-  //   firestoreHost = hostForLocal;
-  //   storageHost   = hostForLocal;
-  //   authHost      = hostForLocal;
-  // }
-  // functionsPort = localFunctionsPort;
-  // firestorePort = localFirestorePort;
-  // storagePort   = localStoragePort;
-  // authPort      = localAuthPort;
+  // プラットフォーム別のデフォルト設定（ローカル用）
+  if(kIsWeb){
+    hostingHost   = hostForLocal; 
+    functionsHost = hostForLocal;
+    firestoreHost = hostForLocal;
+    storageHost   = hostForLocal;
+    authHost      = hostForLocal;
+  }
+  else{
+    if(Platform.isAndroid) {
+      // Androidエミュレータの場合
+      hostingHost   = hostForAndroidEmulator;
+      functionsHost = hostForAndroidEmulator;
+      firestoreHost = hostForAndroidEmulator;
+      storageHost   = hostForAndroidEmulator;
+      authHost      = hostForAndroidEmulator;
+    }
+    else {
+      // その他のプラットフォーム（iOSやデスクトップなど）
+      hostingHost   = hostForLocal;
+      functionsHost = hostForLocal;
+      firestoreHost = hostForLocal;
+      storageHost   = hostForLocal;
+      authHost      = hostForLocal;
+    }
+  }
+  functionsPort = localFunctionsPort;
+  firestorePort = localFirestorePort;
+  storagePort   = localStoragePort;
+  authPort      = localAuthPort;
+  getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
@@ -95,8 +102,8 @@ void main() async {
     print("Storage Host: $storageHost");
     print("Auth Host: $authHost");
 
-    final dbService = DatabaseService();
-    dbService.urlToPath();
+    // final dbService = DatabaseService();
+    // dbService.urlToPath();
     
     // 接続テストを実行
     await testFirestoreConnection();

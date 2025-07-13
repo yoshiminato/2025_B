@@ -108,6 +108,10 @@ int firestorePort    = CloudFlare.port;
 int storagePort      = CloudFlare.port;
 int authPort         = CloudFlare.port;
 
+late String Function(String host, int port, String path) getUrl = (host, port, path) => getHttpsUrl(host, port, path);
+
+
+
 // 画面上にログを表示するためのグローバル変数
 List<String> debugMessages = [];
 

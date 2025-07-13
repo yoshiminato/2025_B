@@ -137,7 +137,13 @@ class ReviewRatingRow extends HookConsumerWidget {
           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
         )),
         SizedBox(width: 2),
-        Text(notifier.value > 0 ? notifier.value.toString() : ''),
+        SizedBox(
+          width: 5, // 固定幅を設定
+          child: Text(
+            notifier.value > 0 ? notifier.value.toString() : '',
+            textAlign: TextAlign.center, // 中央揃え
+          ),
+        ),
       ],
     );
   }

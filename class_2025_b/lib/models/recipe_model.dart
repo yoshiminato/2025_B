@@ -1,5 +1,3 @@
-
-
 // レシピクラス
 import 'package:class_2025_b/models/review_model.dart';
 
@@ -8,7 +6,7 @@ class Recipe{
   String? id;                      // Firestore用のドキュメントID
   String title;                    // レシピのタイトル
   String description;              // レシピの説明
-  String? imagePath;
+  String? imagePath;               // レシピの画像パス（Firestore保存用）
   String? imageBase64;             // レシピの画像のBase64エンコードされた文字列（生成AIの出力受取用）
   Map<String, String> ingredients; // 材料のリスト
   List<String> steps;              // 調理手順のリスト {手順: 所要時間}
@@ -18,7 +16,7 @@ class Recipe{
   DateTime createdAt;              // 作成日時
   String? userId;                  // 作成者のUID
   int reviewCount;                 // レビュー数（初期値は0）
-  ReviewAverage reviewAverage; // レビューの平均値
+  ReviewAverage reviewAverage;     // レビューの平均値
 
   Recipe({
     this.id,
