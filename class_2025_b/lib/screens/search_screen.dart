@@ -46,12 +46,10 @@ class SearchScreen extends HookConsumerWidget {
       /* 検索文字列が提出されたら検索処理 */
       onSubmitted: (value) async {
         try{
-          // 検索結果プロバイダのNotifierを取得
-          final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
           // 検索結果を有で更新
           ref.read(hasSearchResultProvider.notifier).state = true;
-          // 検索処理
-          await searchResultNotifier.updateSearchResult();
+          // 検索結果更新トリガーをインクリメント
+          ref.read(searchTriggerProvider.notifier).state++;
         } 
         catch (e) {
           // エラーが発生した場合はスナックバーで通知

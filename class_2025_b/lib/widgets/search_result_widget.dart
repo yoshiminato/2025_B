@@ -17,7 +17,7 @@ class SearchResultWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
     // 検索結果をプロバイダから取得
-    final searchResult = ref.watch(searchResultNotifierProvider);
+    final searchResult = ref.watch(searchResultProvider);
 
     // 検索テキストをプロバイダから取得
     final searchText = ref.read(searchTextProvider);
@@ -27,8 +27,6 @@ class SearchResultWidget extends ConsumerWidget {
       icon: const Icon(Icons.arrow_back),
       iconSize: 15,
       onPressed: () {
-        // 検索結果をクリア
-        ref.read(searchResultNotifierProvider.notifier).clearSearchResult();
         // 検索結果がない状態に戻す
         ref.read(hasSearchResultProvider.notifier).state = false;
       },

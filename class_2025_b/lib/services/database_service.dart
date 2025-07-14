@@ -214,6 +214,12 @@ class DatabaseService{
         .where((keyword) => keyword.isNotEmpty)
         .toList();
       
+      // キーワードリストが空の場合は空のリストを返す
+      if (keywordsList.isEmpty) {
+        debugPrint("有効なキーワードがありません");
+        return [];
+      }
+      
       for (var keyword in keywordsList) {
         debugPrint("キーワード: $keyword");
       }

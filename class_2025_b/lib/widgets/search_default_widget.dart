@@ -181,8 +181,6 @@ class RadioTileWidget extends ConsumerWidget {
       onChanged: (value) {
         if (value != null) {
           ref.read(sortStateProvider.notifier).state = value;
-          final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
-          searchResultNotifier.updateSearchResult();
           Navigator.of(context).pop();
         }
       },

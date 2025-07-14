@@ -59,8 +59,7 @@ class ReviewFormWidget extends HookConsumerWidget {
             );
             if(!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("レビューを投稿しました")));
-            final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
-            searchResultNotifier.updateSearchResult();
+            ref.read(searchTriggerProvider.notifier).state++;
           } : null,
           child: const Text('レビューを投稿する'),
         )
