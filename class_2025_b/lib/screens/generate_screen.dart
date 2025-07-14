@@ -1,17 +1,10 @@
-import 'package:class_2025_b/models/filter_model.dart';
-import 'package:class_2025_b/services/database_service.dart';
-import 'package:class_2025_b/services/storage_service.dart';
 import 'package:class_2025_b/states/custom_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:class_2025_b/services/function_service.dart';
-import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
-import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/states/generate_state.dart';
-import 'package:class_2025_b/models/review_model.dart';
 import 'dart:ui';
 
 class GenerateScreen extends HookConsumerWidget {
@@ -70,16 +63,16 @@ class GenerateScreen extends HookConsumerWidget {
         dialog = SizedBox.shrink();
         break;
       case GenerateState.generatingRecipe:
-        dialog = dialog = Dialog(text: "レシピ生成中...");
+        dialog = dialog = Dialog(text: "レシピ生成中...", isError: false);
         break;
       case GenerateState.generatingImage:
-        dialog = Dialog(text: "レシピ画像生成中...");
+        dialog = Dialog(text: "レシピ画像生成中...", isError: false);
         break;
       case GenerateState.storingImage:
-        dialog = Dialog(text: "画像保存中...");
+        dialog = Dialog(text: "画像保存中...", isError: false);
         break;
       case GenerateState.registeringRecipe:
-        dialog = Dialog(text: "レシピ保存中...");
+        dialog = Dialog(text: "レシピ保存中...", isError: false);
         break;
       case GenerateState.error:
         dialog = Dialog(text: "レシピ生成に失敗しました",
@@ -87,7 +80,8 @@ class GenerateScreen extends HookConsumerWidget {
           ontap: () {
             notifier.reset();
             resetFilters();
-          }
+          },
+          isError: true
         );
     }
 
@@ -240,10 +234,11 @@ class GenerateScreen extends HookConsumerWidget {
 }
 
 class Dialog extends StatelessWidget {
-  const Dialog({super.key, required this.text, this.btnText, this.ontap});
+  const Dialog({super.key, required this.text, this.btnText, this.ontap, required this.isError});
   final String text;
   final String? btnText;
   final VoidCallback? ontap;
+  final bool isError;
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +249,20 @@ class Dialog extends StatelessWidget {
       children: [
         Text(text, style: const TextStyle(fontSize: 16)),
         const SizedBox(height: 24),
-        const CircularProgressIndicator(),
+        ...(
+          isError
+            ? [
+                Icon(Icons.warning, color: Colors.red, size: 48),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: ontap,
+                  child: Text(btnText ?? "生成画面に戻る"),
+                )
+              ]
+            : [
+                const CircularProgressIndicator()
+              ]
+        ),
       ],
     );
 
@@ -288,25 +296,7 @@ class Dialog extends StatelessWidget {
             ),
           ),
         ),
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              contentContainer,
-              if (btnText != null && ontap != null) ...[
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: ontap,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Text(btnText!),
-                ),
-              ],
-            ],
-          ),
-        ),
+        contentContainer
       ]
     );
   }

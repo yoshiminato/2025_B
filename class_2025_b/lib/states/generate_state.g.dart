@@ -7,12 +7,12 @@ part of 'generate_state.dart';
 // **************************************************************************
 
 String _$generateStateNotifierHash() =>
-    r'e474863ab3d03ff59a85defa09c3eeb274afaddb';
+    r'106bb69bb4647432250495fe44faa38366983dfa';
 
 /// See also [GenerateStateNotifier].
 @ProviderFor(GenerateStateNotifier)
 final generateStateNotifierProvider =
-    AutoDisposeNotifierProvider<GenerateStateNotifier, GenerateState>.internal(
+    NotifierProvider<GenerateStateNotifier, GenerateState>.internal(
       GenerateStateNotifier.new,
       name: r'generateStateNotifierProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,6 +22,6 @@ final generateStateNotifierProvider =
       allTransitiveDependencies: null,
     );
 
-typedef _$GenerateStateNotifier = AutoDisposeNotifier<GenerateState>;
+typedef _$GenerateStateNotifier = Notifier<GenerateState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

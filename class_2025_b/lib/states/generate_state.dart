@@ -29,7 +29,7 @@ final buttonLabels = [
 
 const generationLimit = 3; // レシピ再生成の最大回数
 
-@riverpod
+@Riverpod(keepAlive: true)
 class GenerateStateNotifier extends _$GenerateStateNotifier {
   @override
   GenerateState build() {

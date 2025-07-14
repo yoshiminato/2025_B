@@ -1,6 +1,6 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,13 +42,11 @@ void main() async {
       // firestoreHost = hostForAndroidEmulator;
       // storageHost   = hostForAndroidEmulator;
       // authHost      = hostForAndroidEmulator;
-
-      // Android実機の場合  
+      //実機の場合  
       hostingHost   = hostForAndroidDevice;
       functionsHost = hostForAndroidDevice;  
       firestoreHost = hostForAndroidDevice;
       storageHost   = hostForAndroidDevice;
-      authHost      = hostForAndroidDevice;
     }
     else {
       // その他のプラットフォーム（iOSやデスクトップなど）
@@ -64,8 +62,6 @@ void main() async {
   storagePort   = localStoragePort;
   authPort      = localAuthPort;
   getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
-  // authPort      = localAuthPort;
-  // getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,7 +77,6 @@ void main() async {
     print("firestore: $firestoreHost:$firestorePort");
     print("storage: $storageHost:$storagePort");
     print("auth: $authHost:$authPort");
-    
     
     FirebaseFirestore.instance.useFirestoreEmulator(firestoreHost, firestorePort);
     FirebaseFunctions.instance.useFunctionsEmulator(functionsHost, functionsPort);
