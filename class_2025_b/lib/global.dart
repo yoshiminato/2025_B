@@ -2,22 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 
-void debugLog(String message) {
-  if (kDebugMode) {
-    print('[DEBUG] $message'); // printはブラウザコンソールに出力される
-    debugPrint('[DEBUG] $message'); // debugPrintも併用
-  }
-}
+// アプリ名
+const appName = "ゴハンナニ？";
 
-String replaceHostInUrl(String url, String newHost) {
-  // http(s)://[IP or host]:[port]/
-  final reg = RegExp(r'^(https?://)([^:/]+)(:\\d+)?');
-  return url.replaceFirstMapped(reg, (m) {
-    final scheme = m.group(1) ?? '';
-    final port = m.group(3) ?? '';
-    return '$scheme$newHost$port';
-  });
-}
 
 String getHttpUrl(String host, int port, String path) {
   // http://host:port/path
@@ -33,33 +20,6 @@ String getHttpsUrl(String host, int port, String path) {
   return 'https://$host:$port$cleanPath';
 }
 
-// ポート番号を置換する関数
-String replacePortInUrl(String url, int newPort) {
-  // http(s)://host(:oldPort)?/path → http(s)://host:newPort/path
-  final reg = RegExp(r'^(https?://[^/:]+)(:\d+)?(\/.*)?');
-  return url.replaceFirstMapped(reg, (m) {
-    final schemeHost = m.group(1) ?? '';
-    final path = m.group(3) ?? '';
-    return '$schemeHost:$newPort$path';
-  });
-}
-
-// URLからプロトコルを抽出する関数
-String extractProtocolFromUrl(String url) {
-  final reg = RegExp(r'^(https?):\/\/');
-  final match = reg.firstMatch(url);
-  return match?.group(1) ?? '';
-}
-
-// URLからポート番号を抽出する関数（ポートが指定されていない場合はnullを返す）
-int? extractPortFromUrl(String url) {
-  final reg = RegExp(r'^https?:\/\/[^:\/]+:(\d+)');
-  final match = reg.firstMatch(url);
-  if (match != null) {
-    return int.tryParse(match.group(1) ?? '');
-  }
-  return null;
-}
 
 // URLからパス部分のみを抽出する関数
 String extractPathFromUrl(String url) {
