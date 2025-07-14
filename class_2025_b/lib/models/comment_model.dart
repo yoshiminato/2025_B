@@ -1,8 +1,11 @@
+import 'package:class_2025_b/models/review_model.dart';
+
 class Comment{
   final String? id;
   final String recipeId;
   final String? userId;
   final String content;
+  Review? review; // レビュー情報（オプション） 
   final DateTime timestamp;
   final String? imagePath; // 画像のパス（ストレージ上のURL）
 

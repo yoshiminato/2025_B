@@ -81,6 +81,9 @@ const hostForLocal = "localhost"; // ローカルホスト
 // Androidエミュレータ用のホスティングIP(Androidエミュレータから見たfirebaseEmulatorが起動している端末ののIP)
 const hostForAndroidEmulator = "10.0.2.2";
 
+// Android実機用のホスティングIP(実機から見たfirebaseEmulatorが起動している端末のIP)
+const hostForAndroidDevice = "192.168.0.7";
+
 // ローカルエミュレータのポート
 const int localFirestorePort = 8080;
 const int localFunctionsPort = 5001;

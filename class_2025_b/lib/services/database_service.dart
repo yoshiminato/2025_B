@@ -147,6 +147,9 @@ class DatabaseService{
 
     debugPrint("getReviewByRecipeId");
 
+    debugPrint("userId: $userId");
+    debugPrint("recipeId: $recipeId");
+
     try {
       // レビューコレクションの取得
       final reviewsRef = FirebaseFirestore.instance.collection('Review');
@@ -163,11 +166,15 @@ class DatabaseService{
       }
 
       if (querySnapshot.docs.isEmpty) {
+        debugPrint("レビューが見つかりません");
         return Review.empty; // デフォルト値を返す
       }
 
+      debugPrint("レビューが見つかりました: ${querySnapshot.docs.first["tasteRating"]}");
       final reveiwMap = querySnapshot.docs.first.data();
-      return Review.fromMap(reveiwMap);
+      final review = Review.fromMap(reveiwMap);
+      debugPrint("レビュー取得成功: tasteRating=${review.tasteRating}, easeRating=${review.easeRating}, cospRating=${review.cospRating}");
+      return review;
 
     } catch (e) {
       handleError(e);
@@ -327,37 +334,6 @@ class DatabaseService{
   //   }
   // }
 
-  Future<void> urlToPath() async{
-    debugPrint("urlToPath: imageUrlをimagePathに変換します");
-    try {
-      final recipeCollection = FirebaseFirestore.instance.collection(recipeCollectionPath);
-      final recipeQuerySnapshot = await recipeCollection.get();
-
-      for (final doc in recipeQuerySnapshot.docs) {
-        final url = doc.data()['imageUrl'] as String?;
-        String? path;
-        if (url != null) {
-          path = extractPathFromUrl(url);
-        }
-        await doc.reference.update({'imagePath': path});
-      }
-
-      final commentCollection = FirebaseFirestore.instance.collection('Comment');
-      final commentQuerySnapshot = await commentCollection.get();
-      for (final doc in commentQuerySnapshot.docs) {
-        final url = doc.data()['imageUrl'] as String?;
-        String? path;
-        if (url != null) {
-          path = extractPathFromUrl(url);
-        }
-        await doc.reference.update({'imagePath': path});
-      }
-    } catch (e) {
-      debugPrint("urlToPathのエラー: $e");
-      handleError(e);
-    }
-  }
-
   /// imageUrlがnullのレシピをすべて削除する
   Future<void> deleteInvalidData() async {
     try {
@@ -394,9 +370,6 @@ class DatabaseService{
   }
   //レビューの値を計算する
   Future<ReviewAverage> calreviewaverage(String recipeId) async {
-    double tasteweight = 0.4; // 味の重み
-    double easeweight = 0.3; // 作りやすさの重み
-    double cospweight = 0.3; // コストパフォーマンスの重み
     try {
       // レビューコレクションの取得
       final reviewsRef = FirebaseFirestore.instance.collection('Review');
@@ -431,7 +404,7 @@ class DatabaseService{
       double easeAve = easeSum / count;
       double cospAve = cospSum / count;
       double uniquenessAve = uniquenessSum / count; // ユニークさの平均を追加
-      double reccommend = (tasteAve*tasteweight + easeAve*easeweight + cospAve*cospweight);
+      double reccommend = (tasteAve*Review.tasteweight + easeAve*Review.easeweight + cospAve*Review.cospweight);
 
       final result = ReviewAverage(
         tasteAve: tasteAve,

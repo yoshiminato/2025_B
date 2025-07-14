@@ -9,8 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/models/comment_model.dart';
+import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/comment_state.dart';
 import 'package:class_2025_b/states/selected_image_state.dart';
+import 'package:class_2025_b/widgets/star_widget.dart';
 import 'package:file_picker/file_picker.dart';
 
 class CommentsWidget extends HookConsumerWidget {
@@ -264,7 +266,8 @@ class CommentsWidget extends HookConsumerWidget {
           const SizedBox(height: 16),
           inputPanel,
           const SizedBox(height: 16),
-          const Text("コメント一覧", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),          const SizedBox(height: 8),
+          const Text("コメント一覧", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),          
+          const SizedBox(height: 8),
           commentsPanel
         ],
       ),
@@ -291,12 +294,7 @@ class CommentCard extends StatelessWidget {
 
     if (path != null) {
       url = getUrl(storageHost, storagePort, path);
-      // url = replaceHostInUrl(comment.imageUrl!, storageHost);
-      // url = replacePortInUrl(url, storagePort);
     }
-
-
-
 
     // コメントで表示する画像
     final image = url != null 
@@ -304,10 +302,7 @@ class CommentCard extends StatelessWidget {
       ? Image.network(ensureAltMediaParameter(url), fit: BoxFit.cover)
 
       // 画像が存在しない場合は画像アイコンを表示
-      : Container(
-          color: Colors.grey[300],
-          child: const Icon(Icons.image),
-        );
+      : Container(color: Colors.grey[300],child: const Icon(Icons.image));
 
     const imageSize = 60.0;
 
@@ -318,18 +313,38 @@ class CommentCard extends StatelessWidget {
       child: image,
     );
 
+    Review? review = comment.review;
+    double? reccomend;
+
+    if(review != null){
+      debugPrint("review is not null");
+      reccomend = review.tasteRating * Review.tasteweight +
+        review.easeRating * Review.easeweight +
+        review.cospRating * Review.cospweight;
+      // debugPrint("review.tasteRating: ${review.tasteRating}");
+      // debugPrint("review.easeRating: ${review.easeRating}");
+      // debugPrint("review.cospRating: ${review.cospRating}");
+      // debugPrint("tasteweight: ${Review.tasteweight}");
+      // debugPrint("easeweight: ${Review.easeweight}"); 
+      // debugPrint("cospweight: ${Review.cospweight}");
+    }
+
     // テキストコメントのコンテナ(コメント, 投稿日時)
     final textCommentContainer = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        StarWidget(rating: reccomend),
         Text(comment.content),
         const SizedBox(height: 4),
         Text(
-          comment.timestamp.toString(),
+          // 投稿日時を日付のみ表示
+          comment.timestamp.toString().split(' ')[0],
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
     );
+
+    
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),                          

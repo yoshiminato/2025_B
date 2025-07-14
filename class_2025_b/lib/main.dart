@@ -32,7 +32,7 @@ void main() async {
   print("=== After Init Check ===");
   print("firestorePort: $firestorePort");
 
-  // // プラットフォーム別のデフォルト設定（ローカル用）
+  // プラットフォーム別のデフォルト設定（ローカル用）
   if(kIsWeb){
     hostingHost   = hostForLocal; 
     functionsHost = hostForLocal;

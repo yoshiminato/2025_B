@@ -126,6 +126,24 @@ final commentsNotifierProvider = FutureProvider<List<Comment>> ((ref) async {
   
   try {
     final comments = await dbService.getCommentsByRecipeId(recipeId);
+
+    for(Comment comment in comments) {
+      // レビュー情報を取得
+      if (comment.userId != null) {
+        final uid = comment.userId!;
+        final rid = ref.read(recipeIdProvider);//comment.recipeId;
+        if (rid == null) {
+          debugPrint("レシピIDがnullです。レビュー情報を取得できません。");
+          continue; // レシピIDがnullの場合はスキップ
+        }
+        final review = await dbService.getReviewByRecipeIdAndUserId(uid, rid);
+
+        comment.review = review; // コメントにレビュー情報を追加
+      } else {
+        comment.review = null; // ユーザーIDがない場合はレビューもnull
+      }
+    }
+
     return comments;
   } 
   catch (e) {

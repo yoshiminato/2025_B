@@ -5,6 +5,7 @@ import 'package:class_2025_b/states/search_state.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
+import 'package:class_2025_b/widgets/star_widget.dart';
 
 
 const tileImageSize = 70.0;
@@ -117,28 +118,7 @@ class ListItem extends ConsumerWidget {
           ),
           const SizedBox(height: 2),
           // レビューがなければ「レビューなし」と表示 
-          (recipe.reviewAverage.reccommend != 0) ?
-          Row(
-            children: [
-              // 星アイコン（小数対応）
-              for (int i = 1; i <= 5; i++)
-                rating >= i
-                  ? const Icon(Icons.star, color: Colors.amber, size: 14)
-                  : (rating >= i - 0.5
-                      ? const Icon(Icons.star_half, color: Colors.amber, size: 14)
-                      : const Icon(Icons.star_border, color: Colors.amber, size: 14)),
-              const SizedBox(width: 4),
-              Text(
-                rating.toStringAsFixed(1),
-                style: const TextStyle(fontSize: 10, color: Colors.black54),
-              ),
-            ],
-          )
-          :
-          const Text(
-            "レビューなし",
-            style: TextStyle(fontSize: 10, color: Colors.black54),
-          ),
+          StarWidget(rating: rating)
         ],
       ),
       onTap: () {
