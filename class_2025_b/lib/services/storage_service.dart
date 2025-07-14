@@ -27,6 +27,7 @@ class StorageService{
       return path;    
     }
     catch (e) {
+      debugPrint("======================================================================画像保存エラー: $e");
       handleError(e);
       throw Exception('画像の保存に失敗しました: ${e.toString()}');
     }

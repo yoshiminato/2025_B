@@ -19,16 +19,9 @@ class GenerateScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // --- アレルギー情報をKVからリセットする関数 ---
-
-    // レシピ生成中かどうかのフラグフック
-    final isGenerating = useState(false);
 
     final genState = ref.watch(generateStateNotifierProvider);
     final notifier = ref.read(generateStateNotifierProvider.notifier);
-
-    // レシピ作成者情報をレシピに追加
-    final user = ref.watch(userProvider);
 
     final usePantryOnly = useState(false);
     
@@ -89,17 +82,12 @@ class GenerateScreen extends HookConsumerWidget {
         dialog = Dialog(text: "レシピ保存中...");
         break;
       case GenerateState.error:
-        dialog = Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("レシピ生成に失敗しました"),
-              ElevatedButton(
-                onPressed: () => notifier.updateState(GenerateState.initial),
-                child: Text("レシピ生成画面に戻る")
-              )
-            ],
-          ),
+        dialog = Dialog(text: "レシピ生成に失敗しました",
+          btnText: "レシピ生成画面に戻る",
+          ontap: () {
+            notifier.reset();
+            resetFilters();
+          }
         );
     }
 
@@ -252,8 +240,10 @@ class GenerateScreen extends HookConsumerWidget {
 }
 
 class Dialog extends StatelessWidget {
-  const Dialog({super.key, required this.text});
+  const Dialog({super.key, required this.text, this.btnText, this.ontap});
   final String text;
+  final String? btnText;
+  final VoidCallback? ontap;
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +288,25 @@ class Dialog extends StatelessWidget {
             ),
           ),
         ),
-        contentContainer,
+        Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              contentContainer,
+              if (btnText != null && ontap != null) ...[
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: ontap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(btnText!),
+                ),
+              ],
+            ],
+          ),
+        ),
       ]
     );
   }

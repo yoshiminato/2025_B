@@ -44,9 +44,6 @@ class RecipeResultWidget extends ConsumerWidget {
           url = getUrl(storageHost, storagePort, path);
         }
 
-        print("=== RecipeResultWidget ===");
-        print("imageUrl: $url");
-
         final RecipeInfo rInfo = RecipeInfo(
           recipe.title, 
           recipe.servings, 

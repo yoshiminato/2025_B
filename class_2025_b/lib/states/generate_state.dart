@@ -198,6 +198,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
     } 
     catch (e) {
       debugPrint("画像保存エラー: $e");
+      updateState(GenerateState.error); // エラー状態に更新
       throw Exception("画像の保存に失敗しました: $e");
     }
   }

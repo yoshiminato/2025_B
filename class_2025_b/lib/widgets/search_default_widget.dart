@@ -85,26 +85,33 @@ Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Co
   final content = asyncRecipe.when(
     data: (recipes) {
 
+      final scrollController = ScrollController();
+
       return SizedBox(
         height: 120,
         child: 
           recipes.isEmpty
             ? Center(child: Text(emptyMessage))
-            : ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: recipes.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: 100,
-                  margin: EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: CarouselCard(recipe: recipes[index]),
-                );
-              },
-            ),
+            : Scrollbar(
+              controller: scrollController,
+              thumbVisibility: true,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                controller: scrollController,
+                itemCount: recipes.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 100,
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: CarouselCard(recipe: recipes[index]),
+                  );
+                },
+              ),
+            )
       );
     },
     error: (error, stack) => Center(child: Text("エラーが発生しました: $error")),

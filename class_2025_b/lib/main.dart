@@ -1,18 +1,15 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:class_2025_b/global.dart';
 import 'package:flutter/material.dart';
-import 'package:class_2025_b/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:cloud_functions/cloud_functions.dart";
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:class_2025_b/services/database_service.dart';
-
-
+import 'firebase_options.dart';
+import 'package:class_2025_b/global.dart';
+import 'package:class_2025_b/app.dart';
 
 
 void main() async {
@@ -28,9 +25,6 @@ void main() async {
   // storagePort   = CloudFlare.port;
   // authPort      = CloudFlare.port;
   // getUrl = (String host, int port, String path) => getHttpsUrl(host, port, path);
-  
-  print("=== After Init Check ===");
-  print("firestorePort: $firestorePort");
 
   // プラットフォーム別のデフォルト設定（ローカル用）
   if(kIsWeb){
@@ -42,12 +36,19 @@ void main() async {
   }
   else{
     if(Platform.isAndroid) {
-      // Androidエミュレータの場合
-      hostingHost   = hostForAndroidEmulator;
-      functionsHost = hostForAndroidEmulator;
-      firestoreHost = hostForAndroidEmulator;
-      storageHost   = hostForAndroidEmulator;
-      authHost      = hostForAndroidEmulator;
+      // // Androidエミュレータの場合
+      // hostingHost   = hostForAndroidEmulator;
+      // functionsHost = hostForAndroidEmulator;
+      // firestoreHost = hostForAndroidEmulator;
+      // storageHost   = hostForAndroidEmulator;
+      // authHost      = hostForAndroidEmulator;
+
+      // Android実機の場合  
+      hostingHost   = hostForAndroidDevice;
+      functionsHost = hostForAndroidDevice;  
+      firestoreHost = hostForAndroidDevice;
+      storageHost   = hostForAndroidDevice;
+      authHost      = hostForAndroidDevice;
     }
     else {
       // その他のプラットフォーム（iOSやデスクトップなど）
@@ -63,6 +64,8 @@ void main() async {
   storagePort   = localStoragePort;
   authPort      = localAuthPort;
   getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
+  // authPort      = localAuthPort;
+  // getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
 
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,12 +75,6 @@ void main() async {
 
   // エミュレータの接続
   try {
-    // Cloudflare Tunnelを使用する場合（HTTPSスキームを明示的に指定）
-    
-    // // Firebase SDKのデバッグログを有効にする
-    // FirebaseFirestore.instance.settings = const FirestoreSettings(
-    //   persistenceEnabled: false,
-    // );
 
     print("=== Firebaseエミュレータに接続中 ===");
     print("functions: $functionsHost:$functionsPort");
@@ -97,10 +94,6 @@ void main() async {
     print("Storage Host: $storageHost");
     print("Auth Host: $authHost");
 
-    // final dbService = DatabaseService();
-    // dbService.urlToPath();
-
-    
     // 接続テストを実行
     await testFirestoreConnection();
    } 

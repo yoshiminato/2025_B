@@ -100,8 +100,6 @@ class DatabaseService{
         return Comment.fromMap(data);
       }).toList();
 
-      debugPrint("コメントは$comment");
-
       return comment;
     }
     catch (e) {
@@ -147,9 +145,6 @@ class DatabaseService{
 
     debugPrint("getReviewByRecipeId");
 
-    debugPrint("userId: $userId");
-    debugPrint("recipeId: $recipeId");
-
     try {
       // レビューコレクションの取得
       final reviewsRef = FirebaseFirestore.instance.collection('Review');
@@ -170,10 +165,8 @@ class DatabaseService{
         return Review.empty; // デフォルト値を返す
       }
 
-      debugPrint("レビューが見つかりました: ${querySnapshot.docs.first["tasteRating"]}");
       final reveiwMap = querySnapshot.docs.first.data();
       final review = Review.fromMap(reveiwMap);
-      debugPrint("レビュー取得成功: tasteRating=${review.tasteRating}, easeRating=${review.easeRating}, cospRating=${review.cospRating}");
       return review;
 
     } catch (e) {
@@ -256,8 +249,6 @@ class DatabaseService{
         .get();
 
       final recipes = <Recipe>[];
-
-      debugPrint("取得したレシピ数: ${query.docs.length}");
 
       for(final doc in query.docs) {
         final data = doc.data();

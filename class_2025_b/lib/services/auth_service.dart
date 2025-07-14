@@ -82,6 +82,15 @@ class AuthService {
       rethrow;
     }
   }
+  
+  Future<void> signInAnonymously() async {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+    } on FirebaseAuthException catch (e) {
+      debugPrint(e.message);
+      rethrow;
+    }
+  } 
 
   // bool isEmailVerified() {
   //   final user = FirebaseAuth.instance.currentUser;

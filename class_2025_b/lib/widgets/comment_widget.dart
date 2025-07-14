@@ -317,16 +317,9 @@ class CommentCard extends StatelessWidget {
     double? reccomend;
 
     if(review != null){
-      debugPrint("review is not null");
       reccomend = review.tasteRating * Review.tasteweight +
         review.easeRating * Review.easeweight +
         review.cospRating * Review.cospweight;
-      // debugPrint("review.tasteRating: ${review.tasteRating}");
-      // debugPrint("review.easeRating: ${review.easeRating}");
-      // debugPrint("review.cospRating: ${review.cospRating}");
-      // debugPrint("tasteweight: ${Review.tasteweight}");
-      // debugPrint("easeweight: ${Review.easeweight}"); 
-      // debugPrint("cospweight: ${Review.cospweight}");
     }
 
     // テキストコメントのコンテナ(コメント, 投稿日時)

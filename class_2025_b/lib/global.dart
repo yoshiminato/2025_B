@@ -82,7 +82,7 @@ const hostForLocal = "localhost"; // ローカルホスト
 const hostForAndroidEmulator = "10.0.2.2";
 
 // Android実機用のホスティングIP(実機から見たfirebaseEmulatorが起動している端末のIP)
-const hostForAndroidDevice = "192.168.0.7";
+const hostForAndroidDevice = "192.168.11.13";
 
 // ローカルエミュレータのポート
 const int localFirestorePort = 8080;
@@ -111,7 +111,7 @@ int firestorePort    = CloudFlare.port;
 int storagePort      = CloudFlare.port;
 int authPort         = CloudFlare.port;
 
-late String Function(String host, int port, String path) getUrl = (host, port, path) => getHttpsUrl(host, port, path);
+String Function(String host, int port, String path) getUrl = (host, port, path) => getHttpsUrl(host, port, path);
 
 
 
