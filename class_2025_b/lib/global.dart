@@ -41,6 +41,7 @@ const hostForLocal = "localhost"; // ローカルホスト
 // Androidエミュレータ用のホスティングIP(Androidエミュレータから見たfirebaseEmulatorが起動している端末ののIP)
 const hostForAndroidEmulator = "10.0.2.2";
 
+
 // Android実機用のホスティングIP(実機から見たfirebaseEmulatorが起動している端末のIP)
 // const hostForAndroidDevice = "169.254.83.107";
 // const hostForAndroidDevice = "192.168.11.13";

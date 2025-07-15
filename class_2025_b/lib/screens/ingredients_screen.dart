@@ -72,6 +72,7 @@ class IconButtons extends StatelessWidget {
               index,
             );
             await kvservice.removeValueFromKeyTypeByIndex(
+
               KeyType.stockitemexpiryId,
               index,
             );
@@ -199,6 +200,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
               //     ),
               //   ),
               // ),
+
             ],
           ),
           Positioned(

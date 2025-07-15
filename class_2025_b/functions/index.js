@@ -88,70 +88,162 @@ export const generateRecipe = onRequest(async (request, response) => {
       return;
     }
 
-    logger.info("Gemini APIを呼び出してレシピを生成中...", { prompt });
+    logger.info("Gemini APIを呼び出してレシピを生成中...");//, { prompt });
+
+    // 試行するモデルのリスト（優先順位順）
+    const models = [
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-1.5-flash",
+      "gemini-1.5-pro",
+      "gemini-2.0-flash-exp",
+      "gemini-1.0-pro"
+    ];
+
+    // AIの出力テキスト
+    let result;
+    let lastError;
+
+    // 各モデルを順番に試行
+    for (const model of models) {
+      try {
+        logger.info(`モデル ${model} でレシピ生成を試行中...`);
+        
+        // プロンプトの結果を取得
+        result = await ai.models.generateContent({
+          model: model,
+          contents: prompt,
+          config: {
+            responseModalities: [Modality.TEXT],
+          },
+        });
+        
+        logger.info(`モデル ${model} で応答取得成功`);
+
+        logger.info("応答:", result);
+
+        let recipeJson = {};
+
+        // レスポンスを分析
+        for (const part of result.candidates[0].content.parts) {
+        
+          if (part.text) {
+          
+            // logger.info("Gemini API応答テキスト:", part.text);
+            // テキスト部分からJSONを抽出
+            const responseText = part.text;
+          
+            logger.info("応答テキスト:", responseText.substring(0, 20)); // 最初の100文字だけログ出力
+          
+            // より堅牢なJSONクリーニング処理
+            let cleanedResponse = responseText;
+          
+            // 1. ```json ``` マーカーを除去
+            cleanedResponse = cleanedResponse.replace(/```json\s*/g, '');
+            cleanedResponse = cleanedResponse.replace(/\s*```/g, '');
+          
+            // 2. JSONの開始位置を特定（最初の{を探す）
+            const jsonStart = cleanedResponse.indexOf('{');
+            const jsonEnd = cleanedResponse.lastIndexOf('}');
+          
+            if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+              cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+            } else {
+              logger.error(cleanedResponse.substring(0, 100));
+              throw new Error('有効なJSONが見つかりませんでした');
+            }
+          
+            try{
+              recipeJson = JSON.parse(cleanedResponse);
+              logger.info("JSONパース成功");
+              // レスポンスの構造を確認（画像データを除く）
+              const debugResponse = { ...recipeJson };
+              logger.info("パースされたレシピデータ:", debugResponse);
+
+              // Flutter側のRecipeモデルで必要なフィールドを追加
+              recipeJson.createdAt = new Date().toISOString();
+              recipeJson.reviwewCount = 0;
+              recipeJson.servings = recipeJson.servings || 1; // 分量を追加（デフォルト値は1）
+
+              response.status(200).json(recipeJson);
+              return; // 成功したら関数全体を終了
+            }
+            catch (jsonError) {
+              logger.error("JSONパースエラー:", jsonError);
+              throw jsonError; // エラーを再スローしてキャッチブロックで処理
+            }
+          }
+        break; // 成功したらループを抜ける
+      }  
+    } 
+    catch (error) {
+        logger.warn(`モデル ${model} でエラー:`, error.message);
+        lastError = error;
+        // 次のモデルを試行
+        continue;
+    }
     
-    const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt,
-      config: {
-        responseModalities: [Modality.TEXT],
-      },
-    });
-
-    logger.info("Gemini API応答:", result);
-
-    let recipeJson = {};
-
-    // レスポンスを分析
-    for (const part of result.candidates[0].content.parts) {
-
-      if (part.text) {
-
-        // logger.info("Gemini API応答テキスト:", part.text);
-        // テキスト部分からJSONを抽出
-        const responseText = part.text;
-
-        logger.info("==Gemini API応答テキスト:", responseText);
-
-        // より堅牢なJSONクリーニング処理
-        let cleanedResponse = responseText;
-
-        // 1. ```json ``` マーカーを除去
-        cleanedResponse = cleanedResponse.replace(/```json\s*/g, '');
-        cleanedResponse = cleanedResponse.replace(/\s*```/g, '');
-
-        // 2. JSONの開始位置を特定（最初の{を探す）
-        const jsonStart = cleanedResponse.indexOf('{');
-        const jsonEnd = cleanedResponse.lastIndexOf('}');
-
-        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-          cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
-        } else {
-          logger.error(cleanedResponse.substring(0, 100));
-          throw new Error('有効なJSONが見つかりませんでした');
-        }
-
-        try{
-          recipeJson = JSON.parse(cleanedResponse);
-          logger.info("JSONパース成功");
-          // レスポンスの構造を確認（画像データを除く）
-          const debugResponse = { ...recipeJson };
-          logger.info("パースされたレシピデータ:", debugResponse);
-        }
-        catch (jsonError) {
-          logger.error("JSONパースエラー:", jsonError);
-          response.status(500).json({ error: 'JSONパースエラー', details: jsonError.message });
-          return;
-        }
-      } 
+    // すべてのモデルで失敗した場合
+    if (!result) {
+      logger.error("すべてのモデルでレシピ生成に失敗:", lastError);
+      response.status(500).json({ 
+        error: 'すべてのGeminiモデルでレシピ生成に失敗しました', 
+        details: lastError?.message 
+      });
+      return;
     }
 
-    // Flutter側のRecipeモデルで必要なフィールドを追加
-    recipeJson.createdAt = new Date().toISOString();
-    recipeJson.reviwewCount = 0;
-    recipeJson.servings = recipeJson.servings || 1; // 分量を追加（デフォルト値は1）
+    // logger.info("応答:", result);
 
-    response.status(200).json(recipeJson);
+    // let recipeJson = {};
+
+    // // レスポンスを分析
+    // for (const part of result.candidates[0].content.parts) {
+
+    //   if (part.text) {
+
+    //     // logger.info("Gemini API応答テキスト:", part.text);
+    //     // テキスト部分からJSONを抽出
+    //     const responseText = part.text;
+
+    //     logger.info("==Gemini API応答テキスト:", responseText);
+
+    //     // より堅牢なJSONクリーニング処理
+    //     let cleanedResponse = responseText;
+
+    //     // 1. ```json ``` マーカーを除去
+    //     cleanedResponse = cleanedResponse.replace(/```json\s*/g, '');
+    //     cleanedResponse = cleanedResponse.replace(/\s*```/g, '');
+
+    //     // 2. JSONの開始位置を特定（最初の{を探す）
+    //     const jsonStart = cleanedResponse.indexOf('{');
+    //     const jsonEnd = cleanedResponse.lastIndexOf('}');
+
+    //     if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+    //       cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+    //     } else {
+    //       logger.error(cleanedResponse.substring(0, 100));
+    //       throw new Error('有効なJSONが見つかりませんでした');
+    //     }
+
+    //     try{
+    //       recipeJson = JSON.parse(cleanedResponse);
+    //       logger.info("JSONパース成功");
+    //       // レスポンスの構造を確認（画像データを除く）
+    //       const debugResponse = { ...recipeJson };
+    //       logger.info("パースされたレシピデータ:", debugResponse);
+    //     }
+    //     catch (jsonError) {
+    //       logger.error("JSONパースエラー:", jsonError);
+    //       response.status(500).json({ error: 'JSONパースエラー', details: jsonError.message });
+    //       return;
+    //     }
+    //   } 
+    }
+
+    
+
+    
     
   } catch (error) {
     response.status(500).json({ error: error.message, errorStack: error.stack, errorName: error.name });
@@ -197,14 +289,50 @@ export const generateBase64Image = onRequest(async (request, response) => {
    
     logger.info("Gemini APIを呼び出して画像を生成中...", { prompt });
 
-    // プロンプトの結果を取得
-    const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash-preview-image-generation",
-      contents: prompt,
-      config: {
-        responseModalities: [Modality.TEXT, Modality.IMAGE],
-      },
-    });
+    // 画像生成可能なモデルのリスト（優先順位順）
+    const imageModels = [
+      "gemini-2.0-flash-exp",
+      "gemini-2.0-flash-preview-image-generation",
+    ];
+
+    // 画像生成結果
+    let result;
+    let lastError;
+    
+    // 各モデルを順番に試行
+    for (const model of imageModels) {
+      try {
+        logger.info(`モデル ${model} で画像生成を試行中...`);
+        
+        // プロンプトの結果を取得
+        result = await ai.models.generateContent({
+          model: model,
+          contents: prompt,
+          config: {
+            responseModalities: [Modality.TEXT, Modality.IMAGE],
+          },
+        });
+        
+        logger.info(`モデル ${model} で画像生成成功`);
+        break; // 成功したらループを抜ける
+        
+      } catch (error) {
+        logger.warn(`モデル ${model} でエラー:`, error.message);
+        lastError = error;
+        // 次のモデルを試行
+        continue;
+      }
+    }
+    
+    // すべてのモデルで失敗した場合
+    if (!result) {
+      logger.error("すべてのモデルで画像生成に失敗:", lastError);
+      response.status(500).json({ 
+        error: 'すべてのGeminiモデルで画像生成に失敗しました', 
+        details: lastError?.message 
+      });
+      return;
+    }
 
     logger.info("Gemini API応答:", result);
 

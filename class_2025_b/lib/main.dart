@@ -63,6 +63,7 @@ void main() async {
   authPort      = localAuthPort;
   getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
 
+
   // Firebaseの初期化　おまじない
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

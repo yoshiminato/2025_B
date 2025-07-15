@@ -145,6 +145,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
     }
 
     return recipe;
+
   }
 
   // 画像生成を行うメソッド
@@ -173,6 +174,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
         genCount++;
       }
     }
+
 
      // recipe がnullの場合のチェック
     if (base64Image == null) {

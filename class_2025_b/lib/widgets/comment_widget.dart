@@ -1,3 +1,4 @@
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:class_2025_b/error_handle.dart';
@@ -12,8 +13,10 @@ import 'package:class_2025_b/models/comment_model.dart';
 import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/comment_state.dart';
 import 'package:class_2025_b/states/selected_image_state.dart';
+
 import 'package:class_2025_b/widgets/star_widget.dart';
 import 'package:file_picker/file_picker.dart';
+
 
 class CommentsWidget extends HookConsumerWidget {
 
@@ -40,6 +43,7 @@ class CommentsWidget extends HookConsumerWidget {
     final capturedImage = ref.watch(capturedImageProvider);
 
     final uploadedImage = ref.watch(uploadedImageProvider);
+
 
     // コメント一覧の取得
     final commentsPanel = ref.watch(commentsNotifierProvider).when(
@@ -100,12 +104,14 @@ class CommentsWidget extends HookConsumerWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
+
                 child: switch (selectedImageType) {
                   SelectedImageType.captured when capturedImage != null =>
                     Image.file(capturedImage, fit: BoxFit.cover),
                   SelectedImageType.uploaded when uploadedImage != null =>
                     Image.memory(uploadedImage, fit: BoxFit.cover),
                   _ => const SizedBox.shrink(),}
+
               ),
             ),
             // 削除ボタン
