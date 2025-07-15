@@ -95,39 +95,50 @@ class ListItem extends ConsumerWidget {
       url = getUrl(storageHost, storagePort, path);
     }
 
-    final item = ListTile(
-      leading: url != null
-        ? Image.network(ensureAltMediaParameter(url), width: tileImageSize, height: tileImageSize, fit: BoxFit.cover)
-        : Image.asset("assets/images/noImage.png", width: tileImageSize, height: tileImageSize, fit: BoxFit.cover),
-      title: Text(
-        recipe.title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis, // テキストが長い場合は省略
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            recipe.ingredients.keys.join(", "),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 8)
-          ),
-          const SizedBox(height: 2),
-          // レビューがなければ「レビューなし」と表示 
-          StarWidget(rating: rating)
-        ],
-      ),
-      onTap: () {
-        // レシピの詳細画面に遷移する処理を追加
-        // レシピIDを状態管理に保存
-        final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-        recipeIdNotifier.state = recipe.id;
-        // レシピの詳細画面に遷移
-        final contentNotifier = ref.read(homeContentTypeProvider.notifier);
-        contentNotifier.state = ContentType.recipe;
-      },
+    final image = url != null
+     ? Image.network(ensureAltMediaParameter(url), fit: BoxFit.cover)
+     : Image.asset("assets/images/noImage.png", fit: BoxFit.cover,);
+
+    final imageContainer = SizedBox(
+      width: tileImageSize,
+      height: tileImageSize,
+      child: image,
+    );
+
+    final title = Text(
+      recipe.title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis, // テキストが長い場合は省略
+      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
+    );
+
+    final ingredients = Text(
+      recipe.ingredients.keys.join(", "),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontSize: 8)
+    );  
+
+    final revcipeData = Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        title,
+        const SizedBox(height: 2),
+        ingredients,
+        const SizedBox(height: 2),
+        StarWidget(rating: rating)
+      ],
+    );
+
+    final item = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        imageContainer,
+        SizedBox(width: 10),
+        Expanded(child: revcipeData)
+      ],
     );
     
     final itemContainer = SizedBox(
@@ -135,17 +146,30 @@ class ListItem extends ConsumerWidget {
       height: tileImageSize + 18, // 星表示分高さを少し増やす
       child: item
     );
-    
-    return Card(
+
+    final itemCard = Card(
       elevation: 4, // 影の強さ
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5.0),
+        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
         child: itemContainer,
       ),
     );
+    
+    return InkWell(
+      child: itemCard,
+      onTap: () {
+        // レシピの詳細画面に遷移する処理を追加
+        final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+        recipeIdNotifier.state = recipe.id;
+        // レシピの詳細画面に遷移
+        final contentNotifier = ref.read(homeContentTypeProvider.notifier);
+        contentNotifier.state = ContentType.recipe;
+      },
+    ); 
+    
   }
 }
 

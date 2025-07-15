@@ -184,21 +184,21 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                   },
                 ),
               ),
-              Material(
-                color: Colors.orange.shade50,
-                child: Container(
-                  height: 40,
-                  alignment: Alignment.center,
-                  child: Text(
-                    "下帯",
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
+              // Material(
+              //   color: Colors.orange.shade50,
+              //   child: Container(
+              //     height: 40,
+              //     alignment: Alignment.center,
+              //     child: Text(
+              //       "下帯",
+              //       style: const TextStyle(
+              //         fontSize: 15,
+              //         fontWeight: FontWeight.bold,
+              //       ),
+              //       textAlign: TextAlign.center,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
           Positioned(
