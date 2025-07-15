@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:class_2025_b/global.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
@@ -10,6 +11,7 @@ import 'package:class_2025_b/states/user_recipe_state.dart';
 import 'package:class_2025_b/states/history_recipe_id_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/search_state.dart';
+import 'package:class_2025_b/states/user_state.dart';
 
 
 class SearchDefaultWidget extends ConsumerWidget {
@@ -23,6 +25,12 @@ class SearchDefaultWidget extends ConsumerWidget {
     final asyncUsersRecipes = ref.watch(usersRecipesProvider);
     final asyncHistryRecipes = ref.watch(historyRecipesProvider);
 
+    final user = ref.watch(userProvider);
+    final usersRecipeEmptyMsg =
+      user != null
+      ? "自分のレシピはありません"
+      : "ログインしていないため、自分のレシピは表示できません";
+
     final column = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center, // 左寄せに変更
@@ -31,24 +39,28 @@ class SearchDefaultWidget extends ConsumerWidget {
           "最近生成されたレシピ",
           asyncRecentRecipes, 
           Colors.pink,
+          "生成されたレシピはありません",
         ),
         const SizedBox(height: 20),
         buildRecipeSection(
           "お気に入りレシピ", 
           asyncFavoriteRecipes, 
           Colors.blue,
+          "お気に入りレシピはありません",
         ),
         const SizedBox(height: 20),
         buildRecipeSection(
           "自分のレシピ", 
           asyncUsersRecipes, 
           Colors.green,
+          usersRecipeEmptyMsg
         ),
         const SizedBox(height: 20),
         buildRecipeSection(
           "閲覧履歴", 
           asyncHistryRecipes, 
           Colors.orange,
+          "閲覧履歴はありません",
         ),
       ],
     );
@@ -61,7 +73,7 @@ class SearchDefaultWidget extends ConsumerWidget {
 final double imageSize = 70; // カルーセルカードの画像サイズ
 
 // レシピセクションを構築する関数
-Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Color color) {
+Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Color color, String emptyMessage) {
 
   // ヘッダー部分
   final header = Padding(
@@ -72,23 +84,34 @@ Widget buildRecipeSection(String title, AsyncValue<List<Recipe>> asyncRecipe, Co
   // コンテンツ部分
   final content = asyncRecipe.when(
     data: (recipes) {
+
+      final scrollController = ScrollController();
+
       return SizedBox(
         height: 120,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: recipes.length,
-          itemBuilder: (context, index) {
-            return Container(
-              width: 100,
-              margin: EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
+        child: 
+          recipes.isEmpty
+            ? Center(child: Text(emptyMessage))
+            : Scrollbar(
+              controller: scrollController,
+              thumbVisibility: true,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                controller: scrollController,
+                itemCount: recipes.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 100,
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: CarouselCard(recipe: recipes[index]),
+                  );
+                },
               ),
-              child: CarouselCard(recipe: recipes[index]),
-            );
-          },
-        ),
+            )
       );
     },
     error: (error, stack) => Center(child: Text("エラーが発生しました: $error")),
@@ -137,7 +160,7 @@ class SortSelecterWidget extends ConsumerWidget {
           ],
         ),
       ),
-    );;
+    );
   }
 }
 
@@ -158,8 +181,6 @@ class RadioTileWidget extends ConsumerWidget {
       onChanged: (value) {
         if (value != null) {
           ref.read(sortStateProvider.notifier).state = value;
-          final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
-          searchResultNotifier.updateSearchResult();
           Navigator.of(context).pop();
         }
       },
@@ -176,15 +197,21 @@ class CarouselCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
+    String? url;
+
+    final path = recipe.imagePath;
+
+    // ホストとポートの(画像生成時の環境による違いの)整合性をとる
+    if(path != null){
+      url = getUrl(storageHost, storagePort, path);
+    }
+
     final imageContainer = SizedBox(
       width: imageSize,
       height: imageSize,
-      child: recipe.imageUrl != null
-        ? Image.network(replaceHostInUrl(recipe.imageUrl!, storageHost), fit: BoxFit.cover)
-        : Image.asset(
-            "assets/images/noImage.png",
-            fit: BoxFit.cover,
-          ),
+      child: url != null
+        ? Image.network(ensureAltMediaParameter(url), fit: BoxFit.cover)
+        : Image.asset("assets/images/noImage.png", fit: BoxFit.cover,),
     );
 
     final column = Column(
@@ -215,7 +242,7 @@ class CarouselCard extends ConsumerWidget {
           contentNotifier.state = ContentType.recipe;
         },
         child: Padding(
-          padding: EdgeInsets.all(5.0),
+          padding: EdgeInsets.all(2.0),
           child: column,
         ),
       );

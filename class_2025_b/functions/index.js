@@ -103,7 +103,7 @@ export const generateRecipe = onRequest(async (request, response) => {
     // AIの出力テキスト
     let result;
     let lastError;
-    
+
     // 各モデルを順番に試行
     for (const model of models) {
       try {

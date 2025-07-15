@@ -1,40 +1,39 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/material.dart';
 
-void debugLog(String message) {
-  if (kDebugMode) {
-    print('[DEBUG] $message'); // printはブラウザコンソールに出力される
-    debugPrint('[DEBUG] $message'); // debugPrintも併用
-  }
+// アプリ名
+const appName = "ゴハンナニ？";
+
+
+String getHttpUrl(String host, int port, String path) {
+  // http://host:port/path
+  // パスが既に/で始まっている場合は重複を避ける
+  final cleanPath = path.startsWith('/') ? path : '/$path';
+  return 'http://$host:$port$cleanPath';
 }
 
-String replaceHostInUrl(String url, String newHost) {
-  // http(s)://[IP or host]:[port]/
-  final reg = RegExp(r'^(https?://)([^:/]+)(:\\d+)?');
-  return url.replaceFirstMapped(reg, (m) {
-    final scheme = m.group(1) ?? '';
-    final port = m.group(3) ?? '';
-    return '$scheme$newHost$port';
-  });
+String getHttpsUrl(String host, int port, String path) {
+  // https://host:port/path
+  // パスが既に/で始まっている場合は重複を避ける
+  final cleanPath = path.startsWith('/') ? path : '/$path';
+  return 'https://$host:$port$cleanPath';
 }
 
-// // Web/Android用: 10.0.2.2→hostingIP 変換
-// String fixEmulatorUrlForWeb(String url) {
-//   if (kIsWeb) {
-//     // Webの場合はhostingIPに変換
-//     return replaceHostInUrl(url, hostingIP);
-//   } else {
-//     try {
-//       if (Platform.isAndroid) {
-//         // Android実機の場合もhostingIPに変換
-//         return replaceHostInUrl(url, hostingIPForAndroidEmulator);
-//       }
-//     } catch (_) {
-//       // WebではPlatformは使えないので例外を握りつぶす
-//     }
-//   }
-//   return url;
-// }
+
+// URLからパス部分のみを抽出する関数
+String extractPathFromUrl(String url) {
+  final reg = RegExp(r'^https?:\/\/[^\/]+(.*)');
+  final match = reg.firstMatch(url);
+  return match?.group(1) ?? '/';
+}
+
+// URLからホスト名を抽出する関数
+String extractHostFromUrl(String url) {
+  final reg = RegExp(r'^https?:\/\/([^:\/]+)');
+  final match = reg.firstMatch(url);
+  return match?.group(1) ?? '';
+}
 
 // エミュレータと同じ端末で実行する場合のホスティングIP
 const hostForLocal = "localhost"; // ローカルホスト
@@ -42,42 +41,42 @@ const hostForLocal = "localhost"; // ローカルホスト
 // Androidエミュレータ用のホスティングIP(Androidエミュレータから見たfirebaseEmulatorが起動している端末ののIP)
 const hostForAndroidEmulator = "10.0.2.2";
 
-// 以下のIPはローカルでのテスト用
-// const hostingIP = "localhost";
-// const functionsIP = hostingIP;
-// const firestoreIP = hostingIP;
-// const storageIP   = hostingIP; 
-// const authIP      = hostingIP;
 
-// 以下のIPはローカルトンネルを使う場合のテスト用
-// url発行ごとに書き換える必要あり
-// const hostingHost   = "hosting.loca.lt";
-// const functionsHost = "functions.loca.lt";
-// const firestoreHost = "firestore.loca.lt";
-// const storageHost   = "storage.loca.lt";
-// const authHost      = "auth.loca.lt";
+// Android実機用のホスティングIP(実機から見たfirebaseEmulatorが起動している端末のIP)
+// const hostForAndroidDevice = "169.254.83.107";
+// const hostForAndroidDevice = "192.168.11.13";
+const hostForAndroidDevice = "10.170.6.228";
 
-// 以下のIPはCloudflare Tunnelを使う場合のテスト用
-// url発行ごとに書き換える必要あり
-// const hostingHost   = "posts-advantage-collective-cookies.trycloudflare.com";
-// const functionsHost = "tube-ev-payments-scenes.trycloudflare.com";
-// const firestoreHost = "throws-toll-minimize-nasa.trycloudflare.com";
-// const storageHost   = "entirely-food-ks-nursing.trycloudflare.com";
-// const authHost      = "titanium-expects-locked-webmaster.trycloudflare.com";
+// ローカルエミュレータのポート
+const int localFirestorePort = 8080;
+const int localFunctionsPort = 5001;
+const int localStoragePort = 9199;
+const int localAuthPort = 9099;
 
-// Androidエミュレータで実行する場合
-const hostingHost   = hostForAndroidEmulator;
-const functionsHost = hostForAndroidEmulator;
-const firestoreHost = hostForAndroidEmulator;
-const storageHost   = hostForAndroidEmulator;
-const authHost      = hostForAndroidEmulator;
+class CloudFlare{
+  static const String hostingHost   = "host.2025classb.com";
+  static const String functionsHost = "functions.2025classb.com";
+  static const String firestoreHost = "firestore.2025classb.com";
+  static const String storageHost   = "storage.2025classb.com";
+  static const String authHost      = "auth.2025classb.com";
+  static const int port = 443;
+}
 
-// // エミュレータと同じ端末で実行する場合
-// const hostingHost   = hostForLocal;
-// const functionsHost = hostForLocal;
-// const firestoreHost = hostForLocal;
-// const storageHost   = hostForLocal;
-// const authHost      = hostForLocal;
+
+// グローバル変数（初期化）
+String hostingHost   = CloudFlare.hostingHost;
+String functionsHost = CloudFlare.functionsHost;
+String firestoreHost = CloudFlare.firestoreHost;
+String storageHost   = CloudFlare.storageHost;
+String authHost      = CloudFlare.authHost;
+int functionsPort    = CloudFlare.port;
+int firestorePort    = CloudFlare.port;
+int storagePort      = CloudFlare.port;
+int authPort         = CloudFlare.port;
+
+String Function(String host, int port, String path) getUrl = (host, port, path) => getHttpsUrl(host, port, path);
+
+
 
 // 画面上にログを表示するためのグローバル変数
 List<String> debugMessages = [];
@@ -92,4 +91,25 @@ void showDebugMessage(String message) {
     print('[SHOW] $message');
     debugPrint('[SHOW] $message');
   }
+}
+
+// URLに?alt=mediaパラメータを追加する関数
+String ensureAltMediaParameter(String url) {
+  // 既に?alt=mediaが含まれている場合はそのまま返す
+  if (url.contains('?alt=media')) {
+    return url;
+  }
+  
+  // URLが空の場合は?alt=mediaのみを返す
+  if (url.isEmpty) {
+    return '?alt=media';
+  }
+  
+  // 既にクエリパラメータがある場合は&alt=mediaを追加
+  if (url.contains('?')) {
+    return '$url&alt=media';
+  }
+  
+  // クエリパラメータがない場合は?alt=mediaを追加
+  return '$url?alt=media';
 }

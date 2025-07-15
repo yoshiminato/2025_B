@@ -29,7 +29,7 @@ final buttonLabels = [
 
 const generationLimit = 3; // レシピ再生成の最大回数
 
-@riverpod
+@Riverpod(keepAlive: true)
 class GenerateStateNotifier extends _$GenerateStateNotifier {
   @override
   GenerateState build() {
@@ -138,12 +138,14 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピ生成に失敗しました: $e");
     }
 
+    // recipe がnullの場合のチェック
     if (recipe == null) {
-      updateState(GenerateState.error); // エラー状態に更新
-      throw Exception("レシピ生成に失敗しました");
+      updateState(GenerateState.error);
+      throw Exception("レシピ生成の最大試行回数に達しました");
     }
 
-    return recipe!;
+    return recipe;
+
   }
 
   // 画像生成を行うメソッド
@@ -173,9 +175,11 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       }
     }
 
+
+     // recipe がnullの場合のチェック
     if (base64Image == null) {
-      updateState(GenerateState.error); // エラー状態に更新
-      throw Exception("画像生成に失敗しました");
+      updateState(GenerateState.error);
+      throw Exception("レシピ画像生成の最大試行回数に達しました");
     }
 
     return base64Image!;
@@ -188,14 +192,15 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
 
     final storageService = StorageService();
     try {
-      final String? imageUrl = await storageService.storeBase64ImageAndGetUrl(base64Image, "recipe");
-      if (imageUrl == null) {
+      final String? imagePath = await storageService.storeBase64ImageAndGetUrl(base64Image, "recipe");
+      if (imagePath == null) {
         throw Exception("画像の保存に失敗しました");
       }
-      return imageUrl;
+      return imagePath;
     } 
     catch (e) {
       debugPrint("画像保存エラー: $e");
+      updateState(GenerateState.error); // エラー状態に更新
       throw Exception("画像の保存に失敗しました: $e");
     }
   }
@@ -214,6 +219,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピIDがnullです");
     }
 
+    debugPrint("レシピ登録完了: recipeId = $recipeId");
     return recipeId;
   }
 
@@ -243,9 +249,9 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
 
     String base64Image = await _genImage(recipe);
 
-    String imageUrl = await _storeImage(base64Image);
+    String imagePath = await _storeImage(base64Image);
 
-    recipe.imageUrl = imageUrl; // 生成された画像URLをレシピに設定
+    recipe.imagePath = imagePath; // 生成された画像URLをレシピに設定
 
     String recipeId = await _registerRecipeToDB(recipe);
 

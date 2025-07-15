@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:class_2025_b/error_handle.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:class_2025_b/global.dart';
+
 
 class DatabaseService{
 
@@ -98,8 +100,6 @@ class DatabaseService{
         return Comment.fromMap(data);
       }).toList();
 
-      debugPrint("コメントは$comment");
-
       return comment;
     }
     catch (e) {
@@ -161,11 +161,13 @@ class DatabaseService{
       }
 
       if (querySnapshot.docs.isEmpty) {
+        debugPrint("レビューが見つかりません");
         return Review.empty; // デフォルト値を返す
       }
 
       final reveiwMap = querySnapshot.docs.first.data();
-      return Review.fromMap(reveiwMap);
+      final review = Review.fromMap(reveiwMap);
+      return review;
 
     } catch (e) {
       handleError(e);
@@ -212,6 +214,12 @@ class DatabaseService{
         .where((keyword) => keyword.isNotEmpty)
         .toList();
       
+      // キーワードリストが空の場合は空のリストを返す
+      if (keywordsList.isEmpty) {
+        debugPrint("有効なキーワードがありません");
+        return [];
+      }
+      
       for (var keyword in keywordsList) {
         debugPrint("キーワード: $keyword");
       }
@@ -247,8 +255,6 @@ class DatabaseService{
         .get();
 
       final recipes = <Recipe>[];
-
-      debugPrint("取得したレシピ数: ${query.docs.length}");
 
       for(final doc in query.docs) {
         final data = doc.data();
@@ -361,9 +367,6 @@ class DatabaseService{
   }
   //レビューの値を計算する
   Future<ReviewAverage> calreviewaverage(String recipeId) async {
-    double tasteweight = 0.4; // 味の重み
-    double easeweight = 0.3; // 作りやすさの重み
-    double cospweight = 0.3; // コストパフォーマンスの重み
     try {
       // レビューコレクションの取得
       final reviewsRef = FirebaseFirestore.instance.collection('Review');
@@ -398,7 +401,7 @@ class DatabaseService{
       double easeAve = easeSum / count;
       double cospAve = cospSum / count;
       double uniquenessAve = uniquenessSum / count; // ユニークさの平均を追加
-      double reccommend = (tasteAve*tasteweight + easeAve*easeweight + cospAve*cospweight);
+      double reccommend = (tasteAve*Review.tasteweight + easeAve*Review.easeweight + cospAve*Review.cospweight);
 
       final result = ReviewAverage(
         tasteAve: tasteAve,

@@ -1,9 +1,7 @@
 import "package:hooks_riverpod/hooks_riverpod.dart";
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/states/search_sort_state.dart';
-part 'search_state.g.dart';
 
 // 検索文字列を保持するプロバイダ
 final searchTextProvider = StateProvider<String>((ref) {
@@ -17,39 +15,30 @@ final hasSearchResultProvider = StateProvider<bool>((ref) {
   return false;
 });
 
+final searchTriggerProvider = StateProvider<int>((ref) {
+  // 検索トリガーの初期状態はfalse
+  return 0;
+});
 
-@Riverpod(keepAlive: true)
-class SearchResultNotifier extends _$SearchResultNotifier {
+final searchResultProvider = FutureProvider<List<Recipe>>((ref) async {
 
-  @override
-  Future<List<Recipe>> build() async {    
-    // 初期状態では空のリストを返す
-    return [];
-  }
+  ref.watch(searchTriggerProvider);
 
-  // 検索結果を更新するメソッド
-  Future<void> updateSearchResult() async {
-
-    final sortType = ref.watch(sortStateProvider);
-    
-    // DatabaseServiceのインスタンスを取得
-    final dbService = DatabaseService();
-
-    // 検索文字列を取得
-    final searchText = ref.read(searchTextProvider);
-
-    // dbから検索
-    final searchResult = await dbService.getKeywordRecipes(searchText, sortType);
-
-    // 検索結果を更新
-    state = AsyncData(searchResult);
-  }
+  // 検索結果を取得
+  final sortType = ref.watch(sortStateProvider);
   
-  // 検索結果を空にする
-  clearSearchResult() {
-    state = const AsyncData([]);
-  }
-}
+  // 検索文字列を取得
+  final searchText = ref.read(searchTextProvider);
+    
+  // DatabaseServiceのインスタンスを取得
+  final dbService = DatabaseService();
+  // dbから検索
+  final searchResult = await dbService.getKeywordRecipes(searchText, sortType);
+
+  return searchResult;
+});
+
+
 
 
 

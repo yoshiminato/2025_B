@@ -1,5 +1,7 @@
+import 'package:class_2025_b/global.dart';
 import 'package:class_2025_b/screens/ingredients_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/screens/generate_screen.dart';
 import 'package:class_2025_b/screens/search_screen.dart';
@@ -57,7 +59,22 @@ class HomeScreen extends ConsumerWidget {
       label: "ingredients",
     );
     return Scaffold(
-      appBar: AppBar(title: const Text("Recipe AI")),
+      appBar: AppBar(
+        centerTitle: true, // ← これを追加
+        title: Text(
+          appName,
+          style: 
+          // TextStyle(
+          //   fontSize: 28,
+          //   color: const Color.fromARGB(255, 233, 140, 0),
+          // ),
+          GoogleFonts.pottaOne(
+            fontSize: 25,
+            fontWeight: FontWeight.w100,
+            color: const Color.fromARGB(255, 233, 140, 0),
+          ),
+        ),
+      ),
       body: screens[content.index],
       drawer: drawer,
       bottomNavigationBar: Theme(

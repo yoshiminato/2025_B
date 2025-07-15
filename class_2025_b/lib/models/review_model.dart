@@ -1,4 +1,9 @@
 class Review {
+  // レビューの重み付け
+  static double tasteweight = 0.4; // 味の重み
+  static double easeweight = 0.3; // 作りやすさの重み
+  static double cospweight = 0.3; // コストパフォーマンスの重み
+
   final int tasteRating;
   final int easeRating;
   final int cospRating;

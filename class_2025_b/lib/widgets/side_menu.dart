@@ -1,4 +1,6 @@
+import 'package:class_2025_b/global.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
@@ -16,7 +18,24 @@ class SideMenuWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final header = DrawerHeader(child: Text("header"));
+    final header = Container(
+      alignment: Alignment.center,
+      constraints: const BoxConstraints(minHeight: 50), // かなり小さめ
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        appName,
+        style: 
+        // TextStyle(
+        //   fontSize: 28,
+        //   color: const Color.fromARGB(255, 233, 140, 0),
+        // ),
+        GoogleFonts.pottaOne(
+          fontSize: 28,
+          fontWeight: FontWeight.w100,
+          color: const Color.fromARGB(255, 233, 140, 0),
+        ),
+      ),
+    );
 
     final signedIn = ref.watch(signedInProvider);
 

@@ -1,5 +1,3 @@
-
-
 // レシピクラス
 import 'package:class_2025_b/models/review_model.dart';
 
@@ -8,7 +6,7 @@ class Recipe{
   String? id;                      // Firestore用のドキュメントID
   String title;                    // レシピのタイトル
   String description;              // レシピの説明
-  String? imageUrl;                // レシピの画像URL（Firebase StorageのURLなど）
+  String? imagePath;               // レシピの画像パス（Firestore保存用）
   String? imageBase64;             // レシピの画像のBase64エンコードされた文字列（生成AIの出力受取用）
   Map<String, String> ingredients; // 材料のリスト
   List<String> steps;              // 調理手順のリスト {手順: 所要時間}
@@ -18,13 +16,13 @@ class Recipe{
   DateTime createdAt;              // 作成日時
   String? userId;                  // 作成者のUID
   int reviewCount;                 // レビュー数（初期値は0）
-  ReviewAverage reviewAverage; // レビューの平均値
+  ReviewAverage reviewAverage;     // レビューの平均値
 
   Recipe({
     this.id,
     required this.title,
     required this.description,
-    this.imageUrl,
+    this.imagePath,
     required this.ingredients,
     required this.steps,
     required this.time,
@@ -46,7 +44,7 @@ class Recipe{
     return {
       'title': title,
       'description': description,
-      'imageUrl': imageUrl,
+      'imagePath': imagePath,
       'ingredients': ingredients, // 従来のMap形式も保持（互換性のため）
       'ingredientNames': ingredientNames, // 検索用の材料名配列
       'ingredientAmounts': ingredientAmounts, // 分量配列
@@ -81,7 +79,7 @@ class Recipe{
       id: map['id'] as String?,
       title: (map['title'] as String?) ?? '',
       description: (map['description'] as String?) ?? '',
-      imageUrl: map['imageUrl'] as String?,
+      imagePath: map['imagePath'] as String?,
       ingredients: ingredients,
       steps: List<String>.from((map['steps'] as List?) ?? []),
       time: (map['time'] as String?) ?? '',
@@ -103,7 +101,7 @@ class Recipe{
     return {
       'title': title,
       'description': description,
-      'imageUrl': imageUrl,
+      'imagePath': imagePath,
       'ingredients': ingredients, // 従来のMap形式も保持（互換性のため）
       'ingredientNames': ingredientNames, // 検索用の材料名配列
       'ingredientAmounts': ingredientAmounts, // 分量配列
@@ -139,7 +137,7 @@ class Recipe{
       id: json['id'] as String?,
       title: json['title'] as String,
       description: json['description'] as String,
-      imageUrl: json['imageUrl'] as String?,
+      imagePath: json['imagePath'] as String?,
       ingredients: ingredients,
       steps: List<String>.from(json['steps'] as List),
       time: json['time'] as String,

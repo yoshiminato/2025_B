@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:class_2025_b/error_handle.dart';
+import 'package:class_2025_b/global.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/foundation.dart';
@@ -21,10 +22,12 @@ class StorageService{
       Reference storageRef = FirebaseStorage.instance.ref().child('$folder/$filename.png');
       await storageRef.putData(imageBytes, SettableMetadata(contentType: "image/png"));
       String downloadUrl = await storageRef.getDownloadURL();
-      debugPrint("画像アップロード成功: $downloadUrl");
-      return downloadUrl;    
+      String path = extractPathFromUrl(downloadUrl);
+      debugPrint("画像アップロード成功: $path");
+      return path;    
     }
     catch (e) {
+      debugPrint("画像保存エラー: $e");
       handleError(e);
       throw Exception('画像の保存に失敗しました: ${e.toString()}');
     }
@@ -40,13 +43,29 @@ class StorageService{
       //imageをfolderへ保存
       await storageRef.putFile(image);
       final url = await storageRef.getDownloadURL();
-      debugPrint("取得したURLは$url");
-      //保存した画像へのURLを返す
-      return url;
+      String path = extractPathFromUrl(url);
+      debugPrint("画像アップロード成功: $path");
+      return path;
     }
     catch (e) {
       handleError(e);
       throw Exception('画像の保存に失敗しました: ${e.toString()}');
+    }
+  }
+
+  // Uint8List型の画像データをFirebase Storageに保存し、ダウンロードURLを返す
+  Future<String> storeUint8ListImageAndGetUrl(Uint8List imageBytes, String folder) async {
+    final uuid = const Uuid().v4();
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child(folder).child('$uuid.png');
+      await storageRef.putData(imageBytes, SettableMetadata(contentType: "image/png"));
+      final url = await storageRef.getDownloadURL();
+      String path = extractPathFromUrl(url);
+      debugPrint("画像アップロード成功: $path");
+      return path;
+    } catch (e) {
+      handleError(e);
+      throw Exception('Uint8List画像の保存に失敗しました: ${e.toString()}');
     }
   }
 }

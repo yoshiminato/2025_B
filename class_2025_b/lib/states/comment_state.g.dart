@@ -7,7 +7,7 @@ part of 'comment_state.dart';
 // **************************************************************************
 
 String _$currentCommentNotifierHash() =>
-    r'4347a9cdff251586d55b734461fdf36855ab833f';
+    r'e2248e7ceea31cfeff8446e45f685e4d314c7ba0';
 
 /// See also [CurrentCommentNotifier].
 @ProviderFor(CurrentCommentNotifier)

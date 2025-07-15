@@ -33,7 +33,7 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
 
     final text = state;
 
-    final recipeId = ref.watch(recipeIdProvider);
+    final recipeId = ref.read(recipeIdProvider);
 
     if (text.isEmpty) {
       throw Exception("コメントが空です");
@@ -43,12 +43,21 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
       throw Exception("レシピIDが設定されていません");
     }
 
-    final File? selectedImage = ref.watch(selectedImageProvider);
+    final selectedImageType = ref.read(selectedImageTypeProvider);
+    final capturedImage = ref.read(capturedImageProvider);
+    final uploadedImage = ref.read(uploadedImageProvider);
 
-    // 画像が選択されている場合はストレージに保存し、URLを取得
-    final imageUrl = selectedImage != null
-        ? await strageService.storeImageAndGetUrl(selectedImage, "comments")
-        : null;
+    late final String? imagePath;
+
+    if(selectedImageType == SelectedImageType.captured && capturedImage != null) {
+      imagePath = await strageService.storeImageAndGetUrl(capturedImage, "comments");
+    }
+    else if(selectedImageType == SelectedImageType.uploaded && uploadedImage != null) {
+      imagePath = await strageService.storeUint8ListImageAndGetUrl(uploadedImage, "comments");
+    }
+    else {
+      imagePath = null; // 画像がない場合は空文字
+    }
 
     // ユーザー情報を取得
     final user = ref.read(userProvider);
@@ -59,7 +68,7 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
       recipeId: recipeId,
       userId: (user == null) ? null : user.uid, // ユーザーIDがnullの場合は匿名とする
       content: text,
-      imageUrl: imageUrl,
+      imagePath: imagePath,
       timestamp: DateTime.now()
     );
 
@@ -73,8 +82,12 @@ class CurrentCommentNotifier extends _$CurrentCommentNotifier {
 
     // コメント送信後の処理
     controller.clear(); // コメント入力欄をクリア
-    ref.read(selectedImageProvider.notifier).state = null; // 選択された画像をクリア
+    ref.read(selectedImageTypeProvider.notifier).state = SelectedImageType.none; // 選択された画像タイプをクリア  
+    ref.read(capturedImageProvider.notifier).state = null; // キャプチャされた画像をクリア
+    ref.read(uploadedImageProvider.notifier).state = null; // アップロードされた
     _clearComment(); // コメントの状態をクリア
+
+    ref.read(commentsRefreshTrigger.notifier).state++; // コメント送信後にリフレッシュ
   }
 
   // コメントをクリアするメソッド
@@ -113,6 +126,24 @@ final commentsNotifierProvider = FutureProvider<List<Comment>> ((ref) async {
   
   try {
     final comments = await dbService.getCommentsByRecipeId(recipeId);
+
+    for(Comment comment in comments) {
+      // レビュー情報を取得
+      if (comment.userId != null) {
+        final uid = comment.userId!;
+        final rid = ref.read(recipeIdProvider);//comment.recipeId;
+        if (rid == null) {
+          debugPrint("レシピIDがnullです。レビュー情報を取得できません。");
+          continue; // レシピIDがnullの場合はスキップ
+        }
+        final review = await dbService.getReviewByRecipeIdAndUserId(uid, rid);
+
+        comment.review = review; // コメントにレビュー情報を追加
+      } else {
+        comment.review = null; // ユーザーIDがない場合はレビューもnull
+      }
+    }
+
     return comments;
   } 
   catch (e) {

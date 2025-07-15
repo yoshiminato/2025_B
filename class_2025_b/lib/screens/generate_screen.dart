@@ -1,17 +1,10 @@
-import 'package:class_2025_b/models/filter_model.dart';
-import 'package:class_2025_b/services/database_service.dart';
-import 'package:class_2025_b/services/storage_service.dart';
 import 'package:class_2025_b/states/custom_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:class_2025_b/services/function_service.dart';
-import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
-import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/states/generate_state.dart';
-import 'package:class_2025_b/models/review_model.dart';
 import 'dart:ui';
 
 class GenerateScreen extends HookConsumerWidget {
@@ -19,16 +12,9 @@ class GenerateScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // --- アレルギー情報をKVからリセットする関数 ---
-
-    // レシピ生成中かどうかのフラグフック
-    final isGenerating = useState(false);
 
     final genState = ref.watch(generateStateNotifierProvider);
     final notifier = ref.read(generateStateNotifierProvider.notifier);
-
-    // レシピ作成者情報をレシピに追加
-    final user = ref.watch(userProvider);
 
     final usePantryOnly = useState(false);
     
@@ -77,29 +63,25 @@ class GenerateScreen extends HookConsumerWidget {
         dialog = SizedBox.shrink();
         break;
       case GenerateState.generatingRecipe:
-        dialog = dialog = Dialog(text: "レシピ生成中...");
+        dialog = dialog = Dialog(text: "レシピ生成中...", isError: false);
         break;
       case GenerateState.generatingImage:
-        dialog = Dialog(text: "レシピ画像生成中...");
+        dialog = Dialog(text: "レシピ画像生成中...", isError: false);
         break;
       case GenerateState.storingImage:
-        dialog = Dialog(text: "画像保存中...");
+        dialog = Dialog(text: "画像保存中...", isError: false);
         break;
       case GenerateState.registeringRecipe:
-        dialog = Dialog(text: "レシピ保存中...");
+        dialog = Dialog(text: "レシピ保存中...", isError: false);
         break;
       case GenerateState.error:
-        dialog = Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("レシピ生成に失敗しました"),
-              ElevatedButton(
-                onPressed: () => notifier.updateState(GenerateState.initial),
-                child: Text("レシピ生成画面に戻る")
-              )
-            ],
-          ),
+        dialog = Dialog(text: "レシピ生成に失敗しました",
+          btnText: "レシピ生成画面に戻る",
+          ontap: () {
+            notifier.reset();
+            resetFilters();
+          },
+          isError: true
         );
     }
 
@@ -175,8 +157,8 @@ class GenerateScreen extends HookConsumerWidget {
                   Slider(
                     value: budgetState.value,
                     min: 0,
-                    max: 1500,
-                    divisions: 100,
+                    max: 2000,
+                    divisions: 20,
                     label: '${budgetState.value.toInt()} 円',
                     activeColor: Colors.orange,
                     inactiveColor: Colors.orange.shade100,
@@ -187,7 +169,7 @@ class GenerateScreen extends HookConsumerWidget {
                     value: timeState.value,
                     min: 0,
                     max: 90,
-                    divisions: 10,
+                    divisions: 9,
                     label: '${timeState.value.toInt()} 分',
                     activeColor: Colors.orange,
                     inactiveColor: Colors.orange.shade100,
@@ -252,8 +234,11 @@ class GenerateScreen extends HookConsumerWidget {
 }
 
 class Dialog extends StatelessWidget {
-  const Dialog({super.key, required this.text});
+  const Dialog({super.key, required this.text, this.btnText, this.ontap, required this.isError});
   final String text;
+  final String? btnText;
+  final VoidCallback? ontap;
+  final bool isError;
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +249,20 @@ class Dialog extends StatelessWidget {
       children: [
         Text(text, style: const TextStyle(fontSize: 16)),
         const SizedBox(height: 24),
-        const CircularProgressIndicator(),
+        ...(
+          isError
+            ? [
+                Icon(Icons.warning, color: Colors.red, size: 48),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: ontap,
+                  child: Text(btnText ?? "生成画面に戻る"),
+                )
+              ]
+            : [
+                const CircularProgressIndicator()
+              ]
+        ),
       ],
     );
 
@@ -298,7 +296,7 @@ class Dialog extends StatelessWidget {
             ),
           ),
         ),
-        contentContainer,
+        contentContainer
       ]
     );
   }

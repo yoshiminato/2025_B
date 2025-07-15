@@ -59,8 +59,7 @@ class ReviewFormWidget extends HookConsumerWidget {
             );
             if(!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("レビューを投稿しました")));
-            final searchResultNotifier = ref.read(searchResultNotifierProvider.notifier);
-            searchResultNotifier.updateSearchResult();
+            ref.read(searchTriggerProvider.notifier).state++;
           } : null,
           child: const Text('レビューを投稿する'),
         )
@@ -137,7 +136,13 @@ class ReviewRatingRow extends HookConsumerWidget {
           visualDensity: VisualDensity(horizontal: -4, vertical: -4),
         )),
         SizedBox(width: 2),
-        Text(notifier.value > 0 ? notifier.value.toString() : ''),
+        SizedBox(
+          width: 5, // 固定幅を設定
+          child: Text(
+            notifier.value > 0 ? notifier.value.toString() : '',
+            textAlign: TextAlign.center, // 中央揃え
+          ),
+        ),
       ],
     );
   }

@@ -1,0 +1,19 @@
+{
+  "name": "recipe/b8aebd92-3f98-4498-8c0c-2a625f3aae5b.png",
+  "bucket": "recipe-ai-175b2.firebasestorage.app",
+  "metageneration": 1,
+  "generation": 1751867961449,
+  "contentType": "image/png",
+  "storageClass": "STANDARD",
+  "contentDisposition": "inline",
+  "downloadTokens": [
+    "32cead9a-e784-4b10-a792-06437a9602ff"
+  ],
+  "etag": "08riZxF0TDIXJesJ1hb4CtL+Hvc",
+  "customMetadata": {},
+  "timeCreated": "2025-07-07T05:59:21.449Z",
+  "updated": "2025-07-07T05:59:21.449Z",
+  "size": 1121553,
+  "md5Hash": "lx0CrjJ6H9mWFyFTolDSYw==",
+  "crc32c": "399403617"
+}
