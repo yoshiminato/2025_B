@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/models/review_model.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/home_state.dart';
 
 
 // レビューが投稿されるごとに発火するプロバイダ
@@ -15,6 +16,8 @@ final reviewTriggerProvider = StateProvider<int>((ref) {
 final reviewProvider = FutureProvider<Review>((ref) async {
 
   final recipeId = ref.watch(recipeIdProvider); // レシピIDを監視して再構築を促す
+
+  ref.watch(homeContentTypeProvider);
 
   final dbService = DatabaseService();
 

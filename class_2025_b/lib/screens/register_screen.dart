@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:class_2025_b/routers/router.dart';
-import 'package:class_2025_b/states/user_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/services/auth_service.dart';
+import 'package:class_2025_b/states/home_state.dart';
+import 'package:class_2025_b/states/recipe_id_state.dart';
 
 /*
 2025/07/06 安田　デザイン調整
@@ -59,6 +60,12 @@ class RegisterScreen extends HookConsumerWidget {
         try {
           await authService.signUp(emailText.value, passwordText.value);
           if(!context.mounted) return;
+          // 生成画面に戻す
+          final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
+          homeContentTypeNotifier.state = ContentType.generate;
+          // レシピIDをクリア
+          final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+          recipeIdNotifier.state = null;
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログイン成功")));
           AppRouter.goToHome(context);
         } catch (e) {
@@ -104,6 +111,12 @@ class RegisterScreen extends HookConsumerWidget {
     final guestLoginLink = GestureDetector(
       onTap: () {
         authService.signOut();
+        // 生成画面に戻す
+        final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
+        homeContentTypeNotifier.state = ContentType.generate;
+        // レシピIDをクリア
+        final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+        recipeIdNotifier.state = null;
         AppRouter.goToHome(context);
       },
       child: Text(

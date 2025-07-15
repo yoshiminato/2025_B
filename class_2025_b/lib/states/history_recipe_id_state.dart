@@ -5,7 +5,7 @@ import 'package:class_2025_b/services/database_service.dart';
 import 'package:class_2025_b/models/recipe_model.dart';
 import 'package:flutter/foundation.dart';
 
-const limit = 10;
+const limit = 20;
 
 final historyRecipesProvider = FutureProvider<List<Recipe>>((ref) async {
 

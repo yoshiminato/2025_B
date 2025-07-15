@@ -14,54 +14,54 @@ import 'package:class_2025_b/app.dart';
 
 void main() async {
 
-  // // Cloudflare Tunnelを使う場合の設定(使用しない場合はコメントアウト)
-  // hostingHost   = CloudFlare.hostingHost;
-  // functionsHost = CloudFlare.functionsHost;
-  // firestoreHost = CloudFlare.firestoreHost;
-  // storageHost   = CloudFlare.storageHost;
-  // authHost      = CloudFlare.authHost;
-  // functionsPort = CloudFlare.port;
-  // firestorePort = CloudFlare.port;
-  // storagePort   = CloudFlare.port;
-  // authPort      = CloudFlare.port;
-  // getUrl = (String host, int port, String path) => getHttpsUrl(host, port, path);
+  // Cloudflare Tunnelを使う場合の設定(使用しない場合はコメントアウト)
+  hostingHost   = CloudFlare.hostingHost;
+  functionsHost = CloudFlare.functionsHost;
+  firestoreHost = CloudFlare.firestoreHost;
+  storageHost   = CloudFlare.storageHost;
+  authHost      = CloudFlare.authHost;
+  functionsPort = CloudFlare.port;
+  firestorePort = CloudFlare.port;
+  storagePort   = CloudFlare.port;
+  authPort      = CloudFlare.port;
+  getUrl = (String host, int port, String path) => getHttpsUrl(host, port, path);
 
-  // プラットフォーム別のデフォルト設定（ローカル用）
-  if(kIsWeb){
-    hostingHost   = hostForLocal; 
-    functionsHost = hostForLocal;
-    firestoreHost = hostForLocal;
-    storageHost   = hostForLocal;
-    authHost      = hostForLocal;
-  }
-  else{
-    if(Platform.isAndroid) {
-      // // Androidエミュレータの場合
-      // hostingHost   = hostForAndroidEmulator;
-      // functionsHost = hostForAndroidEmulator;
-      // firestoreHost = hostForAndroidEmulator;
-      // storageHost   = hostForAndroidEmulator;
-      // authHost      = hostForAndroidEmulator;
-      //実機の場合  
-      hostingHost   = hostForAndroidDevice;
-      functionsHost = hostForAndroidDevice;  
-      firestoreHost = hostForAndroidDevice;
-      storageHost   = hostForAndroidDevice;
-    }
-    else {
-      // その他のプラットフォーム（iOSやデスクトップなど）
-      hostingHost   = hostForLocal;
-      functionsHost = hostForLocal;
-      firestoreHost = hostForLocal;
-      storageHost   = hostForLocal;
-      authHost      = hostForLocal;
-    }
-  }
-  functionsPort = localFunctionsPort;
-  firestorePort = localFirestorePort;
-  storagePort   = localStoragePort;
-  authPort      = localAuthPort;
-  getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
+  // // プラットフォーム別のデフォルト設定（ローカル用）
+  // if(kIsWeb){
+  //   hostingHost   = hostForLocal; 
+  //   functionsHost = hostForLocal;
+  //   firestoreHost = hostForLocal;
+  //   storageHost   = hostForLocal;
+  //   authHost      = hostForLocal;
+  // }
+  // else{
+  //   if(Platform.isAndroid) {
+  //     // Androidエミュレータの場合
+  //     hostingHost   = hostForAndroidEmulator;
+  //     functionsHost = hostForAndroidEmulator;
+  //     firestoreHost = hostForAndroidEmulator;
+  //     storageHost   = hostForAndroidEmulator;
+  //     authHost      = hostForAndroidEmulator;
+  //     // //実機の場合  
+  //     // hostingHost   = hostForAndroidDevice;
+  //     // functionsHost = hostForAndroidDevice;  
+  //     // firestoreHost = hostForAndroidDevice;
+  //     // storageHost   = hostForAndroidDevice;
+  //   }
+  //   else {
+  //     // その他のプラットフォーム（iOSやデスクトップなど）
+  //     hostingHost   = hostForLocal;
+  //     functionsHost = hostForLocal;
+  //     firestoreHost = hostForLocal;
+  //     storageHost   = hostForLocal;
+  //     authHost      = hostForLocal;
+  //   }
+  // }
+  // functionsPort = localFunctionsPort;
+  // firestorePort = localFirestorePort;
+  // storagePort   = localStoragePort;
+  // authPort      = localAuthPort;
+  // getUrl = (String host, int port, String path) => getHttpUrl(host, port, path);
 
 
   // Firebaseの初期化　おまじない

@@ -13,7 +13,7 @@ class DatabaseService{
 
   final String recipeCollectionPath = 'recipes';
 
-  final int limit = 10; // レシピの取得数の制限
+  final int limit = 20; // レシピの取得数の制限
 
   // 生成したレシピを追加するメソッド
   Future<String?> addRecipe(Recipe recipe) async {

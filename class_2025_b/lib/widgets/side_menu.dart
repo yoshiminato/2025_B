@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
+import 'package:class_2025_b/states/home_state.dart';
+import 'package:class_2025_b/states/recipe_id_state.dart';
 import 'package:class_2025_b/services/auth_service.dart';
 
 /*
@@ -58,9 +60,14 @@ class SideMenuWidget extends ConsumerWidget {
           ? () async {
               // ログアウト処理を実行
               try {
-                debugPrint("ログアウト処理を開始");
                 await authService.signOut();
                 if (!context.mounted) return;
+                // 生成画面に戻す
+                final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
+                homeContentTypeNotifier.state = ContentType.generate;
+                // レシピIDをクリア
+                final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+                recipeIdNotifier.state = null;
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("ログアウトしました")));
