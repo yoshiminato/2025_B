@@ -1,4 +1,5 @@
 import 'package:class_2025_b/services/database_service.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:class_2025_b/states/home_state.dart';
@@ -18,6 +19,8 @@ final usersRecipesProvider = FutureProvider<List<Recipe>>((ref)  async{
   // ユーザ情報を取得
   final user = ref.watch(userProvider);
   final userId = (user!=null) ? user.uid : null;
+
+  debugPrint("ユーザID: $userId");
 
   // ユーザIDがnullの場合は空のリストを返す
   if (userId == null) {

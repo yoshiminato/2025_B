@@ -31,10 +31,16 @@ const generationLimit = 3; // レシピ再生成の最大回数
 
 @Riverpod(keepAlive: true)
 class GenerateStateNotifier extends _$GenerateStateNotifier {
+
+  String? userId;
+
   @override
   GenerateState build() {
+    final user = ref.watch(userProvider);
+    userId = user?.uid; // ユーザIDを取得
     return GenerateState.initial; // 初期状態はinitial
   }
+
 
   // 状態を更新するメソッド
   void updateState(GenerateState newState) {
@@ -102,7 +108,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
     Recipe? recipe;
 
     try{
-      List<Review> reviews = await dbService.getReviewsByUserId(user?.uid ?? "");
+      List<Review> reviews = await dbService.getReviewsByUserId(userId ?? "");
       //レビューに対するレシピIDを取得
       List<String> reviewsRecipesId = reviews.map((review) => review.recipeId).toList();
       //レビューに対するレシピ情報を取得
@@ -144,6 +150,8 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピ生成の最大試行回数に達しました");
     }
 
+    recipe.userId = userId; // ユーザIDを設定
+
     return recipe;
 
   }
@@ -182,7 +190,7 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
       throw Exception("レシピ画像生成の最大試行回数に達しました");
     }
 
-    return base64Image!;
+    return base64Image;
   }
 
   // 画像をストレージに保存するメソッド

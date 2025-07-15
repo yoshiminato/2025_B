@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/services/auth_service.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/generate_state.dart';
 
 /*
 2025/07/06 安田　デザイン調整
@@ -66,6 +67,9 @@ class RegisterScreen extends HookConsumerWidget {
           // レシピIDをクリア
           final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
           recipeIdNotifier.state = null;
+          // 生成状態を初期化
+          final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
+          generateStateNotifier.updateState(GenerateState.initial);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("ログイン成功")));
           AppRouter.goToHome(context);
         } catch (e) {
@@ -117,6 +121,10 @@ class RegisterScreen extends HookConsumerWidget {
         // レシピIDをクリア
         final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
         recipeIdNotifier.state = null;
+        // 生成状態を初期化
+        final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
+        generateStateNotifier.updateState(GenerateState.initial);
+
         AppRouter.goToHome(context);
       },
       child: Text(

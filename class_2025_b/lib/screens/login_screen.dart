@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:class_2025_b/services/auth_service.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/generate_state.dart';
 
 
 /*
@@ -66,6 +67,9 @@ class LoginScreen extends HookConsumerWidget {
           // レシピIDをクリア
           final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
           recipeIdNotifier.state = null;
+          // 生成状態を初期化
+          final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
+          generateStateNotifier.updateState(GenerateState.initial);
           if(!context.mounted) return;
           ScaffoldMessenger.of(
             context,
@@ -114,6 +118,9 @@ class LoginScreen extends HookConsumerWidget {
         // レシピIDをクリア
         final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
         recipeIdNotifier.state = null;
+        // 生成状態を初期化
+        final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
+        generateStateNotifier.updateState(GenerateState.initial);
         AppRouter.goToHome(context);
       },
       child: Text(

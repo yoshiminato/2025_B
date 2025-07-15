@@ -6,6 +6,7 @@ import 'package:class_2025_b/routers/router.dart';
 import 'package:class_2025_b/states/user_state.dart';
 import 'package:class_2025_b/states/home_state.dart';
 import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/generate_state.dart';
 import 'package:class_2025_b/services/auth_service.dart';
 
 /*
@@ -68,6 +69,9 @@ class SideMenuWidget extends ConsumerWidget {
                 // レシピIDをクリア
                 final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
                 recipeIdNotifier.state = null;
+                // 生成状態を初期化
+                final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
+                generateStateNotifier.updateState(GenerateState.initial);
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("ログアウトしました")));
