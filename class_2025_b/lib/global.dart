@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:class_2025_b/states/generate_state.dart';
+import 'package:class_2025_b/states/recipe_id_state.dart';
+import 'package:class_2025_b/states/home_state.dart';
+import 'package:class_2025_b/states/search_state.dart';
 
 // アプリ名
 const appName = "ゴハンナニ？";
@@ -20,7 +24,6 @@ String getHttpsUrl(String host, int port, String path) {
   return 'https://$host:$port$cleanPath';
 }
 
-
 // URLからパス部分のみを抽出する関数
 String extractPathFromUrl(String url) {
   final reg = RegExp(r'^https?:\/\/[^\/]+(.*)');
@@ -28,11 +31,21 @@ String extractPathFromUrl(String url) {
   return match?.group(1) ?? '/';
 }
 
-// URLからホスト名を抽出する関数
-String extractHostFromUrl(String url) {
-  final reg = RegExp(r'^https?:\/\/([^:\/]+)');
-  final match = reg.firstMatch(url);
-  return match?.group(1) ?? '';
+void initState(WidgetRef ref) {
+  // 初期化処理
+  // 生成画面に戻す
+  final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
+  homeContentTypeNotifier.state = ContentType.generate;
+  // レシピIDをクリア
+  final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
+  recipeIdNotifier.state = null;
+  // 生成状態を初期化
+  final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
+  generateStateNotifier.updateState(GenerateState.initial);
+  // 検索関係の状態を初期化
+  ref.read(hasSearchResultProvider.notifier).state = false;
+  ref.read(searchTextProvider.notifier).state = '';
+  ref.read(searchTriggerProvider.notifier).state++;
 }
 
 // エミュレータと同じ端末で実行する場合のホスティングIP
@@ -45,7 +58,8 @@ const hostForAndroidEmulator = "10.0.2.2";
 // Android実機用のホスティングIP(実機から見たfirebaseEmulatorが起動している端末のIP)
 // const hostForAndroidDevice = "169.254.83.107";
 // const hostForAndroidDevice = "192.168.11.13";
-const hostForAndroidDevice = "10.170.6.228";
+// const hostForAndroidDevice = "10.170.6.228";
+const hostForAndroidDevice = "192.168.10.110";
 
 // ローカルエミュレータのポート
 const int localFirestorePort = 8080;

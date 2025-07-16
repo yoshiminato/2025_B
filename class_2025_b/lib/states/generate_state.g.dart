@@ -7,7 +7,7 @@ part of 'generate_state.dart';
 // **************************************************************************
 
 String _$generateStateNotifierHash() =>
-    r'106bb69bb4647432250495fe44faa38366983dfa';
+    r'06e4fbdd62f3082985fe1d369e61f70ee09ea898';
 
 /// See also [GenerateStateNotifier].
 @ProviderFor(GenerateStateNotifier)

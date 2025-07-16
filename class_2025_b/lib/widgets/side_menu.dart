@@ -63,15 +63,7 @@ class SideMenuWidget extends ConsumerWidget {
               try {
                 await authService.signOut();
                 if (!context.mounted) return;
-                // 生成画面に戻す
-                final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
-                homeContentTypeNotifier.state = ContentType.generate;
-                // レシピIDをクリア
-                final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-                recipeIdNotifier.state = null;
-                // 生成状態を初期化
-                final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
-                generateStateNotifier.updateState(GenerateState.initial);
+                initState(ref);
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("ログアウトしました")));

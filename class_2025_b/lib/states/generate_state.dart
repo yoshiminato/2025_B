@@ -27,7 +27,7 @@ final buttonLabels = [
   'コク深い', '香ばしい', '素朴な',
 ];
 
-const generationLimit = 3; // レシピ再生成の最大回数
+const generationLimit = 5; // レシピ再生成の最大回数
 
 @Riverpod(keepAlive: true)
 class GenerateStateNotifier extends _$GenerateStateNotifier {
@@ -103,7 +103,6 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
     final functionService = FunctionService();
 
     int genCount = 0;
-    final user = ref.read(userProvider);
 
     Recipe? recipe;
 
@@ -262,6 +261,8 @@ class GenerateStateNotifier extends _$GenerateStateNotifier {
     recipe.imagePath = imagePath; // 生成された画像URLをレシピに設定
 
     String recipeId = await _registerRecipeToDB(recipe);
+
+    updateState(GenerateState.initial);
 
     return recipeId; // 生成されたレシピIDを返す
   }

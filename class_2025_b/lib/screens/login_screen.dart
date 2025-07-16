@@ -1,3 +1,4 @@
+import 'package:class_2025_b/global.dart';
 import 'package:flutter/material.dart';
 import 'package:class_2025_b/routers/router.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -61,15 +62,7 @@ class LoginScreen extends HookConsumerWidget {
       onPressed: () async {
         try {
           await authService.signIn(emailText.value, passwordText.value);
-          // 生成画面に戻す
-          final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
-          homeContentTypeNotifier.state = ContentType.generate;
-          // レシピIDをクリア
-          final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-          recipeIdNotifier.state = null;
-          // 生成状態を初期化
-          final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
-          generateStateNotifier.updateState(GenerateState.initial);
+          initState(ref);
           if(!context.mounted) return;
           ScaffoldMessenger.of(
             context,
@@ -112,15 +105,7 @@ class LoginScreen extends HookConsumerWidget {
     final guestLoginLink = GestureDetector(
       onTap: () {
         authService.signOut();
-        // 生成画面に戻す
-        final homeContentTypeNotifier = ref.read(homeContentTypeProvider.notifier);
-        homeContentTypeNotifier.state = ContentType.generate;
-        // レシピIDをクリア
-        final recipeIdNotifier = ref.read(recipeIdProvider.notifier);
-        recipeIdNotifier.state = null;
-        // 生成状態を初期化
-        final generateStateNotifier = ref.read(generateStateNotifierProvider.notifier);
-        generateStateNotifier.updateState(GenerateState.initial);
+        initState(ref);
         AppRouter.goToHome(context);
       },
       child: Text(
