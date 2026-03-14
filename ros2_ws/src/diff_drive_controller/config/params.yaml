@@ -1,0 +1,41 @@
+# diff_drive_controller parameters
+#
+# Adjust these values to match your physical robot before running.
+diff_drive_controller:
+  ros__parameters:
+
+    # -----------------------------------------------------------------------
+    # Robot geometry
+    # -----------------------------------------------------------------------
+
+    # Radius of each wheel [m]
+    wheel_radius: 0.033
+
+    # Distance between the contact points of the two wheels [m]
+    wheel_base: 0.160
+
+    # -----------------------------------------------------------------------
+    # Encoder
+    # -----------------------------------------------------------------------
+
+    # Number of encoder ticks per full wheel revolution (counts-per-revolution).
+    # For a quadrature encoder this is typically 4 × PPR.
+    encoder_resolution: 4096
+
+    # -----------------------------------------------------------------------
+    # Frame IDs
+    # -----------------------------------------------------------------------
+
+    # Frame in which odometry is expressed
+    odom_frame: "odom"
+
+    # Frame attached to the robot base
+    base_frame: "base_link"
+
+    # -----------------------------------------------------------------------
+    # TF
+    # -----------------------------------------------------------------------
+
+    # Set to false if another node (e.g. robot_localization) publishes the
+    # odom → base_link transform.
+    publish_tf: true
