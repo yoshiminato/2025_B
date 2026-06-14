@@ -3,7 +3,7 @@
 献立生成アプリ
 ユーザの指定した条件に即した献立の画像と調理手順を提供する
 
-https://github.com/yoshiminato/2025_B/blob/main/assets/videos/demo.gif
+![gif](https://github.com/yoshiminato/2025_B/blob/main/assets/videos/demo.gif)
 
 ## 📁 プロジェクト構成
 
